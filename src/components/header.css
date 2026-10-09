@@ -1,0 +1,57 @@
+.site-header { height: 92px; background: var(--color-surface); }
+.header-content { display: flex; align-items: center; justify-content: space-between; height: 100%; }
+.header-nav { display: flex; flex-shrink: 0; align-items: center; gap: 32px; }
+
+.nav-item {
+  --nav-scale-duration: 300ms;
+  --nav-scale-easing: ease-out;
+  position: relative;
+  box-sizing: content-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 40px;
+  /* Expand the hit area without shifting the original menu labels. */
+  margin-inline: -16px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--color-text);
+  font-size: var(--type-label-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-label-leading);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: scale var(--nav-scale-duration) var(--nav-scale-easing), background-color 300ms ease-out;
+}
+
+.nav-item[aria-current='page'] { color: var(--color-text-accent); }
+
+@supports (transition-timing-function: linear(0, 1)) {
+  .nav-item {
+    --nav-scale-duration: 570ms;
+    --nav-scale-easing: linear(0, .099, .315, .555, .765, .921, 1.019, 1.069, 1.083, 1.076, 1.059, 1.039, 1.021, 1.007, .999, .994, .993, .994, .995, 1);
+  }
+
+  .nav-item:active {
+    --nav-scale-duration: 225ms;
+    --nav-scale-easing: linear(0, .282, .619, .821, .921, .967, .986, .995, .998, 1);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:hover { background-color: var(--color-nav-hover); }
+}
+
+.nav-item:active {
+  scale: .97;
+  background-color: var(--color-nav-pressed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-item { transition: none; }
+  .nav-item, .nav-item:active { scale: 1; }
+}

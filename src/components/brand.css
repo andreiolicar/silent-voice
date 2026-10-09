@@ -1,0 +1,12 @@
+.brand { --brand-scale: 1; width: calc(223px * var(--brand-scale)); height: calc(36px * var(--brand-scale)); cursor: pointer; transition: opacity var(--interaction-duration) var(--interaction-easing); }
+.brand--small { --brand-scale: .88; }
+.brand__icon { left: 0; top: 0; width: calc(36.465px * var(--brand-scale)); height: auto; }
+.brand__name { left: 22.71%; top: 16.63%; width: calc(172.368px * var(--brand-scale)); height: auto; }
+
+@media (hover: hover) and (pointer: fine) {
+  .brand:hover { opacity: .92; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand { transition: none; }
+}

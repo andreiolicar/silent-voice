@@ -1,0 +1,107 @@
+/* Brand primitives and semantic colors are the only palette values in the UI. */
+/* Static exports also make these variables available to inline SVG gradients. */
+@theme static {
+  --font-sans: 'Inter Variable', 'Inter', sans-serif;
+
+  --color-brand: #1AA99B;
+  --color-brand-light: color-mix(in srgb, var(--color-brand) 60%, var(--color-surface));
+  --color-ink: #051b34;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #fafafa;
+  --color-surface-hover: color-mix(in srgb, var(--color-brand) 6%, var(--color-surface));
+  --color-surface-raised-hover: color-mix(in srgb, var(--color-brand) 2%, var(--color-surface));
+  --color-text: var(--color-ink);
+  --color-text-muted: color-mix(in srgb, var(--color-ink) 64%, var(--color-surface));
+  --color-text-accent: var(--color-brand);
+  --color-text-on-brand: var(--color-surface);
+  --color-text-inverse: var(--color-surface);
+  --color-text-inverse-muted: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  --color-border-inverse: color-mix(in srgb, var(--color-surface) 16%, transparent);
+  --color-border: #dedede;
+  --color-border-subtle: #ededed;
+  --color-border-soft: #f0f0f0;
+  --color-border-accent: color-mix(in srgb, var(--color-brand) 22%, var(--color-surface));
+  --color-focus: var(--color-ink);
+  --color-nav-hover: color-mix(in srgb, var(--color-brand) 14%, transparent);
+  --color-nav-pressed: color-mix(in srgb, var(--color-brand) 24%, transparent);
+  --color-shadow: #000000;
+  --color-mask: #ffffff;
+  --color-device-guide: color-mix(in srgb, var(--color-ink) 16%, transparent);
+
+  /* Tints keep the artwork soft while sharing the exact brand hue. */
+  --color-illustration-tint: color-mix(in srgb, var(--color-brand) 12%, var(--color-surface));
+  --color-illustration-panel: #f2f2f2;
+  --color-illustration-accent: color-mix(in srgb, var(--color-brand) 62%, var(--color-surface));
+  --color-illustration-line-light: #e8e8e8;
+  --color-illustration-icon-bg: color-mix(in srgb, var(--color-brand) 5%, var(--color-surface));
+  --color-illustration-line: #dbdbdb;
+
+  /* Tailwind aliases keep brand, accent text and surface utilities explicit. */
+  --color-primary: var(--color-brand);
+  --color-secondary: var(--color-ink);
+  --color-accent: var(--color-text-accent);
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+:root {
+  --type-display-size: 44px;
+  --type-display-leading: 53px;
+  --type-heading-size: 32px;
+  --type-heading-leading: 38.4px;
+  --type-question-size: 20px;
+  --type-question-leading: 28px;
+  --type-body-size: 16px;
+  --type-body-leading: 24px;
+  --type-label-size: 14px;
+  --type-label-leading: 21px;
+  --type-control-size: var(--type-label-size);
+  --type-control-leading: var(--type-label-leading);
+  --type-caption-size: 12px;
+  --type-caption-leading: 18px;
+  --type-footer-size: 15px;
+  --type-footer-leading: 22px;
+  --type-footer-fine-size: 13px;
+  --type-metric-size: var(--type-question-size);
+  --tracking-normal: 0;
+  --tracking-tight: -.02em;
+  --tracking-label: .07em;
+
+  --page-max-width: 1344px;
+  --page-gutter: 48px;
+  --radius-card: 24px;
+  --radius-pill: 48px;
+  --interaction-duration: 180ms;
+  --interaction-easing: cubic-bezier(.2, .8, .2, 1);
+
+  --color-surface-tint: color-mix(in srgb, var(--color-brand) 12%, var(--color-surface));
+  --color-surface-hero: color-mix(in srgb, var(--color-brand) 10%, var(--color-surface));
+  --color-surface-accent: color-mix(in srgb, var(--color-brand) 30%, var(--color-surface));
+  --gradient-accent: linear-gradient(270deg, var(--color-brand), var(--color-brand-light));
+  --gradient-contact: var(--gradient-accent);
+  --gradient-brand: linear-gradient(180deg, var(--color-brand-light), var(--color-brand));
+  --color-footer-background: var(--color-brand);
+  --color-footer-dot: color-mix(in srgb, var(--color-brand-light) 80%, transparent);
+  --color-footer-copyright: var(--color-ink);
+  --gradient-footer: linear-gradient(to bottom, var(--color-surface), color-mix(in srgb, var(--color-surface) 55%, transparent) 18%, transparent 48%);
+  --shadow-footer: 0 12px 40px color-mix(in srgb, var(--color-ink) 14%, transparent);
+  --shadow-footer-social: 0 2px 3px color-mix(in srgb, var(--color-ink) 4%, transparent);
+  --shadow-footer-tooltip: 0 4px 12px color-mix(in srgb, var(--color-ink) 12%, transparent);
+  --shadow-button-small: 0 2px 4px color-mix(in srgb, var(--color-ink) 4%, transparent);
+
+  --shadow-cta-hover: 0 4px 12px color-mix(in srgb, var(--color-brand) 12%, transparent);
+  --shadow-cta-pressed: 0 1px 3px color-mix(in srgb, var(--color-brand) 10%, transparent);
+  --shadow-contact: 0 2px 4px color-mix(in srgb, var(--color-ink) 6%, transparent), 0 10px 10px -4px color-mix(in srgb, var(--color-ink) 3%, transparent);
+  --shadow-contact-bubble: -.6px .6px .84px -.25px color-mix(in srgb, var(--color-shadow) 2%, transparent), -1.6px 1.6px 2.3px -.5px color-mix(in srgb, var(--color-shadow) 2%, transparent), -3.5px 3.5px 5px -.75px color-mix(in srgb, var(--color-shadow) 2%, transparent), -7.9px 7.9px 11.1px -1px color-mix(in srgb, var(--color-shadow) 3%, transparent), -20px 20px 28.3px -1.25px color-mix(in srgb, var(--color-shadow) 5%, transparent);
+  --shadow-card-inset: inset 0 0 0 1px color-mix(in srgb, var(--color-surface) 32%, transparent);
+
+  --glass-backdrop: blur(4px);
+  --glass-surface: color-mix(in srgb, var(--color-surface) 36%, transparent);
+  --glass-active: color-mix(in srgb, var(--color-brand) 68%, transparent);
+  --glass-active-shadow: 0 0 20px color-mix(in srgb, var(--color-brand) 15%, transparent);
+  --glass-reflections: inset .7px .7px 0 color-mix(in srgb, var(--color-surface) 48%, transparent), inset -.5px -.5px 0 color-mix(in srgb, var(--color-surface) 22%, transparent);
+  --glass-conversation-reflection: inset 1px 1px 0 color-mix(in srgb, var(--color-surface) 45%, transparent);
+}

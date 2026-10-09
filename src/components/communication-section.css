@@ -1,0 +1,52 @@
+.communication-section {
+  padding: 56px 0 112px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.communication-section__layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 48px;
+}
+
+.communication-section__media { width: 100%; min-width: 0; }
+
+.communication-section__copy,
+.communication-section__details,
+.communication-section__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.communication-section__copy { gap: 72px; }
+.communication-section__details { gap: 40px; width: 100%; }
+.communication-section__intro { gap: 12px; width: 100%; }
+
+.communication-section__description,
+.communication-section__benefits p {
+  margin: 0;
+  font-size: var(--type-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-body-leading);
+}
+
+.communication-section__description { color: var(--color-text-muted); }
+
+.communication-section__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.communication-section__benefits li { display: flex; align-items: center; gap: 12px; }
+.communication-section__benefits p { flex: 1; min-width: 0; }
+.communication-section__benefits li + li { color: var(--color-text-muted); }
+.communication-section__benefits svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--color-brand); }

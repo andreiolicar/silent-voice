@@ -1,0 +1,6 @@
+.hero { background: var(--color-surface-hero); scroll-margin-top: 124px; }
+.hero__layout { padding-top: 60px; }
+.hero__copy { width: 546px; padding-top: 32px; }
+.hero__eyebrow { font-size: var(--type-label-size); font-weight: var(--font-weight-medium); line-height: var(--type-label-leading); }
+.hero__heading { font-size: var(--type-display-size); font-weight: var(--font-weight-regular); line-height: var(--type-display-leading); letter-spacing: var(--tracking-normal); white-space: nowrap; }
+.hero__description { width: 454px; font-size: var(--type-body-size); font-weight: var(--font-weight-regular); line-height: var(--type-body-leading); color: var(--color-text-muted); }

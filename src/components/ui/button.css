@@ -1,0 +1,84 @@
+.sv-button {
+  --button-height: 54px;
+  --button-scale-duration: 300ms;
+  --button-scale-easing: ease-out;
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  height: var(--button-height);
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--type-body-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: 21px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: scale var(--button-scale-duration) var(--button-scale-easing), background-color 300ms ease-out, border-color 300ms ease-out, outline-color 300ms ease-out;
+}
+
+.sv-button--green {
+  border: 2px solid color-mix(in srgb, var(--color-surface) 10%, transparent);
+  background-color: var(--color-brand);
+  background-image: linear-gradient(color-mix(in srgb, var(--color-brand) 72%, var(--color-surface)), var(--color-brand));
+  background-origin: border-box;
+  color: var(--color-text-on-brand);
+}
+
+.sv-button--green::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--color-surface);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.sv-button--white { color: var(--color-secondary); padding-inline: 24px; line-height: 20px; }
+.sv-button--small { --button-height: 48px; padding-inline: 22px; font-size: var(--type-footer-size); line-height: 20px; }
+.sv-button--white.sv-button--small { border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-surface)); box-shadow: var(--shadow-button-small); }
+
+@supports (transition-timing-function: linear(0, 1)) {
+  .sv-button {
+    --button-scale-duration: 570ms;
+    --button-scale-easing: linear(0, .099, .315, .555, .765, .921, 1.019, 1.069, 1.083, 1.076, 1.059, 1.039, 1.021, 1.007, .999, .994, .993, .994, .995, 1);
+  }
+
+  .sv-button:active {
+    --button-scale-duration: 225ms;
+    --button-scale-easing: linear(0, .282, .619, .821, .921, .967, .986, .995, .998, 1);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sv-button--green:hover { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
+  .sv-button--green:hover::after { opacity: .06; }
+  .sv-button--white:hover { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
+  .sv-button--white.sv-button--small:hover { border-color: var(--color-border); }
+}
+
+.sv-button:active { scale: .97; }
+.sv-button--green:active { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
+.sv-button--white:active { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
+.sv-button--white.sv-button--small:active { border-color: var(--color-border); }
+.sv-button--green:active::after { background-color: var(--color-secondary); opacity: .08; }
+.sv-button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-button, .sv-button::after { transition: none; }
+  .sv-button, .sv-button:active { scale: 1; }
+}
