@@ -42,6 +42,7 @@
   font-size: var(--type-label-size);
   line-height: var(--type-label-leading);
   font-weight: var(--font-weight-medium);
+  text-align: left;
 }
 .admin-login .sv-button {
   width: 100%;
@@ -51,9 +52,6 @@
 }
 .admin-login .sv-button:focus-visible {
   outline-offset: 3px;
-}
-.admin-login .sv-input {
-  text-align: center;
 }
 .admin-login .admin-login-feedback {
   color: var(--color-text-muted);

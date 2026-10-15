@@ -74,7 +74,7 @@ export function Login({
           aria-labelledby="admin-login-title"
         >
           <header className="admin-login-header">
-            <Brand href="/" />
+            <Brand href="/" size="small" />
           </header>
           <h1 id="admin-login-title" className="admin-login-title">
             Entrar

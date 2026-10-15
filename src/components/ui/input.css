@@ -2,16 +2,17 @@ input.sv-input {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: 54px;
-  padding: 0 22px;
+  height: 44px;
+  padding: 0 14px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  border-radius: 12px;
   background: var(--color-surface);
   color: var(--color-ink);
   font: inherit;
   font-size: var(--type-label-size);
   font-weight: var(--font-weight-regular);
   line-height: var(--type-label-leading);
+  text-align: left;
   outline: none;
   transition: border-color var(--interaction-duration) var(--interaction-easing);
 }
