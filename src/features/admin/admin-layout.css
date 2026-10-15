@@ -67,7 +67,7 @@
   padding: 11px 12px;
   border-bottom: 1px solid var(--crm-layout-border);
 }
-.crm-layout-brand-row .brand { --brand-scale: .68; }
+.crm-layout-brand-row .brand { --brand-scale: .68; margin-inline-start: 8px; }
 .crm-icon { display: inline-block; flex-shrink: 0; vertical-align: middle; }
 .crm-layout-collapse {
   display: flex;
@@ -269,7 +269,7 @@
   .crm-layout { --crm-layout-sidebar-width: 220px; }
   .crm-layout--collapsed { --crm-layout-sidebar-width: 64px; }
   .crm-layout-brand-row { padding-inline: 10px; }
-  .crm-layout-brand-row .brand { --brand-scale: .62; }
+  .crm-layout-brand-row .brand { --brand-scale: .62; margin-inline-start: 10px; }
   .crm-layout-topbar { gap: 8px; }
   .crm-layout-breadcrumb-parent { display: none; }
   .crm-layout-breadcrumb > .crm-icon { display: none; }
