@@ -13,7 +13,7 @@ npm run dev:api
 npm run dev
 ```
 
-A landing está em http://127.0.0.1:5173 e a API local em http://127.0.0.1:3001. O Vite encaminha `/api`. `APP_ORIGIN` precisa corresponder exatamente à origem do site, inclusive host e porta. Usar `localhost` no lugar de `127.0.0.1` requer ajustar esse valor. O processo da API precisa ser reiniciado após alterar o `.env`.
+A landing está em http://127.0.0.1:5173 e a API local em http://127.0.0.1:3001. O Vite encaminha `/api`. `APP_ORIGIN` define a origem permitida, incluindo protocolo e porta. No desenvolvimento local, `localhost` e `127.0.0.1` são aceitos como alternativas somente no mesmo protocolo e porta configurados. Em produção, e para domínios que não sejam loopback, a origem deve corresponder exatamente à configurada. O processo da API precisa ser reiniciado após alterar o `.env`.
 
 Sem chave Mistral, o assistente informa indisponibilidade real; o formulário de interesse e o backoffice continuam funcionando. Não há respostas simuladas habilitadas no produto. A qualidade, a latência e o acesso ao modelo precisam ser validados com a conta configurada.
 

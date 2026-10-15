@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { ServerConfig } from '../config.ts'
+import { isAllowedOrigin } from '../origin.ts'
 import type { ChatProvider } from './provider.ts'
 import { productKnowledge } from './knowledge.ts'
 import type { ChatStreamEvent } from '../../shared/chat.ts'
@@ -36,7 +37,7 @@ export async function registerChatRoute(
     '/api/chat',
     { config: { rateLimit: { max: 10, timeWindow: 60_000 } } },
     async (req, reply) => {
-      if (req.headers.origin !== config.origin)
+      if (!isAllowedOrigin(req.headers.origin, config))
         return reply.code(403).send({ error: 'Origem não permitida.' })
       const parsed = schema.safeParse(req.body)
       if (!parsed.success)

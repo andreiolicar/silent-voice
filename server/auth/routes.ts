@@ -5,6 +5,7 @@ import { z } from 'zod'
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import type Database from 'better-sqlite3'
 import type { ServerConfig } from '../config.ts'
+import { isAllowedOrigin } from '../origin.ts'
 import { createSessionStore } from './store.ts'
 import { verifyPassword } from './password.ts'
 
@@ -21,7 +22,7 @@ export function requireOrigin(
   reply: FastifyReply,
   config: ServerConfig
 ): boolean {
-  if (request.headers.origin !== config.origin) {
+  if (!isAllowedOrigin(request.headers.origin, config)) {
     reply.code(403).send({ error: 'Solicitação não permitida.' })
     return false
   }
