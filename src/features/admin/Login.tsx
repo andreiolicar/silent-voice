@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Brand } from '../../components/Brand'
 import { GreenButton } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { AdminApiError, adminFetch, apiMessage, isAborted } from './admin-api'
@@ -73,9 +72,6 @@ export function Login({
           className="admin-login-form"
           aria-labelledby="admin-login-title"
         >
-          <header className="admin-login-header">
-            <Brand href="/" size="small" />
-          </header>
           <h1 id="admin-login-title" className="admin-login-title">
             Entrar
           </h1>

@@ -1,16 +1,11 @@
 .admin-login {
+  --admin-login-radius: 12px;
   min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 48px 24px;
   background: var(--color-surface-hero);
   text-align: center;
-}
-.admin-login-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 32px;
 }
 .admin-login-content {
   width: 440px;
@@ -20,24 +15,24 @@
   padding: 40px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-card);
+  border-radius: var(--admin-login-radius);
   box-shadow: 0 8px 32px color-mix(in srgb, var(--color-ink) 3%, transparent);
 }
 .admin-login .admin-login-title {
-  margin: 0 0 32px;
-  font-size: 28px;
-  line-height: 36px;
+  margin: 0 0 28px;
+  font-size: 24px;
+  line-height: 32px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-tight);
   text-align: center;
 }
 .admin-login-form form {
   display: grid;
-  gap: 22px;
+  gap: 20px;
 }
 .admin-login-field {
   display: grid;
-  gap: 9px;
+  gap: 8px;
   color: var(--color-ink);
   font-size: var(--type-label-size);
   line-height: var(--type-label-leading);
@@ -45,9 +40,11 @@
   text-align: left;
 }
 .admin-login .sv-button {
+  --button-height: 44px;
   width: 100%;
-  margin-top: 6px;
-  font-size: var(--type-body-size);
+  margin-top: 0;
+  border-radius: var(--admin-login-radius);
+  font-size: var(--type-label-size);
   font-weight: var(--font-weight-semibold);
 }
 .admin-login .sv-button:focus-visible {
@@ -59,7 +56,7 @@
   line-height: var(--type-caption-leading);
 }
 .admin-login-form > .admin-login-feedback {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 @media (max-width: 700px) {
   .admin-login {
