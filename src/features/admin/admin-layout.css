@@ -23,12 +23,10 @@
   min-height: 100dvh;
   background: var(--crm-layout-surface);
   color: var(--crm-layout-text);
-  font-family: Inter, var(--font-sans, sans-serif);
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -.02em;
-  font-feature-settings: 'salt' 1;
 }
 .crm-layout--collapsed { --crm-layout-sidebar-width: 64px; }
 .crm-layout-skip {

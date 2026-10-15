@@ -38,7 +38,7 @@ body:has(.admin-shell) {
 
   min-height: 100dvh;
   color: var(--color-ink);
-  font-family: var(--font-sans, Inter, sans-serif);
+  font-family: var(--font-sans);
   background: var(--admin-background);
   font-size: 14px;
   line-height: 1.5;
