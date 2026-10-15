@@ -1,7 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { writeFile, unlink, mkdir } from 'node:fs/promises'
+import { writeFile, unlink, mkdir, mkdtemp, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { createServer } from 'vite'
 
@@ -24,13 +25,16 @@ test('development server never serves private database or backup files, includin
   for (const path of files)
     await writeFile(path, 'synthetic-private-fixture-no-personal-data')
   const previousDatabase = process.env.SQLITE_PATH
+  const cacheDir = await mkdtemp(resolve(tmpdir(), 'silent-voice-vite-test-'))
   process.env.SQLITE_PATH = resolve(`${marker}-configured`)
-  const server = await createServer({
-    root: process.cwd(),
-    logLevel: 'silent',
-    server: { host: '127.0.0.1', port: 0, hmr: false },
-  })
+  let server
   try {
+    server = await createServer({
+      root: process.cwd(),
+      cacheDir,
+      logLevel: 'silent',
+      server: { host: '127.0.0.1', port: 0, hmr: false },
+    })
     await server.listen()
     const port = server.httpServer.address().port
     for (const path of files) {
@@ -50,7 +54,8 @@ test('development server never serves private database or backup files, includin
   } finally {
     if (previousDatabase === undefined) delete process.env.SQLITE_PATH
     else process.env.SQLITE_PATH = previousDatabase
-    await server.close()
+    await server?.close()
+    await rm(cacheDir, { recursive: true, force: true })
     for (const path of files) await unlink(path).catch(() => {})
   }
 })

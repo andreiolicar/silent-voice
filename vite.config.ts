@@ -12,6 +12,16 @@ export default defineConfig(({ mode }) => {
   )
   return {
     plugins: [react(), tailwindcss()],
+    optimizeDeps: {
+      include: [
+        '@openuidev/react-lang',
+        '@openuidev/react-ui/ThemeProvider',
+        '@openuidev/react-ui/Card',
+        '@openuidev/react-ui/Steps',
+        '@openuidev/react-ui/Button',
+        'zod/v4',
+      ],
+    },
     server: {
       proxy: { '/api': 'http://127.0.0.1:3001' },
       forwardConsole: false,

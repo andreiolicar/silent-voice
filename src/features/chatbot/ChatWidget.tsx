@@ -1,6 +1,7 @@
 import './openui-bootstrap'
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { ChatTransport } from './chat-client'
+import { LoadBoundary } from '../../components/LoadBoundary'
 import './chat-widget.css'
 const ChatPanel = lazy(() => import('./ChatPanel'))
 export function ChatWidget({
@@ -32,21 +33,42 @@ export function ChatWidget({
   return (
     <div id="silent-voice-chat">
       {loaded && (
-        <Suspense
+        <LoadBoundary
           fallback={
             open ? (
-              <div className="sv-chat-loading" role="status">
-                Carregando assistente…
-              </div>
+              <section
+                id="silent-voice-chat-panel"
+                className="sv-chat-loading"
+                role="dialog"
+                aria-label="Assistente Silent Voice"
+              >
+                <p role="alert">
+                  Não foi possível carregar o assistente. Recarregue a página ou
+                  fale com a equipe.
+                </p>
+                <a href="mailto:contato@silentvoice.com.br">
+                  contato@silentvoice.com.br
+                </a>
+              </section>
             ) : null
           }
         >
-          <ChatPanel
-            hidden={!open}
-            onMinimize={minimize}
-            transport={transport}
-          />
-        </Suspense>
+          <Suspense
+            fallback={
+              open ? (
+                <div className="sv-chat-loading" role="status">
+                  Carregando assistente…
+                </div>
+              ) : null
+            }
+          >
+            <ChatPanel
+              hidden={!open}
+              onMinimize={minimize}
+              transport={transport}
+            />
+          </Suspense>
+        </LoadBoundary>
       )}
       <button
         ref={launcher}
