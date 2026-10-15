@@ -68,14 +68,14 @@ export function Login({
 
   return (
     <main className="admin-login">
-      <header className="admin-login-header">
-        <Brand href="/" />
-      </header>
       <div className="admin-login-content">
         <section
           className="admin-login-form"
           aria-labelledby="admin-login-title"
         >
+          <header className="admin-login-header">
+            <Brand href="/" />
+          </header>
           <h1 id="admin-login-title" className="admin-login-title">
             Entrar
           </h1>
