@@ -26,3 +26,10 @@ __pycache__/
 *.pyc
 .vite/
 coverage/
+
+# Private application data and backups
+/data/
+/backups/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

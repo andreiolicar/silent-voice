@@ -2,7 +2,7 @@ import { createContext, useContext, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 
 type IntroPhase = 'holding' | 'revealing' | 'complete'
-type IntroState = { ready: boolean; immediate: boolean }
+type IntroState = { ready: boolean; immediate: boolean; complete: boolean }
 
 declare global {
   interface Window {
@@ -15,7 +15,11 @@ declare global {
   }
 }
 
-const IntroContext = createContext<IntroState>({ ready: true, immediate: false })
+const IntroContext = createContext<IntroState>({
+  ready: true,
+  immediate: false,
+  complete: true,
+})
 const eventName = 'silentvoice:intro-state'
 
 function subscribe(onChange: () => void) {
@@ -30,7 +34,13 @@ function getPhase(): IntroPhase {
 export function IntroProvider({ children }: { children: ReactNode }) {
   const phase = useSyncExternalStore(subscribe, getPhase, () => 'complete')
   return (
-    <IntroContext.Provider value={{ ready: phase !== 'holding', immediate: window.__silentVoiceIntro?.immediate ?? false }}>
+    <IntroContext.Provider
+      value={{
+        ready: phase !== 'holding',
+        complete: phase === 'complete',
+        immediate: window.__silentVoiceIntro?.immediate ?? false,
+      }}
+    >
       {children}
     </IntroContext.Provider>
   )

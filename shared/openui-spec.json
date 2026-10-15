@@ -1,0 +1,161 @@
+{
+  "root": "Answer",
+  "components": {
+    "Answer": {
+      "signature": "Answer(title: string, children: (Text | HowTo | BulletList | ContactAction)[])",
+      "description": "Uma resposta curta com título e até oito blocos. Não pode conter outro Answer."
+    },
+    "Text": {
+      "signature": "Text(text: string)",
+      "description": "Texto curto em português, sem HTML ou Markdown."
+    },
+    "HowTo": {
+      "signature": "HowTo(items: {title: string, detail: string}[])",
+      "description": "Até cinco passos curtos com título e explicação."
+    },
+    "BulletList": {
+      "signature": "BulletList(items: string[])",
+      "description": "Até seis itens de texto simples, sem links ou HTML."
+    },
+    "ContactAction": {
+      "signature": "ContactAction()",
+      "description": "Abre somente o formulário de contato local. Não recebe URL, destino ou ação."
+    }
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "Answer": {
+        "$ref": "#/$defs/Answer"
+      },
+      "Text": {
+        "$ref": "#/$defs/Text"
+      },
+      "HowTo": {
+        "$ref": "#/$defs/HowTo"
+      },
+      "BulletList": {
+        "$ref": "#/$defs/BulletList"
+      },
+      "ContactAction": {
+        "$ref": "#/$defs/ContactAction"
+      }
+    },
+    "required": [
+      "Answer",
+      "Text",
+      "HowTo",
+      "BulletList",
+      "ContactAction"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+      "Answer": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "children": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Text"
+                },
+                {
+                  "$ref": "#/$defs/HowTo"
+                },
+                {
+                  "$ref": "#/$defs/BulletList"
+                },
+                {
+                  "$ref": "#/$defs/ContactAction"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "children"
+        ],
+        "additionalProperties": false,
+        "description": "Uma resposta curta com título e até oito blocos. Não pode conter outro Answer."
+      },
+      "Text": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1200
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "Texto curto em português, sem HTML ou Markdown."
+      },
+      "HowTo": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 90
+                },
+                "detail": {
+                  "type": "string",
+                  "maxLength": 350
+                }
+              },
+              "required": [
+                "title",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Até cinco passos curtos com título e explicação."
+      },
+      "BulletList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 250
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Até seis itens de texto simples, sem links ou HTML."
+      },
+      "ContactAction": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "Abre somente o formulário de contato local. Não recebe URL, destino ou ação."
+      }
+    }
+  }
+}

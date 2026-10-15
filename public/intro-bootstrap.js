@@ -1,5 +1,7 @@
 /* Runs before React so the first paint is already the branded curtain. */
 ;(function () {
+  // The administration is independent from the landing's introductory curtain.
+  if (/^\/admin(?:\/|$)/.test(window.location.pathname)) return
   if (window.__silentVoiceIntro) return
 
   var html = document.documentElement
