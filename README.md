@@ -6,11 +6,12 @@ O escopo atual é desktop, com largura mínima de **1280 px**. A composição mo
 
 ## Executar e validar
 
-Requer Node.js **22.12 ou superior** e npm.
+Requer Node.js **24 LTS** e npm.
 
 ```sh
 npm ci
-npm run dev
+npm run dev:api # em um terminal
+npm run dev     # em outro terminal
 ```
 
 Abra o endereço informado pelo Vite. O servidor de desenvolvimento usa `127.0.0.1`.
@@ -21,7 +22,7 @@ npm run build
 npm run preview
 ```
 
-`npm test` verifica a coreografia dos cards, a sequência interativa do dispositivo e o bootstrap da abertura. `npm run build` gera o SVG da abertura, valida TypeScript e cria `dist/`. `npm run preview` serve esse build localmente. Para conferir somente os tipos, use `npm run typecheck`.
+`npm test` mantém os testes de cards/dispositivo/abertura e inclui chat, OpenUI, captura de interesse e administração. `npm run build` gera o SVG da abertura, valida TypeScript e cria `dist/`. `npm run preview` serve esse build localmente. Para conferir somente os tipos, use `npm run typecheck`.
 
 ## Interface atual
 
@@ -45,7 +46,7 @@ Motion coordena as entradas e a interação do dispositivo. Os ciclos dos cards 
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `src/App.tsx` | Composição das seções e provedores de animação/abertura. |
+| `src/App.tsx` e `src/LandingPage.tsx` | Rotas e composição preservada da landing. |
 | `src/components/` | Seções, controles compartilhados, cards e dispositivo interativo. |
 | `src/styles/` e `src/entrance.ts` | Tokens, tipografia, estilos globais e entradas compartilhadas. |
 | `src/intro/` e `public/intro-bootstrap.js` | SVG, CSS e coordenação da abertura. |
@@ -60,3 +61,11 @@ O build publicado reúne o código de `src/`, `index.html` e os arquivos de `pub
 As fontes editáveis das mídias, capturas e registros de produção em `docs/reference/`, assim como os planos em `docs/superpowers/`, permanecem preservados na cópia local e ficam fora do Git. Não serão enviados ao GitHub. Reproduzir essas mídias pode exigir Blender, cwebp, FFmpeg e Python com Pillow/NumPy, conforme o processo utilizado. Esses programas e registros não são necessários para instalar, testar ou compilar o site.
 
 `tools/` e `.superpowers/` também são locais e ignorados. Dependências, builds, backups, logs e caches ficam fora do versionamento: instale `node_modules/` com `npm ci` e gere `dist/` com `npm run build`.
+
+## Chatbot e backoffice
+
+Assistente fixo no canto inferior direito, com Mistral no servidor e respostas visuais em OpenUI, seguindo os tokens atuais. Contatos são gravados em SQLite e consultados em `/admin`, com login obrigatório no servidor. Não há usuário/senha padrão.
+
+Leia [setup, administração, limites e backup](docs/chatbot-backoffice.md). A chave Mistral é configurada somente no `.env` do servidor; sem ela, contato e administração continuam disponíveis. Não há persistência de transcrição completa.
+
+Código: `src/features/chatbot/`, `src/features/admin/`, `server/` e contratos em `shared/`. A API de desenvolvimento usa porta 3001, com proxy pelo Vite5173. Esta entrega não inclui publicação.
