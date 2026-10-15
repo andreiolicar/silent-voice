@@ -7,12 +7,29 @@ type ActionControlProps = {
   style?: CSSProperties
   'aria-label'?: AriaAttributes['aria-label']
   'aria-current'?: AriaAttributes['aria-current']
+  type?: 'button' | 'submit' | 'reset'
+  disabled?: boolean
 }
 
-export function ActionControl({ children, href, ...props }: ActionControlProps) {
+export function ActionControl({
+  children,
+  href,
+  type = 'button',
+  disabled,
+  ...props
+}: ActionControlProps) {
   return href ? (
-    <a {...props} href={href}>{children}</a>
+    <a {...props} href={href}>
+      {children}
+    </a>
   ) : (
-    <button {...props} type="button" aria-disabled="true">{children}</button>
+    <button
+      {...props}
+      type={type}
+      disabled={disabled}
+      aria-disabled={disabled || type === 'button' ? true : undefined}
+    >
+      {children}
+    </button>
   )
 }

@@ -232,7 +232,36 @@ describe('administrative workflow', () => {
       'E-mail ou senha incorretos'
     )
     expect(screen.getByLabelText('Senha')).toHaveValue('')
-    expect(screen.getByRole('alert')).toHaveFocus()
+    await waitFor(() => expect(screen.getByLabelText('Senha')).toHaveFocus())
+    expect(screen.getByLabelText('Senha')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    )
+    expect(screen.getByLabelText('Senha')).toHaveAccessibleDescription(
+      'E-mail ou senha incorretos. Tente novamente.'
+    )
+  })
+
+  it('keeps a retry target focused after a login service error without marking credentials invalid', async () => {
+    setupFetch((path) =>
+      path === '/api/auth/login' ? response({}, 503) : undefined
+    )
+    mount('/admin/login')
+    fireEvent.change(await screen.findByLabelText('E-mail'), {
+      target: { value: 'admin@example.com' },
+    })
+    fireEvent.change(screen.getByLabelText('Senha'), {
+      target: { value: 'password' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível concluir'
+    )
+    await waitFor(() => expect(screen.getByLabelText('Senha')).toHaveFocus())
+    expect(screen.getByLabelText('Senha')).not.toHaveAttribute(
+      'aria-invalid',
+      'true'
+    )
   })
 
   it('retries a failed list request and displays only the returned records', async () => {

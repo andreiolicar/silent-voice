@@ -58,27 +58,29 @@
     --button-scale-easing: linear(0, .099, .315, .555, .765, .921, 1.019, 1.069, 1.083, 1.076, 1.059, 1.039, 1.021, 1.007, .999, .994, .993, .994, .995, 1);
   }
 
-  .sv-button:active {
+  .sv-button:active:not(:disabled) {
     --button-scale-duration: 225ms;
     --button-scale-easing: linear(0, .282, .619, .821, .921, .967, .986, .995, .998, 1);
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .sv-button--green:hover { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
-  .sv-button--green:hover::after { opacity: .06; }
-  .sv-button--white:hover { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
-  .sv-button--white.sv-button--small:hover { border-color: var(--color-border); }
+  .sv-button--green:hover:not(:disabled) { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
+  .sv-button--green:hover:not(:disabled)::after { opacity: .06; }
+  .sv-button--white:hover:not(:disabled) { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
+  .sv-button--white.sv-button--small:hover:not(:disabled) { border-color: var(--color-border); }
 }
 
-.sv-button:active { scale: .97; }
-.sv-button--green:active { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
-.sv-button--white:active { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
-.sv-button--white.sv-button--small:active { border-color: var(--color-border); }
-.sv-button--green:active::after { background-color: var(--color-secondary); opacity: .08; }
+.sv-button:active:not(:disabled) { scale: .97; }
+.sv-button--green:active:not(:disabled) { outline-color: color-mix(in srgb, var(--color-brand) 10%, transparent); }
+.sv-button--white:active:not(:disabled) { outline-color: color-mix(in srgb, var(--color-surface) 32%, transparent); }
+.sv-button--white.sv-button--small:active:not(:disabled) { border-color: var(--color-border); }
+.sv-button--green:active:not(:disabled)::after { background-color: var(--color-secondary); opacity: .08; }
 .sv-button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 5px; }
 
 @media (prefers-reduced-motion: reduce) {
   .sv-button, .sv-button::after { transition: none; }
-  .sv-button, .sv-button:active { scale: 1; }
+  .sv-button, .sv-button:active:not(:disabled) { scale: 1; }
 }
+
+.sv-button:disabled { cursor: default; opacity: .55; scale: 1; }

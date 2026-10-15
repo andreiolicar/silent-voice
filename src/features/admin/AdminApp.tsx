@@ -14,23 +14,10 @@ import type { Session, AdminRequest as Request } from './admin-api'
 import { formatAdminDate } from './admin-format'
 import { LeadPanel } from './LeadPanel'
 import type { LeadDraft } from './LeadPanel'
+import { Brand } from '../../components/Brand'
+import { Login } from './Login'
 import './admin.css'
 
-function Brand() {
-  return (
-    <a
-      className="admin-brand"
-      href="/"
-      aria-label="Silent Voice — página inicial"
-    >
-      <img className="admin-brand-icon" src="/assets/icone.svg" alt="" />
-      <span className="admin-brand-wordmark">
-        <img src="/assets/silent-voice.svg" alt="" />
-        <small>ÁREA DE GESTÃO</small>
-      </span>
-    </a>
-  )
-}
 export function AdminApp() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -140,133 +127,6 @@ export function AdminApp() {
   )
 }
 
-function Login({
-  onLogin,
-  expired,
-}: {
-  onLogin: (session: Session) => void
-  expired: boolean
-}) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState('')
-  const controller = useRef<AbortController | null>(null)
-  const errorRef = useRef<HTMLParagraphElement>(null)
-  useEffect(() => () => controller.current?.abort(), [])
-  useEffect(() => {
-    if (error) errorRef.current?.focus()
-  }, [error])
-  async function submit(event: FormEvent) {
-    event.preventDefault()
-    setPending(true)
-    setError('')
-    controller.current?.abort()
-    controller.current = new AbortController()
-    const signal = controller.current.signal
-    try {
-      const { csrfToken } = await adminFetch<{ csrfToken: string }>(
-        '/auth/csrf',
-        { signal }
-      )
-      const result = await adminFetch<Session>(
-        '/auth/login',
-        {
-          method: 'POST',
-          signal,
-          body: JSON.stringify({ email: email.trim(), password }),
-        },
-        csrfToken
-      )
-      setPassword('')
-      onLogin(result)
-    } catch (error) {
-      if (isAborted(error)) return
-      setPassword('')
-      setError(
-        error instanceof AdminApiError && error.status === 401
-          ? 'E-mail ou senha incorretos. Tente novamente.'
-          : apiMessage(error)
-      )
-    } finally {
-      if (!signal.aborted) setPending(false)
-    }
-  }
-  return (
-    <main className="admin-login">
-      <div className="admin-login-brand">
-        <Brand />
-      </div>
-      <section className="admin-login-card" aria-labelledby="admin-login-title">
-        <div className="admin-eyebrow">BEM-VINDO DE VOLTA</div>
-        <h1 id="admin-login-title">
-          Cada conversa,
-          <br />
-          mais perto.
-        </h1>
-        <p>
-          Acesse os contatos e acompanhe os próximos passos do Silent Voice.
-        </p>
-        {expired && (
-          <p className="admin-notice" role="status">
-            Sua sessão expirou. Entre novamente para continuar. Seus rascunhos
-            foram preservados nesta janela.
-          </p>
-        )}
-        <form onSubmit={submit}>
-          <label className="admin-field">
-            E-mail
-            <input
-              autoFocus
-              type="email"
-              maxLength={254}
-              autoComplete="username"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              disabled={pending}
-            />
-          </label>
-          <label className="admin-field">
-            Senha
-            <input
-              type="password"
-              maxLength={256}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              disabled={pending}
-            />
-          </label>
-          {error && (
-            <p
-              className="admin-error"
-              role="alert"
-              ref={errorRef}
-              tabIndex={-1}
-            >
-              {error}
-            </p>
-          )}
-          <button
-            type="submit"
-            className="admin-button admin-button-primary"
-            disabled={pending}
-          >
-            {pending ? 'Entrando…' : 'Entrar'}
-            <span aria-hidden="true">↗</span>
-          </button>
-        </form>
-        <div className="admin-login-foot">
-          Acesso restrito à equipe Silent Voice
-        </div>
-      </section>
-      <span className="admin-login-bottom">Comunicação que aproxima.</span>
-    </main>
-  )
-}
-
 function Dashboard({
   email,
   request,
@@ -359,7 +219,7 @@ function Dashboard({
   return (
     <>
       <header className="admin-header">
-        <Brand />
+        <Brand href="/" size="small" />
         <div className="admin-header-account">
           <span>{email}</span>
           <button
