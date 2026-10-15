@@ -69,7 +69,7 @@ function setupFetch(
     })
   )
 }
-function mount(path = '/admin') {
+function mount(path = '/admin/cadastros') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <AdminApp />
@@ -82,6 +82,16 @@ afterEach(() => {
 })
 
 describe('administrative workflow', () => {
+  it('opens the overview first and navigates to the contact register through the sidebar', async () => {
+    setupFetch()
+    mount('/admin')
+    expect(await screen.findByRole('heading', { name: 'Visão geral' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('Buscar')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('link', { name: 'Cadastros' }))
+    expect(await screen.findByLabelText('Buscar')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })).toBeInTheDocument()
+  })
+
   it('logs in with CSRF and renders actual empty state', async () => {
     setupFetch((path) =>
       path.startsWith('/api/admin/leads?')
@@ -102,7 +112,7 @@ describe('administrative workflow', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
     expect(
-      await screen.findByText('Nenhum contato encontrado')
+      await screen.findByText('Nenhum cadastro recebido')
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sair' })).toBeInTheDocument()
   })
@@ -209,6 +219,7 @@ describe('administrative workflow', () => {
       target: { value: 'password' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+    fireEvent.click(await screen.findByRole('link', { name: 'Cadastros' }))
     fireEvent.click(
       await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
     )
@@ -318,17 +329,17 @@ describe('administrative workflow', () => {
     fireEvent.change(screen.getByLabelText('Status'), {
       target: { value: 'contacted' },
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Filtros' }))
     fireEvent.change(screen.getByLabelText('De'), {
       target: { value: '2026-10-01' },
     })
     fireEvent.change(screen.getByLabelText('Até'), {
       target: { value: '2026-10-15' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }))
+    fireEvent.submit(screen.getByRole('form', { name: 'Filtrar contatos' }))
     expect(await screen.findByText('1–25 de 26 contatos')).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: 'Em contato: 26 contatos' })
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Status')).toHaveValue('contacted')
+    expect(screen.getByRole('link', { name: 'Em contato' })).toHaveAttribute('aria-current', 'page')
     fireEvent.click(screen.getByRole('button', { name: 'Próxima →' }))
     expect(
       await screen.findByRole('button', { name: 'Ver contato de Bruno Lima' })
@@ -337,7 +348,7 @@ describe('administrative workflow', () => {
     expect(screen.getByRole('button', { name: 'Próxima →' })).toBeDisabled()
   })
 
-  it('keeps keyboard focus inside details and returns it after Escape', async () => {
+  it('allows background navigation with inline details and returns focus after Escape', async () => {
     setupFetch()
     mount()
     const trigger = await screen.findByRole('button', {
@@ -355,7 +366,9 @@ describe('administrative workflow', () => {
     const save = screen.getByRole('button', { name: 'Adicionar anotação' })
     save.focus()
     fireEvent.keyDown(save, { key: 'Tab' })
-    expect(close).toHaveFocus()
+    expect(save).toHaveFocus()
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'false')
+    expect(screen.getByRole('link', { name: 'Cadastros' })).toBeInTheDocument()
     fireEvent.keyDown(close, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(trigger).toHaveFocus()
@@ -382,7 +395,7 @@ describe('administrative workflow', () => {
     fireEvent.change(screen.getByLabelText('Buscar'), {
       target: { value: 'Atual' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Filtrar' }))
+    fireEvent.submit(screen.getByRole('form', { name: 'Filtrar contatos' }))
     expect(
       await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
     ).toBeInTheDocument()
@@ -434,6 +447,7 @@ describe('administrative workflow', () => {
       target: { value: 'password' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+    fireEvent.click(await screen.findByRole('link', { name: 'Cadastros' }))
     fireEvent.click(
       await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
     )
@@ -471,7 +485,7 @@ describe('administrative workflow', () => {
     })
     mount()
     fireEvent.click(
-      await screen.findByRole('button', { name: 'Novo: 26 contatos' })
+      await screen.findByRole('link', { name: 'Novo' })
     )
     await screen.findByText('1–25 de 26 contatos')
     fireEvent.click(screen.getByRole('button', { name: 'Próxima →' }))
@@ -533,7 +547,7 @@ describe('administrative workflow', () => {
       await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
       if (filteredOut) {
         fireEvent.click(
-          screen.getByRole('button', { name: 'Novo: 1 contatos' })
+          screen.getByRole('link', { name: 'Novo' })
         )
         await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
       }

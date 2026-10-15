@@ -10,6 +10,8 @@ import type {
 import { AdminApiError, apiMessage, isAborted } from './admin-api'
 import { formatAdminDate } from './admin-format'
 import type { AdminRequest as Request } from './admin-api'
+import { AdminIcon } from './AdminIcon'
+import './lead-panel.css'
 
 export type LeadDraft = { text: string; status?: LeadStatus }
 const profileLabels = {
@@ -26,6 +28,7 @@ export function LeadPanel({
   close,
   restoreFocus,
   onChange,
+  mode = 'modal',
 }: {
   id: string
   request: Request
@@ -34,8 +37,10 @@ export function LeadPanel({
   close: () => void
   restoreFocus: () => void
   onChange: () => void
+  mode?: 'modal' | 'inline'
 }) {
-  const [data, setData] = useState<LeadDetail | null>(null)
+  const [detail, setData] = useState<LeadDetail | null>(null)
+  const data = detail?.lead.id === id ? detail : null
   const [loading, setLoading] = useState(true)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
@@ -45,18 +50,25 @@ export function LeadPanel({
   const closeButton = useRef<HTMLButtonElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
   const mutation = useRef<AbortController | null>(null)
+  const restoreFocusRef = useRef(restoreFocus)
+  restoreFocusRef.current = restoreFocus
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
     const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    if (mode === 'modal') document.body.style.overflow = 'hidden'
     closeButton.current?.focus()
     return () => {
       mutation.current?.abort()
-      document.body.style.overflow = previousOverflow
+      if (mode === 'modal') document.body.style.overflow = previousOverflow
       if (previous?.isConnected) previous.focus()
-      else restoreFocus()
+      else restoreFocusRef.current()
     }
-  }, [restoreFocus])
+  }, [id, mode])
+  useEffect(() => {
+    setError('')
+    setNotice('')
+    setPending(false)
+  }, [id])
   useEffect(() => {
     if (error) errorRef.current?.focus()
   }, [error])
@@ -71,6 +83,7 @@ export function LeadPanel({
       })
       .catch((error) => {
         if (
+          !controller.signal.aborted &&
           !isAborted(error) &&
           !(error instanceof AdminApiError && error.status === 401)
         )
@@ -91,7 +104,7 @@ export function LeadPanel({
       event.stopPropagation()
       close()
     }
-    if (event.key === 'Tab') {
+    if (event.key === 'Tab' && mode === 'modal') {
       const controls = panel.current?.querySelectorAll<HTMLElement>(
         'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]'
       )
@@ -109,7 +122,7 @@ export function LeadPanel({
   }
   async function save(kind: 'status' | 'note', event: FormEvent) {
     event.preventDefault()
-    if (!data || pending) return
+    if (!data || pending || loading) return
     setPending(true)
     setError('')
     setNotice('')
@@ -151,6 +164,7 @@ export function LeadPanel({
       }
     } catch (error) {
       if (
+        signal.aborted ||
         isAborted(error) ||
         (error instanceof AdminApiError && error.status === 401)
       )
@@ -167,15 +181,15 @@ export function LeadPanel({
   }
   return (
     <div
-      className="admin-panel-backdrop"
+      className={mode === 'inline' ? 'admin-inspector-slot' : 'admin-panel-backdrop'}
       onClick={(event) => {
-        if (event.target === event.currentTarget && !pending) close()
+        if (mode === 'modal' && event.target === event.currentTarget && !pending) close()
       }}
     >
       <section
-        className="admin-panel"
+        className={`admin-panel${mode === 'inline' ? ' admin-panel-inline' : ''}`}
         role="dialog"
-        aria-modal="true"
+        aria-modal={mode === 'modal'}
         aria-label={
           data ? `Contato de ${data.lead.name}` : 'Detalhes do contato'
         }
@@ -183,7 +197,14 @@ export function LeadPanel({
         onKeyDown={keyboard}
       >
         <header className="admin-panel-top">
-          <span className="admin-eyebrow">DETALHES DO CONTATO</span>
+          {mode === 'inline' ? (
+            <>
+              <span className="admin-inspector-initial" aria-hidden="true">
+                {data?.lead.name.trim().slice(0, 1).toLocaleUpperCase('pt-BR') || '·'}
+              </span>
+              <h2 className="admin-inspector-title">{data?.lead.name || 'Detalhes do contato'}</h2>
+            </>
+          ) : <span className="admin-eyebrow">DETALHES DO CONTATO</span>}
           <button
             ref={closeButton}
             type="button"
@@ -192,7 +213,7 @@ export function LeadPanel({
             onClick={close}
             disabled={pending}
           >
-            ×
+            {mode === 'inline' ? <AdminIcon name="close" /> : '×'}
           </button>
         </header>
         {error && (
@@ -230,6 +251,33 @@ export function LeadPanel({
         )}
         {data && (
           <div className="admin-panel-body">
+            {mode === 'inline' ? (
+              <div className="admin-inspector-summary">
+                <p className="admin-inspector-objective">{data.lead.objective}</p>
+                <dl className="admin-inspector-fields">
+                  <div>
+                    <dt>E-mail</dt>
+                    <dd><a href={`mailto:${data.lead.email}`}>{data.lead.email}</a></dd>
+                  </div>
+                  {data.lead.duplicateEmail && (
+                    <div>
+                      <dt>Cadastro</dt>
+                      <dd><span className="admin-inspector-duplicate">E-mail repetido</span></dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt>Recebido em</dt>
+                    <dd><AdminIcon name="calendar" /><time dateTime={data.lead.createdAt}>{formatAdminDate(data.lead.createdAt)}</time></dd>
+                  </div>
+                  {data.lead.profile && (
+                    <div><dt>Perfil</dt><dd>{profileLabels[data.lead.profile]}</dd></div>
+                  )}
+                  {data.lead.organization && (
+                    <div><dt>Organização</dt><dd>{data.lead.organization}</dd></div>
+                  )}
+                </dl>
+              </div>
+            ) : <>
             <div className="admin-person">
               <span
                 className="admin-avatar admin-avatar-large"
@@ -265,6 +313,7 @@ export function LeadPanel({
                 <dd>{data.lead.objective}</dd>
               </div>
             </dl>
+            </>}
             <form
               className="admin-status-form"
               onSubmit={(event) => void save('status', event)}

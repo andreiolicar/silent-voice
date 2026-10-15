@@ -1,0 +1,434 @@
+.admin-contacts-page {
+  display: flex;
+  min-width: 0;
+  min-height: calc(100dvh - 54px);
+  flex-direction: column;
+  color: var(--crm-layout-text);
+  background: var(--crm-layout-white);
+  font-size: 14px;
+  letter-spacing: -0.28px;
+}
+.admin-contacts-toolbar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--crm-layout-border);
+  background: var(--crm-layout-surface);
+}
+.admin-contacts-search,
+.admin-contacts-status-filter,
+.admin-contacts-control {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 30px;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--crm-layout-border);
+  border-radius: 8px;
+  background: var(--crm-layout-white);
+  color: var(--crm-layout-muted);
+  box-shadow: 0 1px 2px rgb(40 40 40 / 8%);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.admin-contacts-search {
+  width: 195px;
+  flex: 0 1 195px;
+}
+.admin-contacts-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  color: var(--crm-layout-text);
+  background: transparent;
+  font-weight: 500;
+  line-height: 16px;
+}
+.admin-contacts-search input::placeholder {
+  color: var(--crm-layout-muted);
+}
+.admin-contacts-toolbar-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+.admin-contacts-status-filter {
+  max-width: 232px;
+  color: var(--crm-layout-text);
+}
+.admin-contacts-status-filter select {
+  width: 100%;
+  min-width: 0;
+  padding: 0 2px;
+  border: 0;
+  appearance: none;
+  color: inherit;
+  background: transparent;
+  font-weight: 500;
+  line-height: 16px;
+}
+.admin-contacts-toolbar-divider {
+  width: 1px;
+  height: 12px;
+  flex: 0 0 1px;
+  background: var(--crm-layout-border);
+}
+.admin-contacts-control {
+  justify-content: center;
+}
+.admin-contacts-control:hover:not(:disabled) {
+  background: var(--crm-layout-hover);
+}
+.admin-contacts-control-primary {
+  border-color: var(--crm-layout-text);
+  color: var(--crm-layout-white);
+  background: var(--crm-layout-text);
+  box-shadow: 0 1px 2px rgb(40 40 40 / 10%), inset 0 2px 2px rgb(255 255 255 / 16%);
+}
+.admin-contacts-control-primary:hover:not(:disabled) {
+  background: var(--crm-layout-text);
+}
+.admin-contacts-filter-anchor {
+  position: relative;
+}
+.admin-contacts-filter-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--crm-layout-brand);
+}
+.admin-contacts-filter-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  padding: 16px;
+  border: 1px solid var(--crm-layout-border);
+  border-radius: 10px;
+  background: var(--crm-layout-white);
+  box-shadow: 0 8px 24px rgb(40 40 40 / 10%);
+}
+.admin-contacts-filter-popover > p {
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.admin-contacts-date-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.admin-contacts-date-fields .admin-field {
+  font-size: 12px;
+}
+.admin-contacts-date-fields input {
+  min-height: 34px;
+  padding: 7px 8px;
+  border-color: var(--crm-layout-border);
+  font-size: 12px;
+}
+.admin-contacts-filter-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+.admin-contacts-filter-popover .admin-contacts-filter-error {
+  margin: 12px 0 0;
+  color: var(--crm-layout-error-text);
+  font-size: 12px;
+  font-weight: 400;
+}
+.admin-contacts-active-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--crm-layout-border);
+  color: var(--crm-layout-muted);
+  background: var(--crm-layout-surface);
+  font-size: 12px;
+}
+.admin-contacts-active-filters > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.admin-contacts-text-button {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: var(--crm-layout-muted);
+  background: transparent;
+  font-weight: 500;
+}
+.admin-contacts-text-button:hover {
+  color: var(--crm-layout-text);
+  text-decoration: underline;
+}
+.admin-contacts-content {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+.admin-contacts-list {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+}
+.admin-contacts-table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.admin-contacts-table {
+  width: 100%;
+  min-width: 796px;
+  border-spacing: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 18px;
+}
+.admin-contacts-col-open { width: 46px; }
+.admin-contacts-col-name { width: 140px; }
+.admin-contacts-col-email { width: 160px; }
+.admin-contacts-col-objective { width: 160px; }
+.admin-contacts-col-status { width: 145px; }
+.admin-contacts-col-date { width: 145px; }
+.admin-contacts-table th,
+.admin-contacts-table td {
+  height: 48px;
+  padding: 0 12px;
+  border-right: 1px solid var(--crm-layout-border);
+  border-bottom: 1px solid var(--crm-layout-border);
+  text-align: left;
+  vertical-align: middle;
+}
+.admin-contacts-table th {
+  color: var(--crm-layout-muted);
+  background: var(--crm-layout-hover);
+  font-weight: 500;
+}
+.admin-contacts-table th:last-child,
+.admin-contacts-table td:last-child {
+  border-right: 0;
+}
+.admin-contacts-table th:first-child,
+.admin-contacts-table td:first-child {
+  padding: 0 11px;
+  text-align: center;
+}
+.admin-contacts-column-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.admin-contacts-table tbody tr {
+  background: var(--crm-layout-white);
+}
+.admin-contacts-table tbody tr:hover,
+.admin-contacts-table tbody tr.admin-contacts-row-selected {
+  background: var(--crm-layout-active);
+}
+.admin-contacts-row-open {
+  display: flex;
+  width: 24px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+}
+.admin-contacts-row-open:hover,
+.admin-contacts-row-open[aria-pressed='true'] {
+  background: var(--crm-layout-control-hover);
+}
+.admin-contacts-name {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: var(--crm-layout-text);
+  background: transparent;
+  text-align: left;
+  font-weight: 500;
+}
+.admin-contacts-name > span:last-child,
+.admin-contacts-cell-text,
+.admin-contacts-email {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-contacts-name:hover > span:last-child {
+  text-decoration: underline;
+}
+.admin-contacts-initial {
+  display: flex;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--crm-layout-border);
+  border-radius: 4px;
+  color: var(--crm-layout-muted);
+  background: var(--crm-layout-hover);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+.admin-contacts-email {
+  color: var(--crm-layout-text);
+  text-decoration-color: var(--crm-layout-muted);
+  text-underline-offset: 2px;
+}
+.admin-contacts-email:hover {
+  color: var(--crm-layout-brand);
+}
+.admin-contacts-status {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.admin-contacts-status-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--crm-layout-status-closed);
+}
+.admin-contacts-status-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-contacts-status-new .admin-contacts-status-dot { background: var(--crm-layout-brand); }
+.admin-contacts-status-contacted .admin-contacts-status-dot { background: var(--crm-layout-status-contacted); }
+.admin-contacts-status-demo_scheduled .admin-contacts-status-dot { background: var(--crm-layout-status-demo); }
+.admin-contacts-table time {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.admin-contacts-state {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  color: var(--crm-layout-muted);
+  text-align: center;
+}
+.admin-contacts-state h3 {
+  color: var(--crm-layout-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+.admin-contacts-state p {
+  max-width: 380px;
+  font-size: 13px;
+}
+.admin-contacts-pagination {
+  display: flex;
+  min-height: 50px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--crm-layout-border);
+  color: var(--crm-layout-muted);
+  background: var(--crm-layout-surface);
+  font-size: 12px;
+}
+.admin-contacts-pagination nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-contacts-pagination .admin-contacts-control {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .admin-contacts-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-contacts-toolbar-actions {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 850px) {
+  .admin-contacts-content-inspecting {
+    flex-direction: column;
+  }
+  .admin-contacts-content-inspecting > .admin-contacts-list {
+    flex-basis: auto;
+  }
+}
+@media (max-width: 600px) {
+  .admin-contacts-toolbar-actions {
+    width: 100%;
+  }
+  .admin-contacts-search {
+    flex-basis: 100%;
+  }
+  .admin-contacts-status-filter {
+    flex: 1 1 140px;
+  }
+  .admin-contacts-toolbar-divider {
+    display: none;
+  }
+  .admin-contacts-refresh {
+    display: none;
+  }
+  .admin-contacts-filter-popover {
+    right: -92px;
+    width: min(320px, calc(100vw - 32px));
+  }
+  .admin-contacts-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .admin-contacts-pagination nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.admin-contacts-search:has(input:focus-visible),
+.admin-contacts-status-filter:has(select:focus-visible) {
+  outline: 2px solid var(--crm-layout-text);
+  outline-offset: 2px;
+}
+.admin-contacts-search input:focus-visible,
+.admin-contacts-status-filter select:focus-visible { outline: none; }
