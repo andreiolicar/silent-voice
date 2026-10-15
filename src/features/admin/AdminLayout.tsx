@@ -16,10 +16,10 @@ type AdminLayoutProps = {
 }
 
 const statusIcons = {
-  new: 'file',
-  contacted: 'mail',
-  demo_scheduled: 'organization',
-  closed: 'contacts',
+  new: 'status-new',
+  contacted: 'status-contacted',
+  demo_scheduled: 'status-demo',
+  closed: 'status-closed',
 } as const
 
 export function AdminLayout({
@@ -57,7 +57,7 @@ export function AdminLayout({
             aria-controls="admin-sidebar-navigation"
             onClick={() => setCollapsed((value) => !value)}
           >
-            <AdminIcon name="collapse" />
+            <AdminIcon name={collapsed ? 'expand' : 'collapse'} />
           </button>
         </div>
         <nav
@@ -118,9 +118,11 @@ export function AdminLayout({
             className="crm-layout-logout"
             onClick={onLogout}
             disabled={loggingOut}
+            aria-label={loggingOut ? 'Saindo…' : 'Sair'}
             title={collapsed ? (loggingOut ? 'Saindo…' : 'Sair') : undefined}
           >
-            {loggingOut ? 'Saindo…' : 'Sair'}
+            <AdminIcon name="logout" />
+            <span className="crm-layout-logout-label">{loggingOut ? 'Saindo…' : 'Sair'}</span>
           </button>
         </div>
       </aside>

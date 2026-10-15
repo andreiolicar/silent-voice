@@ -4,11 +4,11 @@ Referência: quarta tela, **CRM Dashboard**, no [arquivo editável do Figma](htt
 
 ## Composição
 
-- Sidebar de 260 px, recolhível para 64 px; topbar e toolbar de 54 px.
-- Tabela com linhas de 48 px, divisórias finas, cabeçalho cinza claro e ações compactas de 30 px.
-- Detalhes em coluna lateral de 395 px, com cabeçalho de 46 px. A tabela tem rolagem horizontal própria quando o painel estiver aberto em larguras menores.
+- Sidebar de 260 px, recolhível para 64 px; itens com altura mínima de 32 px e quebra de linha; topbar e toolbar de 54 px.
+- Tabela com linhas de no mínimo 48 px, divisórias finas, cabeçalho cinza claro e ações compactas de 30 px. Dados longos quebram linha e expandem a altura sem reticências.
+- Detalhes em coluna lateral de 395 px, com cabeçalho de no mínimo 46 px e nome completo com quebra de linha. A tabela tem rolagem horizontal própria quando o painel estiver aberto em larguras menores.
 - Inter, verde `#1AA99B` e azul-marinho `#051B34`. Tokens do CRM centralizados no escopo `.crm-layout`, consumidos pela tabela, visão geral e inspector.
-- Ícones SVG locais em `public/assets/admin/`, exportados do Figma e preservados em suas dimensões intrínsecas. Nenhuma captura da referência é usada como interface.
+- Ícones [Lucide React](https://lucide.dev/guide/react), importados individualmente em um componente tipado: 16 px, traço 1,65 e cor herdada. Hover e estado ativo da sidebar usam a mesma faixa de largura total; o ativo mantém o marcador verde. A marca no CRM tem aproximadamente 152 px de largura. Nenhuma captura da referência é usada como interface.
 
 ## Navegação e dados
 
@@ -28,4 +28,4 @@ O login aprovado continua sem logo, com card/campos/botão de raio 12 px e campo
 - Safari: sessão real existente, visão geral, navegação para cadastros e estado vazio. A base estava vazia; o inspector com dados foi conferido no Chromium e nos testes de componentes.
 - Capturas locais em `docs/reference/admin-v2/` (ignoradas no Git). Capturas povoadas são identificadas como dados ilustrativos de QA.
 
-Entrega local na branch `chatbot-backoffice`, sem publicação, alteração de senha ou dependências novas. Servidores frontend e API mantidos em execução.
+Entrega local na branch `chatbot-backoffice`, sem publicação ou alteração de senha. Lucide React é a dependência adicionada para os ícones solicitados. Servidores frontend e API mantidos em execução.

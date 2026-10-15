@@ -67,6 +67,8 @@
   padding: 11px 12px;
   border-bottom: 1px solid var(--crm-layout-border);
 }
+.crm-layout-brand-row .brand { --brand-scale: .68; }
+.crm-icon { display: inline-block; flex-shrink: 0; vertical-align: middle; }
 .crm-layout-collapse {
   display: flex;
   flex: 0 0 30px;
@@ -103,35 +105,38 @@
   line-height: 12px;
   text-transform: uppercase;
 }
+/* Keep every row on the same full-width track in rest, hover and active states. */
 .crm-nav-link {
   position: relative;
   display: flex;
   flex-shrink: 0;
   align-items: center;
   gap: 8px;
-  width: 100%;
+  width: calc(100% + 24px);
   min-width: 0;
-  height: 30px;
-  padding: 8px;
-  border-radius: 8px;
+  min-height: 32px;
+  margin-inline: -12px;
+  padding: 6px 20px;
+  border-radius: 0;
   color: var(--crm-layout-muted);
   text-decoration: none;
+  transition: color 140ms ease, background-color 140ms ease;
 }
-.crm-nav-link > :first-child { flex-shrink: 0; }
 .crm-nav-label {
+  flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   font-size: 14px;
-  line-height: 14px;
+  line-height: 20px;
 }
-.crm-nav-link:hover { color: var(--crm-layout-text); background: var(--crm-layout-hover); }
+@media (hover: hover) and (pointer: fine) {
+  .crm-nav-link:hover {
+    color: var(--crm-layout-text);
+    background: var(--crm-layout-active);
+  }
+}
 .crm-nav-link[aria-current='page'] {
-  width: calc(100% + 24px);
-  margin-inline: -12px;
-  padding-inline: 20px;
-  border-radius: 0;
   color: var(--crm-layout-text);
   background: var(--crm-layout-active);
   font-weight: 600;
@@ -174,15 +179,18 @@
   line-height: 1;
 }
 .crm-layout-email {
-  overflow: hidden;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
   color: var(--crm-layout-muted);
   font-size: 12px;
   line-height: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .crm-layout-logout {
-  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
   width: 100%;
   padding: 8px;
   border: 0;
@@ -243,7 +251,8 @@
 .crm-layout--collapsed .crm-layout-brand-row { justify-content: center; }
 .crm-layout--collapsed .crm-nav-group-label,
 .crm-layout--collapsed .crm-nav-label,
-.crm-layout--collapsed .crm-layout-email {
+.crm-layout--collapsed .crm-layout-email,
+.crm-layout--collapsed .crm-layout-logout-label {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -253,18 +262,17 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
-.crm-layout--collapsed .crm-nav-link { justify-content: center; gap: 0; }
-.crm-layout--collapsed .crm-nav-link[aria-current='page'] { padding-inline: 8px; }
+.crm-layout--collapsed .crm-nav-link { justify-content: center; gap: 0; padding-inline: 0; }
 .crm-layout--collapsed .crm-layout-account-identity { justify-content: center; padding: 0; }
-.crm-layout--collapsed .crm-layout-logout { padding-inline: 0; font-size: 11px; text-align: center; }
+.crm-layout--collapsed .crm-layout-logout { justify-content: center; padding-inline: 0; }
 @media (max-width: 700px) {
   .crm-layout { --crm-layout-sidebar-width: 220px; }
   .crm-layout--collapsed { --crm-layout-sidebar-width: 64px; }
   .crm-layout-brand-row { padding-inline: 10px; }
-  .crm-layout-brand-row .brand { --brand-scale: .7; }
+  .crm-layout-brand-row .brand { --brand-scale: .62; }
   .crm-layout-topbar { gap: 8px; }
   .crm-layout-breadcrumb-parent { display: none; }
-  .crm-layout-breadcrumb > img { display: none; }
+  .crm-layout-breadcrumb > .crm-icon { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .crm-layout-sidebar,

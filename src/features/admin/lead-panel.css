@@ -20,7 +20,7 @@
   letter-spacing: -0.28px;
 }
 .admin-panel-inline .admin-panel-top {
-  height: 46px;
+  height: auto;
   min-height: 46px;
   justify-content: flex-start;
   gap: 4px;
@@ -32,13 +32,12 @@
   min-width: 0;
   flex: 1 1 auto;
   padding: 0 2px;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--crm-layout-text);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 .admin-inspector-initial {
   display: flex;

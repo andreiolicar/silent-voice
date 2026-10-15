@@ -28,6 +28,7 @@
     "@openuidev/react-ui": "0.18.1",
     "better-sqlite3": "^13.0.3",
     "fastify": "^5.12.7",
+    "lucide-react": "^1.57.0",
     "motion": "^13.5.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

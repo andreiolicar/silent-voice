@@ -60,10 +60,10 @@
 .crm-overview-contact { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .crm-overview-contact-avatar { display: inline-flex; flex: 0 0 28px; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; background: var(--crm-layout-brand-soft); color: var(--crm-overview-text); font-size: 12px; }
 .crm-overview-contact-details { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.crm-overview-contact-details strong { overflow: hidden; font-weight: 500; line-height: 16px; text-overflow: ellipsis; white-space: nowrap; }
-.crm-overview-contact-details > span { overflow: hidden; color: var(--crm-overview-muted); font-size: 12px; line-height: 15px; text-overflow: ellipsis; white-space: nowrap; }
-.crm-overview-objective { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 20px; }
-.crm-overview-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; line-height: 18px; }
+.crm-overview-contact-details strong { font-weight: 500; line-height: 20px; white-space: normal; overflow-wrap: anywhere; }
+.crm-overview-contact-details > span { color: var(--crm-overview-muted); font-size: 12px; line-height: 18px; white-space: normal; overflow-wrap: anywhere; }
+.crm-overview-objective { display: block; white-space: normal; overflow-wrap: anywhere; line-height: 20px; }
+.crm-overview-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
 .crm-overview-date { color: var(--crm-overview-muted); font-size: 12px; line-height: 18px; }
 .crm-overview-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 240px; padding: 32px 20px; color: var(--crm-overview-muted); font-size: 13px; line-height: 20px; text-align: center; }
 .crm-overview-state h3 { color: var(--crm-overview-text); font-size: 14px; font-weight: 500; line-height: 20px; }

@@ -219,6 +219,7 @@
   text-align: left;
   vertical-align: middle;
 }
+.admin-contacts-table td { padding-block: 6px; }
 .admin-contacts-table th {
   color: var(--crm-layout-muted);
   background: var(--crm-layout-hover);
@@ -278,9 +279,9 @@
 .admin-contacts-email {
   display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 20px;
 }
 .admin-contacts-name:hover > span:last-child {
   text-decoration: underline;
@@ -314,7 +315,8 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 20px;
 }
 .admin-contacts-status-dot {
   width: 6px;
@@ -325,14 +327,14 @@
 }
 .admin-contacts-status-label {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .admin-contacts-status-new .admin-contacts-status-dot { background: var(--crm-layout-brand); }
 .admin-contacts-status-contacted .admin-contacts-status-dot { background: var(--crm-layout-status-contacted); }
 .admin-contacts-status-demo_scheduled .admin-contacts-status-dot { background: var(--crm-layout-status-demo); }
 .admin-contacts-table time {
-  white-space: nowrap;
+  display: block;
+  white-space: normal;
   font-variant-numeric: tabular-nums;
   font-size: 14px;
 }

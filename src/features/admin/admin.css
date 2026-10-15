@@ -377,6 +377,8 @@ body:has(.admin-shell) {
   overflow-wrap: anywhere;
 }
 .admin-note-list li > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

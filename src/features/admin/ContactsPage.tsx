@@ -255,6 +255,7 @@ export function ContactsPage({
             disabled={loading}
             onClick={() => setRefresh((value) => value + 1)}
           >
+            <AdminIcon name="refresh" />
             Atualizar
           </button>
           <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
