@@ -66,18 +66,18 @@ function applySearchAndDates(query: string) {
 
 afterEach(cleanup)
 
-it('defaults missing and invalid tracking statuses to new in one toolbar selector without a status strip', async () => {
+it('defaults missing and invalid tracking statuses to all in one toolbar selector without a status strip', async () => {
   for (const path of ['/admin/acompanhamento', '/admin/acompanhamento?status=invalid']) {
     const { request, paths } = fakeRequest(() => list([contact()]))
     const view = mount(request, path)
     await screen.findByRole('button', { name: 'Ver contato de Ana nova' })
     const selector = screen.getByRole('combobox', { name: 'Status' })
-    expect(selector).toHaveValue('new')
-    expect(within(selector).getAllByRole('option')).toHaveLength(4)
+    expect(selector).toHaveValue('')
+    expect(within(selector).getAllByRole('option')).toHaveLength(5)
     expect(screen.queryByRole('navigation', { name: 'Status do acompanhamento' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Acompanhamento de contatos 1' })).toBeInTheDocument()
     expect(paths.at(-1)?.pathname).toBe('/admin/leads')
-    expect(paths.at(-1)?.searchParams.get('status')).toBe('new')
+    expect(paths.at(-1)?.searchParams.get('status')).toBeNull()
     expect(paths.at(-1)?.searchParams.get('page')).toBe('1')
     view.unmount()
   }
@@ -86,7 +86,7 @@ it('defaults missing and invalid tracking statuses to new in one toolbar selecto
 it('selects all four statuses and follows browser history while preserving applied search and dates', async () => {
   const { request, paths } = fakeRequest((url) => {
     const stage = stages.find((item) => item.status === url.searchParams.get('status'))
-    return list(stage ? [contact(stage.status, stage.name)] : [])
+    return list(stage ? [contact(stage.status, stage.name)] : stages.map((item) => contact(item.status, item.name)))
   })
   mount(request, '/admin/acompanhamento?status=new')
   await screen.findByRole('button', { name: 'Ver contato de Ana nova' })
@@ -115,6 +115,18 @@ it('selects all four statuses and follows browser history while preserving appli
   expect(paths.at(-1)?.searchParams.get('status')).toBe('closed')
   expect(paths.at(-1)?.searchParams.get('q')).toBe('Equipe')
   expect(screen.getByLabelText('Buscar')).toHaveValue('Equipe')
+  fireEvent.change(selector, { target: { value: '' } })
+  await screen.findByRole('button', { name: 'Ver contato de Ana nova' })
+  expect(selector).toHaveValue('')
+  expect(within(selector).getByRole('option', { name: 'Todos os status' })).toBeInTheDocument()
+  expect(screen.getByLabelText('Rota atual').textContent).toBe('/admin/acompanhamento')
+  expect(Object.fromEntries(paths.at(-1)!.searchParams)).toEqual({
+    page: '1', q: 'Equipe', from: '2026-10-01', to: '2026-10-15',
+  })
+  fireEvent.click(screen.getByRole('button', { name: 'Voltar no histórico' }))
+  await screen.findByRole('button', { name: 'Ver contato de Diego encerrado' })
+  expect(selector).toHaveValue('closed')
+  expect(screen.queryByRole('button', { name: 'Ver contato de Ana nova' })).not.toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Filtros' }))
   expect(screen.getByLabelText('De')).toHaveValue('2026-10-01')
   expect(screen.getByLabelText('Até')).toHaveValue('2026-10-15')
@@ -165,7 +177,7 @@ it('keeps the toolbar status selector available during loading and with an empty
     complete!({ items: [contact()], total: 1, page: 1, counts: { new: 12, contacted: 0, demo_scheduled: 8, closed: 3 } })
   })
   expect(screen.getByRole('heading', { name: 'Acompanhamento de contatos 1' })).toBeInTheDocument()
-  expect(within(selector).getAllByRole('option')).toHaveLength(4)
+  expect(within(selector).getAllByRole('option')).toHaveLength(5)
   fireEvent.change(selector, { target: { value: 'contacted' } })
   await act(async () => {
     complete!({ items: [], total: 0, page: 1, counts })

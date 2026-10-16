@@ -14,7 +14,7 @@ Referência: quarta tela, **CRM Dashboard**, no [arquivo editável do Figma](htt
 
 `/admin` apresenta os totais globais por status e os cinco cadastros mais recentes. `/admin/cadastros` oferece busca, filtros de status e data, paginação de 25 registros, exportação CSV da página e detalhes com status e anotações.
 
-`/admin/acompanhamento` centraliza Novo, Em contato, Demonstração combinada e Encerrado numa única entrada da sidebar. A seleção de status fica no filtro da toolbar, sem faixa adicional de botões e contadores, e usa o parâmetro `status`; voltar e avançar no navegador atualiza a seleção, mantendo busca e datas aplicadas. Sem status válido, a seleção inicial é Novo. Limpar os filtros conserva o status de acompanhamento. A Visão geral aponta seus totais para essa rota; Cadastros continua mostrando a lista completa.
+`/admin/acompanhamento` centraliza Novo, Em contato, Demonstração combinada e Encerrado numa única entrada da sidebar. A seleção de status fica no filtro da toolbar, sem faixa adicional de botões e contadores, e usa o parâmetro `status`; voltar e avançar no navegador atualiza a seleção, mantendo busca e datas aplicadas. A opção “Todos os status” remove esse parâmetro e é a seleção inicial quando não há status válido, igual a Cadastros. Limpar os filtros conserva o status de acompanhamento. A Visão geral aponta seus totais para essa rota; Cadastros continua mostrando a lista completa.
 
 Exportação escapa o CSV e mantém fórmulas de planilha como texto. Nenhum cadastro ilustrativo foi inserido na base real.
 

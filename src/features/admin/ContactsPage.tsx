@@ -32,7 +32,7 @@ export function ContactsPage({
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const tracking = view === 'tracking'
-  const sidebarStatus = validStatus(searchParams.get('status')) || (tracking ? 'new' : '')
+  const sidebarStatus = validStatus(searchParams.get('status'))
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState(sidebarStatus)
   const [from, setFrom] = useState('')
@@ -179,7 +179,7 @@ export function ContactsPage({
                 syncStatus(value)
               }}
             >
-              {!tracking && <option value="">Todos os status</option>}
+              <option value="">Todos os status</option>
               {leadStatuses.map((item) => (
                 <option key={item} value={item}>
                   {statusLabels[item]}
