@@ -137,7 +137,6 @@
 .crm-nav-link[aria-current='page'] {
   color: var(--crm-layout-text);
   background: var(--crm-layout-active);
-  font-weight: 600;
 }
 .crm-nav-link[aria-current='page']::before {
   position: absolute;
