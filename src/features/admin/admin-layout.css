@@ -177,10 +177,14 @@
   line-height: 1;
 }
 .crm-layout-avatar {
+  flex-basis: 26px;
+  width: 26px;
+  height: 26px;
   border-color: var(--color-brand);
   border-radius: 50%;
   background: var(--color-brand);
   color: var(--crm-layout-surface);
+  font-size: 12px;
 }
 .crm-layout-email {
   min-width: 0;
