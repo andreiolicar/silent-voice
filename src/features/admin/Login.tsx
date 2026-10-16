@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import * as m from 'motion/react-m'
+import { useSectionEntrance } from '../../entrance'
 import { GreenButton } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { AdminApiError, adminFetch, apiMessage, isAborted } from './admin-api'
@@ -13,6 +15,7 @@ export function Login({
   onLogin: (session: Session) => void
   expired: boolean
 }) {
+  const { ref, enter, revealOnFocus } = useSectionEntrance<HTMLElement>()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [pending, setPending] = useState(false)
@@ -68,13 +71,16 @@ export function Login({
   return (
     <main className="admin-login">
       <div className="admin-login-content">
-        <section
-          className="admin-login-form"
+        <m.section
+          ref={ref}
+          className="admin-login-form entrance-control"
           aria-labelledby="admin-login-title"
+          onFocusCapture={revealOnFocus}
+          {...enter(0, 12, 0.55)}
         >
-          <h1 id="admin-login-title" className="admin-login-title">
+          <m.h1 id="admin-login-title" className="admin-login-title" {...enter(0.08, 8, 0.5)}>
             Entrar
-          </h1>
+          </m.h1>
           {expired && (
             <p className="admin-login-feedback" role="status">
               Sua sessão expirou. Entre novamente para continuar. Seus rascunhos
@@ -82,7 +88,7 @@ export function Login({
             </p>
           )}
           <form onSubmit={submit} aria-busy={pending}>
-            <label className="admin-login-field">
+            <m.label className="admin-login-field" {...enter(0.16, 10, 0.5)}>
               <span>E-mail</span>
               <Input
                 type="email"
@@ -94,8 +100,8 @@ export function Login({
                 onChange={(event) => setEmail(event.target.value)}
                 disabled={pending}
               />
-            </label>
-            <label className="admin-login-field">
+            </m.label>
+            <m.label className="admin-login-field" {...enter(0.24, 10, 0.5)}>
               <span>Senha</span>
               <Input
                 ref={passwordInput}
@@ -115,7 +121,7 @@ export function Login({
                 aria-invalid={invalidCredentials || undefined}
                 aria-describedby={error ? 'admin-login-error' : undefined}
               />
-            </label>
+            </m.label>
             {error && (
               <p
                 className="admin-login-feedback"
@@ -125,11 +131,13 @@ export function Login({
                 {error}
               </p>
             )}
-            <GreenButton type="submit" disabled={pending}>
-              {pending ? 'Entrando…' : 'Entrar'}
-            </GreenButton>
+            <m.div {...enter(0.32, 8, 0.5)}>
+              <GreenButton type="submit" disabled={pending}>
+                {pending ? 'Entrando…' : 'Entrar'}
+              </GreenButton>
+            </m.div>
           </form>
-        </section>
+        </m.section>
       </div>
     </main>
   )

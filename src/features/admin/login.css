@@ -1,5 +1,4 @@
 .admin-login {
-  --admin-login-radius: 12px;
   min-height: 100dvh;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -16,7 +15,7 @@
   padding: 40px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
-  border-radius: var(--admin-login-radius);
+  border-radius: var(--radius-card);
   box-shadow: 0 8px 32px color-mix(in srgb, var(--color-ink) 3%, transparent);
 }
 .admin-login .admin-login-title {

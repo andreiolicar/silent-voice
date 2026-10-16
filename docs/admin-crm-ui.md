@@ -20,7 +20,9 @@ Exportação escapa o CSV e mantém fórmulas de planilha como texto. Nenhum cad
 
 Autenticação, CSRF, expiração de sessão, controle de versão e rascunhos em memória foram preservados. O painel lateral não prende o Tab nem bloqueia a rolagem da página; Escape fecha os detalhes e restaura o foco. Aplicar filtros de data retorna o foco ao controle persistente; Enter na busca conserva o foco na busca.
 
-O login continua sem logo, com card de raio 12 px e campos/botão em pílula de altura 44 px. O grid permite reduzir o card até 358 px em uma viewport de 390 px, sem rolagem horizontal. Labels e valores dos campos continuam à esquerda; título e feedback ficam centralizados. Landing page e chatbot não foram redesenhados nesta alteração.
+O login continua sem logo, com card usando `--radius-card` (24 px), igual aos cards verdes de dispositivo e aplicativo da home. Campos e botão continuam em pílula de altura 44 px. O grid permite reduzir o card até 358 px em uma viewport de 390 px, sem rolagem horizontal. Labels e valores dos campos continuam à esquerda; título e feedback ficam centralizados. Landing page e chatbot não foram redesenhados nesta alteração.
+
+A entrada reutiliza `useSectionEntrance`, `LazyMotion` e os componentes `m.*` da landing. O card sobe 12 px e aparece em 550 ms; título, campos e botão entram em sequência, terminando em aproximadamente 820 ms. Foco no formulário revela imediatamente todos os controles. Movimento reduzido apresenta tudo estático e visível; preenchimento, erros e estado de envio não reiniciam a entrada.
 
 ## Foco e estados dos controles
 
@@ -32,7 +34,7 @@ O login continua sem logo, com card de raio 12 px e campos/botão em pílula de 
 
 ## Verificação
 
-- Suíte completa: `npm test` (69 testes Node + 77 testes UI). Inclui os quatro status, histórico do navegador, preservação de busca/datas, limpeza na segunda página, contadores e integração da sidebar.
+- Suíte completa: `npm test` (69 testes Node + 79 testes UI). Inclui os quatro status, histórico do navegador, preservação de busca/datas, limpeza na segunda página, contadores, integração da sidebar e revelação do login por foco/movimento reduzido.
 - Tipagem: `npm run typecheck`; compilação: `npm run build`.
 - Chromium: conferência visual em 1920, 1440 e 1280 px; sidebar, tabela, inspector, navegação por status, histórico do navegador e foco dos filtros. Botões medidos em 28 px, fonte 12 px e ícones 14 px; sem rolagem horizontal global. O filtro de datas também foi conferido em 390 px e ficou contido na área disponível. Dados de conferência foram respondidos apenas na aba de teste, sem alterar o banco.
 - Safari: nesta revisão a sessão existente estava expirada e levou ao login. A tela protegida com os novos filtros foi validada no Chromium e nos testes de componentes; nenhuma credencial ou conta foi alterada.

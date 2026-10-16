@@ -11,6 +11,7 @@ import {
 } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter } from 'react-router-dom'
+import { domAnimation, LazyMotion } from 'motion/react'
 import { AdminApp } from './AdminApp'
 
 const lead = {
@@ -71,9 +72,11 @@ function setupFetch(
 }
 function mount(path = '/admin/cadastros') {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <AdminApp />
-    </MemoryRouter>
+    <LazyMotion features={domAnimation} strict>
+      <MemoryRouter initialEntries={[path]}>
+        <AdminApp />
+      </MemoryRouter>
+    </LazyMotion>
   )
 }
 afterEach(() => {
@@ -82,6 +85,31 @@ afterEach(() => {
 })
 
 describe('administrative workflow', () => {
+  it('reveals the complete login immediately when a field receives focus during entrance', async () => {
+    setupFetch()
+    mount('/admin/login')
+    const email = screen.getByRole('textbox', { name: 'E-mail' })
+    act(() => email.focus())
+    await waitFor(() => {
+      expect(email).toHaveFocus()
+      expect(screen.getByRole('region', { name: 'Entrar' })).toHaveStyle({ opacity: '1', transform: 'none' })
+    })
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled()
+  })
+
+  it('shows the login without hidden entrance frames when reduced motion is preferred', () => {
+    setupFetch()
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+    }))
+    mount('/admin/login')
+    expect(screen.getByRole('region', { name: 'Entrar' })).toHaveStyle({ opacity: '1', transform: 'none' })
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeEnabled()
+  })
+
   it('opens one tracking page from the sidebar and filters its four real statuses', async () => {
     setupFetch((path) => {
       if (!path.startsWith('/api/admin/leads?')) return undefined
