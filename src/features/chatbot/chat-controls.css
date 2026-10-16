@@ -9,6 +9,7 @@
   font-weight: var(--font-weight-medium);
   line-height: var(--type-caption-leading);
   box-shadow: none;
+  transition: background-color var(--interaction-duration) var(--interaction-easing), border-color var(--interaction-duration) var(--interaction-easing), outline-color var(--interaction-duration) var(--interaction-easing);
 }
 #silent-voice-chat .sv-chat-button--regular {
   --button-height: 40px;
@@ -23,9 +24,6 @@
 }
 #silent-voice-chat .sv-chat-button--white {
   border-color: var(--sv-chat-border);
-}
-#silent-voice-chat .sv-chat-button--green {
-  color: var(--color-secondary);
 }
 #silent-voice-chat .sv-chat-button--quiet {
   border-color: transparent;
@@ -49,6 +47,10 @@
 #silent-voice-chat .sv-chat-button--icon .sv-chat-icon {
   width: 16px;
   height: 16px;
+}
+#silent-voice-chat .sv-chat-minimize .sv-chat-icon {
+  width: calc(32px * var(--sv-chat-mark-ratio));
+  height: calc(32px * var(--sv-chat-mark-ratio));
 }
 @media (hover: hover) and (pointer: fine) {
   #silent-voice-chat .sv-chat-button--quiet:hover:not(:disabled) {

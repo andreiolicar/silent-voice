@@ -53,15 +53,7 @@ export function ChatWidget({
             ) : null
           }
         >
-          <Suspense
-            fallback={
-              open ? (
-                <div className="sv-chat-loading" role="status">
-                  Carregando assistente…
-                </div>
-              ) : null
-            }
-          >
+          <Suspense fallback={null}>
             <ChatPanel
               hidden={!open}
               onMinimize={minimize}

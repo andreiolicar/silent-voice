@@ -30,7 +30,7 @@ async function open() {
 }
 afterEach(() => vi.unstubAllGlobals())
 describe('public chatbot widget', () => {
-  it('clears the welcome screen when a conversation starts and restores it only for a new conversation', async () => {
+  it('keeps the welcome screen dismissed when minimizing an existing conversation', async () => {
     const { transport } = controlledTransport()
     render(<ChatWidget transport={transport} />)
     const composer = await open()
@@ -39,9 +39,11 @@ describe('public chatbot widget', () => {
     await userEvent.type(composer, 'Como funciona?{Enter}')
     expect(welcome).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Solicitar demonstração' })).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: 'Nova conversa' }))
-    expect(screen.getByRole('heading', { level: 3 })).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Solicitar demonstração' })).toBeEnabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Minimizar assistente' }))
+    await open()
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
   })
 
   it('waits for the intro, opens on demand, focuses composer and restores focus with Escape', async () => {
@@ -63,9 +65,9 @@ describe('public chatbot widget', () => {
       screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
     ).toHaveAttribute('aria-expanded', 'false')
   })
-  it('keeps messages and generation alive while minimized; resets and ignores late responses', async () => {
+  it('keeps messages and generation alive while minimized; aborts on unmount and ignores late responses', async () => {
     const { transport, calls } = controlledTransport()
-    render(<ChatWidget transport={transport} />)
+    const { unmount } = render(<ChatWidget transport={transport} />)
     const composer = await open()
     await userEvent.type(composer, 'Como funciona?{Enter}')
     expect(await screen.findByText('Como funciona?')).toBeVisible()
@@ -98,8 +100,10 @@ describe('public chatbot widget', () => {
       screen.getByRole('textbox', { name: 'Sua mensagem' }),
       'Outra dúvida{Enter}'
     )
-    await userEvent.click(screen.getByRole('button', { name: 'Nova conversa' }))
+    unmount()
     expect(calls[1].signal.aborted).toBe(true)
+    render(<ChatWidget transport={transport} />)
+    await open()
     await act(async () => {
       calls[1].emit({
         type: 'delta',
@@ -154,10 +158,6 @@ describe('public chatbot widget', () => {
     expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveValue(
       'Olá'
     )
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Falar com a equipe' })
-    )
-    expect(screen.getByLabelText('Nome')).toBeVisible()
     expect(
       screen.getByRole('link', { name: 'contato@silentvoice.com.br' })
     ).toBeVisible()
@@ -192,6 +192,22 @@ describe('public chatbot widget', () => {
     )
     expect(viewport.scrollTop).toBe(1000)
   })
+  it('opens the contact form from an OpenUI answer without restoring removed toolbar actions', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await userEvent.type(await open(), 'Quero uma demonstração{Enter}')
+    await act(async () => {
+      calls[0].emit({ type: 'delta', requestId: calls[0].request.requestId, text: 'root = Answer("Demonstração", [ContactAction()])' })
+      calls[0].emit({ type: 'done', requestId: calls[0].request.requestId, finishReason: 'stop' })
+      calls[0].resolve()
+    })
+    await userEvent.click(await screen.findByRole('button', { name: 'Conversar com a equipe' }))
+    expect(screen.getByLabelText('Nome')).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Voltar à conversa' }))
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveFocus()
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
+  })
   it('keeps a pending lead registration alive while minimized without sending its fields to the AI', async () => {
     let complete!: (response: Response) => void
     const fetcher = vi.fn(
@@ -205,7 +221,7 @@ describe('public chatbot widget', () => {
     render(<ChatWidget transport={transport} />)
     await open()
     await userEvent.click(
-      screen.getByRole('button', { name: 'Falar com a equipe' })
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
     )
     await userEvent.type(screen.getByLabelText('Nome'), 'Maria Silva')
     await userEvent.type(screen.getByLabelText('E-mail'), 'maria@example.com')
@@ -243,7 +259,7 @@ describe('public chatbot widget', () => {
     vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({id:'receipt-1',createdAt:'2026-10-15T12:00:00.000Z'}),{status:201})))
     render(<ChatWidget/>)
     await open()
-    await userEvent.click(screen.getByRole('button',{name:'Falar com a equipe'}))
+    await userEvent.click(screen.getByRole('button',{name:'Solicitar demonstração'}))
     await userEvent.type(screen.getByLabelText('Nome'),'Maria Silva')
     await userEvent.type(screen.getByLabelText('E-mail'),'maria@example.com')
     await userEvent.type(screen.getByLabelText('Objetivo do contato'),'Quero conhecer o dispositivo.')
@@ -253,21 +269,21 @@ describe('public chatbot widget', () => {
     await userEvent.click(screen.getByRole('button',{name:'Abrir assistente Silent Voice'}))
     expect(receipt).toHaveFocus()
     await userEvent.click(screen.getByRole('button',{name:'Voltar à conversa'}))
-    await userEvent.click(screen.getByRole('button',{name:'Falar com a equipe'}))
+    await userEvent.click(screen.getByRole('button',{name:'Solicitar demonstração'}))
     expect(receipt).toHaveFocus()
   })
-  it('preserves the contact form across chat and minimize, and clears it on a new conversation', async () => {
+  it('preserves the contact form across chat and minimize without reset actions', async () => {
     render(<ChatWidget />)
     await open()
     await userEvent.click(
-      screen.getByRole('button', { name: 'Falar com a equipe' })
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
     )
     await userEvent.type(screen.getByLabelText('Nome'), 'Maria')
     await userEvent.click(
       screen.getByRole('button', { name: 'Voltar à conversa' })
     )
     await userEvent.click(
-      screen.getByRole('button', { name: 'Falar com a equipe' })
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
     )
     expect(screen.getByLabelText('Nome')).toHaveValue('Maria')
     await userEvent.click(
@@ -278,10 +294,7 @@ describe('public chatbot widget', () => {
     )
     await waitFor(() => expect(screen.getByLabelText('Nome')).toBeVisible())
     expect(screen.getByLabelText('Nome')).toHaveValue('Maria')
-    await userEvent.click(screen.getByRole('button', { name: 'Nova conversa' }))
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Falar com a equipe' })
-    )
-    expect(screen.getByLabelText('Nome')).toHaveValue('')
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
   })
 })

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowUpRight, ChevronDown, Minus, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, ChevronDown, Minus } from 'lucide-react'
 import { ThemeProvider, createTheme } from '@openuidev/react-ui/ThemeProvider'
 import type { ChatTransport } from './chat-client'
 import { useChatConversation } from './useChatConversation'
@@ -40,7 +40,6 @@ export default function ChatPanel({
   const chat = useChatConversation(transport)
   const [mode, setMode] = useState<'chat' | 'contact'>('chat')
   const [hasContact, setHasContact] = useState(false)
-  const [leadVersion, setLeadVersion] = useState(0)
   const composer = useRef<HTMLTextAreaElement>(null)
   const contact = useRef<HTMLDivElement>(null)
   const scroll = useRef<HTMLDivElement>(null)
@@ -50,7 +49,7 @@ export default function ChatPanel({
     if (hidden) return
     if (mode === 'chat') composer.current?.focus()
     else contact.current?.querySelector<HTMLElement>('input, [data-contact-receipt]')?.focus()
-  }, [hidden, mode, leadVersion])
+  }, [hidden, mode])
   useEffect(() => {
     if (!scroll.current || hidden || mode !== 'chat') return
     if (chat.messages.length === 0) {
@@ -62,12 +61,6 @@ export default function ChatPanel({
   const openContact = () => {
     setHasContact(true)
     setMode('contact')
-  }
-  const reset = () => {
-    chat.reset()
-    setLeadVersion((v) => v + 1)
-    setHasContact(false)
-    setMode('chat')
   }
   const lastQuestion = [...chat.messages]
     .reverse()
@@ -105,20 +98,8 @@ export default function ChatPanel({
             <Minus className="sv-chat-icon" size={16} strokeWidth={1.65} aria-hidden="true" />
           </ChatButton>
         </header>
-        <nav className="sv-chat-toolbar" aria-label="Ações da conversa">
-          <ChatButton tone="quiet" onClick={reset}>
-            <RotateCcw className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
-            Nova conversa
-          </ChatButton>
-          {mode === 'chat' ? (
-            <ChatButton
-              className="sv-chat-contact-button"
-              onClick={openContact}
-            >
-              Falar com a equipe
-              <ArrowUpRight className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
-            </ChatButton>
-          ) : (
+        {mode === 'contact' && (
+          <nav className="sv-chat-toolbar" aria-label="Ações da conversa">
             <ChatButton
               className="sv-chat-contact-button"
               onClick={() => setMode('chat')}
@@ -126,8 +107,8 @@ export default function ChatPanel({
               <ArrowLeft className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
               Voltar à conversa
             </ChatButton>
-          )}
-        </nav>
+          </nav>
+        )}
         <div
           ref={scroll}
           className="sv-chat-scroll"
@@ -225,7 +206,7 @@ export default function ChatPanel({
             hidden={mode !== 'contact'}
             inert={mode !== 'contact'}
           >
-            <ChatLeadForm key={leadVersion} />
+            <ChatLeadForm />
           </div>
         )}
         <div
