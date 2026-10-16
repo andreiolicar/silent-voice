@@ -71,7 +71,7 @@
   max-width: calc(100vw - 32px);
   height: 640px;
   max-height: calc(100dvh - 120px);
-  border: 1px solid var(--sv-chat-border);
+  border: 0;
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: 0 12px 48px color-mix(in srgb, var(--color-ink) 12%, transparent);
