@@ -277,8 +277,7 @@
   .crm-layout-workspace { transition: none; }
 }
 
-.crm-layout :focus-visible { outline-offset: 2px; }
-.crm-layout .crm-nav-link:focus-visible { outline-offset: -2px; }
+.admin-shell a.crm-nav-link:focus-visible:not(:disabled) { outline-offset: -2px; }
 
 .crm-layout-collapse .crm-icon,
 .crm-layout-logout .crm-icon {

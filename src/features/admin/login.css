@@ -2,6 +2,7 @@
   --admin-login-radius: 12px;
   min-height: 100dvh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 48px 24px;
   background: var(--color-surface-hero);
@@ -39,16 +40,15 @@
   font-weight: var(--font-weight-medium);
   text-align: left;
 }
+.admin-login :is(.sv-input, .sv-button) {
+  border-radius: var(--radius-pill);
+}
 .admin-login .sv-button {
   --button-height: 44px;
   width: 100%;
   margin-top: 0;
-  border-radius: var(--admin-login-radius);
   font-size: var(--type-label-size);
   font-weight: var(--font-weight-semibold);
-}
-.admin-login .sv-button:focus-visible {
-  outline-offset: 3px;
 }
 .admin-login .admin-login-feedback {
   color: var(--color-text-muted);

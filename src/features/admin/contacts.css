@@ -402,13 +402,35 @@
   }
 }
 
-.admin-contacts-search:has(input:focus-visible),
-.admin-contacts-status-filter:has(select:focus-visible) {
-  outline: 2px solid var(--crm-layout-text);
-  outline-offset: 2px;
+.admin-contacts-search,
+.admin-contacts-status-filter {
+  transition: border-color var(--interaction-duration) var(--interaction-easing),
+    box-shadow var(--interaction-duration) var(--interaction-easing);
 }
-.admin-contacts-search input:focus-visible,
-.admin-contacts-status-filter select:focus-visible { outline: none; }
+.admin-contacts-search:focus-within,
+.admin-contacts-status-filter:focus-within {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 2px var(--admin-focus-halo);
+}
+.admin-shell .admin-contacts-search input:focus:not(:disabled),
+.admin-shell .admin-contacts-status-filter select:focus:not(:disabled) {
+  outline: none;
+  box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-contacts-search:hover:not(:focus-within),
+  .admin-contacts-status-filter:hover:not(:focus-within) {
+    border-color: color-mix(in srgb, var(--color-brand) 40%, var(--color-border));
+  }
+}
+@media (forced-colors: active) {
+  .admin-contacts-search:focus-within,
+  .admin-contacts-status-filter:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
 
 .admin-contacts-search > .crm-icon,
 .admin-contacts-status-filter > .crm-icon,

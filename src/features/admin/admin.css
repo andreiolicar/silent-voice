@@ -2,6 +2,9 @@ body:has(.admin-shell) {
   min-width: 0;
 }
 .admin-shell {
+  /* Keep the admin focus treatment local; landing controls retain their style. */
+  --color-focus: color-mix(in srgb, var(--color-brand) 80%, var(--color-ink));
+  --admin-focus-halo: color-mix(in srgb, var(--color-brand) 12%, transparent);
   --admin-background: color-mix(
     in srgb,
     var(--color-ink) 3%,
@@ -61,15 +64,32 @@ body:has(.admin-shell) {
   opacity: 0.48;
   cursor: default;
 }
-.admin-shell button,
-.admin-shell a,
-.admin-shell input,
-.admin-shell select,
-.admin-shell textarea {
-  outline-offset: 4px;
+.admin-shell :focus-visible,
+.admin-shell :is(button, a):focus-visible:not(:disabled) {
+  outline: 1px solid var(--color-focus);
+  outline-offset: 2px;
 }
-.admin-shell :focus-visible {
-  outline: 2px solid var(--color-ink);
+.admin-shell :is(input, select, textarea) {
+  transition: border-color var(--interaction-duration) var(--interaction-easing),
+    box-shadow var(--interaction-duration) var(--interaction-easing);
+}
+.admin-shell :is(input, select, textarea):focus:not(:disabled) {
+  border-color: var(--color-focus);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--admin-focus-halo);
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-shell :is(input, select, textarea):hover:not(:focus):not(:disabled) {
+    border-color: color-mix(in srgb, var(--color-brand) 40%, var(--color-border));
+  }
+}
+@media (forced-colors: active) {
+  .admin-shell { --color-focus: Highlight; }
+  .admin-shell :is(button, a, input, select, textarea):focus-visible:not(:disabled) {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
 }
 .admin-shell h1,
 .admin-shell h2,
