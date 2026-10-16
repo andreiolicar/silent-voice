@@ -93,6 +93,19 @@ test('provider unavailable returns controlled error and no fake answer', () =>
       assert.doesNotMatch(r.body, /secret-provider-detail|"type":"done"/)
     }
   ))
+test('upstream rate limits remain distinct from a generic provider failure without exposing details', () =>
+  withApp(
+    {
+      async *stream() {
+        throw Object.assign(new Error('private-provider-detail'), { statusCode: 429 })
+      },
+    },
+    async app => {
+      const r = await post(app)
+      assert.match(r.body, /"code":"provider_rate_limited"/)
+      assert.doesNotMatch(r.body, /private-provider-detail|"type":"done"/)
+    }
+  ))
 test('truncated provider never becomes a success', () =>
   withApp(
     {

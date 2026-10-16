@@ -30,6 +30,22 @@ async function open() {
 }
 afterEach(() => vi.unstubAllGlobals())
 describe('public chatbot widget', () => {
+  it.each(['O que é o Silent Voice?', 'Como o dispositivo funciona?', 'O que posso ver no aplicativo?'])('sends the suggested question "%s" and renders the streamed answer', async question => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await open()
+    await userEvent.click(screen.getByRole('button', { name: question }))
+    expect(calls).toHaveLength(1)
+    expect(calls[0].request.messages.at(-1)?.content).toBe(question)
+    await act(async () => {
+      calls[0].emit({ type: 'delta', requestId: calls[0].request.requestId, text: 'root = Answer("Informações", [Text("Resposta de teste recebida por streaming.")])' })
+      calls[0].emit({ type: 'done', requestId: calls[0].request.requestId, finishReason: 'stop' })
+      calls[0].resolve()
+    })
+    expect(screen.getByText('Resposta de teste recebida por streaming.')).toBeVisible()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toBeEnabled()
+  })
   it('keeps the welcome screen dismissed when minimizing an existing conversation', async () => {
     const { transport } = controlledTransport()
     render(<ChatWidget transport={transport} />)
@@ -191,6 +207,21 @@ describe('public chatbot widget', () => {
       })
     )
     expect(viewport.scrollTop).toBe(1000)
+  })
+  it('explains an upstream usage limit and keeps the question available without automatic retries', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await userEvent.type(await open(), 'Como funciona?{Enter}')
+    await act(async () => {
+      calls[0].emit({ type: 'error', requestId: calls[0].request.requestId, code: 'provider_rate_limited', retryable: true })
+      calls[0].resolve()
+    })
+    expect(screen.getByRole('alert')).toHaveTextContent('limite de uso do serviço de IA')
+    expect(calls).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Enviar mensagem' })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Rever pergunta' }))
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveValue('Como funciona?')
+    expect(screen.getByRole('button', { name: 'Enviar mensagem' })).toBeEnabled()
   })
   it('opens the contact form from an OpenUI answer without restoring removed toolbar actions', async () => {
     const { transport, calls } = controlledTransport()

@@ -110,7 +110,9 @@ export function useChatConversation(transport: ChatTransport = streamChat) {
             finalized = true
             setPhase('error')
             setError(
-              'Não foi possível concluir a resposta. Você ainda pode conversar com a equipe.'
+              event.code === 'provider_rate_limited'
+                ? 'O assistente atingiu o limite de uso do serviço de IA. Tente novamente mais tarde ou fale com a equipe pelo e-mail abaixo.'
+                : 'Não foi possível concluir a resposta. Você ainda pode conversar com a equipe.'
             )
           }
         }

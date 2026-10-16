@@ -127,11 +127,13 @@ export async function registerChatRoute(
             code: 'stream_interrupted',
             retryable: true,
           })
-      } catch {
+      } catch (error) {
+        const rateLimited = error !== null && typeof error === 'object' &&
+          'statusCode' in error && error.statusCode === 429
         send({
           type: 'error',
           requestId,
-          code: abort.signal.aborted ? 'timeout' : 'provider_unavailable',
+          code: abort.signal.aborted ? 'timeout' : rateLimited ? 'provider_rate_limited' : 'provider_unavailable',
           retryable: true,
         })
       } finally {

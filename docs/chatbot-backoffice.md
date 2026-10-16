@@ -17,6 +17,8 @@ A landing está em http://127.0.0.1:5173 e a API local em http://127.0.0.1:3001.
 
 Sem chave Mistral, o assistente informa indisponibilidade real; o formulário de interesse e o backoffice continuam funcionando. Não há respostas simuladas habilitadas no produto. A qualidade, a latência e o acesso ao modelo precisam ser validados com a conta configurada.
 
+Um `429` do Mistral é repassado como `provider_rate_limited` e explicado no chat, sem retry automático ou exposição da resposta privada do provedor. Ter uma chave configurada não garante cota: confira o modelo de `MISTRAL_MODEL` em [API › Limits](https://admin.mistral.ai/plateforme/limits). No diagnóstico local de 2026-10-16, `mistral-small-2603` retornou código 1300 e `x-ratelimit-limit-req-minute: 0`, mesmo numa requisição mínima. A liberação depende dos limites da organização/modelo; não pode ser resolvida por CSS ou por repetição das chamadas. Após ajustar a conta ou trocar a configuração por um modelo com acesso confirmado, reinicie apenas a API e valide uma conversa real.
+
 ## Administrador
 
 Não existe usuário ou senha padrão. Em terminal privado interativo:
