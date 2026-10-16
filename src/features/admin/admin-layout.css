@@ -241,8 +241,6 @@
   gap: 5px;
   min-width: 0;
   padding: 8px;
-  border-radius: 8px;
-  background: var(--crm-layout-active);
   white-space: nowrap;
 }
 .crm-layout-content { min-width: 0; outline-offset: -4px; }
