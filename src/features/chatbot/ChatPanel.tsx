@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ArrowUpRight, ChevronDown, Minus } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Minus } from 'lucide-react'
 import { ThemeProvider, createTheme } from '@openuidev/react-ui/ThemeProvider'
 import type { ChatTransport } from './chat-client'
 import { useChatConversation } from './useChatConversation'
@@ -223,15 +223,6 @@ export default function ChatPanel({
             onSend={chat.send}
             onStop={chat.stop}
           />
-          <details className="sv-chat-privacy">
-            <summary>Sobre a IA e seus dados<ChevronDown className="sv-chat-icon" size={12} strokeWidth={1.65} aria-hidden="true" /></summary>
-            <p>
-              O texto da conversa é enviado ao provedor de IA Mistral para gerar
-              respostas. A IA pode cometer erros. Evite dados clínicos e outras
-              informações sensíveis. O formulário de contato é separado e seus
-              campos não são enviados automaticamente à IA.
-            </p>
-          </details>
           <a className="sv-chat-email" href="mailto:contato@silentvoice.com.br">
             contato@silentvoice.com.br
           </a>

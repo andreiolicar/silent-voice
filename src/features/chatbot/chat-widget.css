@@ -191,13 +191,6 @@
 }
 #silent-voice-chat .sv-chat-message-author .sv-chat-brand-mark { width: 14px; height: 14px; color: var(--color-brand); }
 #silent-voice-chat .sv-chat-bottom { flex-shrink: 0; padding: 12px 20px 14px; }
-#silent-voice-chat .sv-chat-privacy {
-  margin-top: 10px;
-  color: var(--sv-chat-muted);
-  font-size: var(--type-caption-size);
-  line-height: var(--type-caption-leading);
-}
-#silent-voice-chat .sv-chat-privacy summary,
 #silent-voice-chat .sv-lead-options summary {
   display: flex;
   width: fit-content;
@@ -208,13 +201,12 @@
   cursor: pointer;
 }
 #silent-voice-chat summary::-webkit-details-marker { display: none; }
-#silent-voice-chat .sv-chat-privacy summary .sv-chat-icon { width: 12px; height: 12px; }
 #silent-voice-chat details[open] > summary .sv-chat-icon { transform: rotate(180deg); }
-#silent-voice-chat .sv-chat-privacy p { max-height: 90px; overflow-y: auto; margin: 8px 0; }
 #silent-voice-chat .sv-chat-email {
-  display: inline-block;
+  display: block;
   max-width: 100%;
-  margin-top: 4px;
+  margin-top: 10px;
+  text-align: center;
   color: var(--sv-chat-muted);
   font-size: var(--type-caption-size);
   line-height: var(--type-caption-leading);
