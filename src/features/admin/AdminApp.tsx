@@ -15,6 +15,7 @@ import { Login } from './Login'
 import { AdminLayout } from './AdminLayout'
 import { Overview } from './Overview'
 import { ContactsPage } from './ContactsPage'
+import { AdminButton } from './AdminButton'
 
 export function AdminApp() {
   const navigate = useNavigate()
@@ -97,9 +98,9 @@ export function AdminApp() {
   ) : sessionError ? (
     <div className="admin-boot">
       <p role="alert">{sessionError}</p>
-      <button className="admin-button" onClick={() => setSessionRetry((value) => value + 1)}>
+      <AdminButton onClick={() => setSessionRetry((value) => value + 1)}>
         Tentar novamente
-      </button>
+      </AdminButton>
     </div>
   ) : session ? (
     <AdminLayout
@@ -132,7 +133,10 @@ export function AdminApp() {
         <Route path="/admin" element={protectedContent}>
           <Route index element={<Overview request={request} />} />
           <Route path="cadastros" element={
-            <ContactsPage request={request} drafts={drafts} updateDraft={updateDraft} />
+            <ContactsPage key="register" request={request} drafts={drafts} updateDraft={updateDraft} />
+          } />
+          <Route path="acompanhamento" element={
+            <ContactsPage key="tracking" view="tracking" request={request} drafts={drafts} updateDraft={updateDraft} />
           } />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>

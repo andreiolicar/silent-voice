@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { leadStatuses, statusLabels } from '../../../shared/leads'
 import type { LeadList, LeadStatus } from '../../../shared/leads'
 import { AdminApiError, apiMessage, isAborted } from './admin-api'
 import type { AdminRequest } from './admin-api'
 import { formatAdminDate } from './admin-format'
 import { AdminIcon } from './AdminIcon'
+import { AdminButton } from './AdminButton'
 import { LeadPanel } from './LeadPanel'
 import type { LeadDraft } from './LeadPanel'
 import { exportLeadPage } from './lead-export'
@@ -22,13 +23,16 @@ export function ContactsPage({
   request,
   drafts,
   updateDraft,
+  view = 'register',
 }: {
   request: AdminRequest
   drafts: Record<string, LeadDraft>
   updateDraft: (id: string, update: Partial<LeadDraft>) => void
+  view?: 'register' | 'tracking'
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const sidebarStatus = validStatus(searchParams.get('status'))
+  const tracking = view === 'tracking'
+  const sidebarStatus = validStatus(searchParams.get('status')) || (tracking ? 'new' : '')
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState(sidebarStatus)
   const [from, setFrom] = useState('')
@@ -60,7 +64,7 @@ export function ContactsPage({
       ? 'A data inicial deve ser anterior ou igual à data final.'
       : ''
   const hasFilters = Boolean(
-    filters.q || filters.status || filters.from || filters.to
+    filters.q || (!tracking && filters.status) || filters.from || filters.to
   )
 
   useEffect(() => {
@@ -124,12 +128,13 @@ export function ContactsPage({
 
   function clearFilters(restoreSearch = false) {
     setQuery('')
-    setStatus('')
+    const nextStatus = tracking ? sidebarStatus : ''
+    setStatus(nextStatus)
     setFrom('')
     setTo('')
     setPage(1)
-    setFilters({ q: '', status: '', from: '', to: '' })
-    syncStatus('')
+    setFilters({ q: '', status: nextStatus, from: '', to: '' })
+    syncStatus(nextStatus)
     if (restoreSearch) searchInput.current?.focus()
   }
 
@@ -141,7 +146,7 @@ export function ContactsPage({
         ref={listHeading}
         tabIndex={-1}
       >
-        Todos os contatos <span>{data ? data.total : '—'}</span>
+        {tracking ? 'Acompanhamento de contatos' : 'Todos os contatos'} <span>{data ? data.total : '—'}</span>
       </h1>
       <form
         className="admin-contacts-toolbar"
@@ -161,29 +166,33 @@ export function ContactsPage({
           />
         </label>
         <div className="admin-contacts-toolbar-actions">
-          <label className="admin-contacts-status-filter">
-            <span className="admin-visually-hidden">Status</span>
-            <AdminIcon name="file" />
-            <select
-              value={status}
-              onChange={(event) => {
-                const value = event.target.value
-                setStatus(value)
-                setPage(1)
-                setFilters((previous) => ({ ...previous, status: value }))
-                syncStatus(value)
-              }}
-            >
-              <option value="">Todos os status</option>
-              {leadStatuses.map((item) => (
-                <option key={item} value={item}>
-                  {statusLabels[item]}
-                </option>
-              ))}
-            </select>
-            <AdminIcon name="chevron-down" />
-          </label>
-          <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
+          {!tracking && (
+            <>
+              <label className="admin-contacts-status-filter">
+                <span className="admin-visually-hidden">Status</span>
+                <AdminIcon name="file" />
+                <select
+                  value={status}
+                  onChange={(event) => {
+                    const value = event.target.value
+                    setStatus(value)
+                    setPage(1)
+                    setFilters((previous) => ({ ...previous, status: value }))
+                    syncStatus(value)
+                  }}
+                >
+                  <option value="">Todos os status</option>
+                  {leadStatuses.map((item) => (
+                    <option key={item} value={item}>
+                      {statusLabels[item]}
+                    </option>
+                  ))}
+                </select>
+                <AdminIcon name="chevron-down" />
+              </label>
+              <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
+            </>
+          )}
           <div
             className="admin-contacts-filter-anchor"
             onKeyDown={(event) => {
@@ -195,10 +204,10 @@ export function ContactsPage({
               }
             }}
           >
-            <button
+            <AdminButton
               type="button"
-              className="admin-contacts-control"
               ref={filterToggle}
+              aria-label="Filtros"
               aria-expanded={showFilters}
               aria-controls="admin-contact-filters"
               onClick={() => setShowFilters((value) => !value)}
@@ -209,7 +218,7 @@ export function ContactsPage({
                 <span className="admin-contacts-filter-dot" aria-label="Datas aplicadas" />
               )}
               <AdminIcon name="chevron-down" />
-            </button>
+            </AdminButton>
             {showFilters && (
               <div
                 ref={filterPopover}
@@ -238,51 +247,67 @@ export function ContactsPage({
                 </div>
                 {filterError && <p className="admin-contacts-filter-error" role="alert">{filterError}</p>}
                 <div className="admin-contacts-filter-footer">
-                  <button type="button" className="admin-contacts-text-button" onClick={() => clearFilters()}>
+                  <AdminButton type="button" onClick={() => clearFilters()}>
                     Limpar
-                  </button>
-                  <button className="admin-contacts-control admin-contacts-control-primary" disabled={Boolean(filterError)}>
+                  </AdminButton>
+                  <AdminButton type="submit" variant="primary" disabled={Boolean(filterError)}>
                     Filtrar
-                  </button>
+                  </AdminButton>
                 </div>
               </div>
             )}
           </div>
-          <button
+          <AdminButton
             type="button"
-            className="admin-contacts-control admin-contacts-refresh"
+            className="admin-contacts-refresh"
             aria-label="Atualizar contatos"
             disabled={loading}
             onClick={() => setRefresh((value) => value + 1)}
           >
             <AdminIcon name="refresh" />
             Atualizar
-          </button>
+          </AdminButton>
           <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
-          <button
+          <AdminButton
             type="button"
-            className="admin-contacts-control admin-contacts-control-primary"
+            variant="primary"
             disabled={loading || !data?.items.length}
             onClick={() => data && exportLeadPage(data.items)}
           >
             <AdminIcon name="export" />
             Exportar página
-          </button>
+          </AdminButton>
         </div>
       </form>
+      {tracking && (
+        <nav className="admin-tracking-statuses" aria-label="Status do acompanhamento" aria-busy={loading}>
+          {leadStatuses.map((item) => (
+            <Link
+              key={item}
+              className="admin-tracking-status"
+              to={`/admin/acompanhamento?status=${item}`}
+              aria-current={sidebarStatus === item ? 'page' : undefined}
+              aria-label={`${statusLabels[item]}: ${data ? data.counts[item] : 'carregando'} contatos`}
+            >
+              <span>{statusLabels[item]}</span>
+              <span className="admin-tracking-count" aria-hidden="true">{data ? data.counts[item] : '—'}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
       {hasFilters && (
         <div className="admin-contacts-active-filters">
           <span>
             {[
               filters.q && `Busca: ${filters.q}`,
-              filters.status && statusLabels[filters.status as LeadStatus],
+              !tracking && filters.status && statusLabels[filters.status as LeadStatus],
               filters.from && `De ${filters.from.split('-').reverse().join('/')}`,
               filters.to && `Até ${filters.to.split('-').reverse().join('/')}`,
             ].filter(Boolean).join(' · ')}
           </span>
-          <button type="button" className="admin-contacts-text-button" onClick={() => clearFilters(true)}>
+          <AdminButton type="button" onClick={() => clearFilters(true)}>
             Limpar filtros
-          </button>
+          </AdminButton>
         </div>
       )}
       <div className={`admin-contacts-content${selected ? ' admin-contacts-content-inspecting' : ''}`}>
@@ -290,9 +315,9 @@ export function ContactsPage({
           {error && (
             <div className="admin-contacts-state">
               <p role="alert" className="admin-error">{error}</p>
-              <button className="admin-contacts-control" onClick={() => setRefresh((value) => value + 1)}>
+              <AdminButton onClick={() => setRefresh((value) => value + 1)}>
                 Tentar novamente
-              </button>
+              </AdminButton>
             </div>
           )}
           {loading ? (
@@ -381,17 +406,15 @@ export function ContactsPage({
                 : loading ? 'Carregando…' : '0 contatos'}
             </span>
             <nav aria-label="Paginação dos contatos">
-              <button
-                className="admin-contacts-control"
+              <AdminButton
                 disabled={loading || page <= 1}
                 onClick={() => setPage((value) => value - 1)}
-              >← Anterior</button>
+              >← Anterior</AdminButton>
               <span>Página {page}</span>
-              <button
-                className="admin-contacts-control"
+              <AdminButton
                 disabled={loading || !data || page * 25 >= data.total}
                 onClick={() => setPage((value) => value + 1)}
-              >Próxima →</button>
+              >Próxima →</AdminButton>
             </nav>
           </div>
         </div>

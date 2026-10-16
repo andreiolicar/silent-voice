@@ -23,22 +23,21 @@
   background: var(--crm-layout-surface);
 }
 .admin-contacts-search,
-.admin-contacts-status-filter,
-.admin-contacts-control {
+.admin-contacts-status-filter {
   display: inline-flex;
   min-width: 0;
-  min-height: 30px;
+  min-height: 28px;
   align-items: center;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 6px;
+  padding: 4px 10px;
   border: 1px solid var(--crm-layout-border);
   border-radius: 8px;
   background: var(--crm-layout-white);
   color: var(--crm-layout-muted);
-  box-shadow: 0 1px 2px rgb(40 40 40 / 8%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
   font-weight: 500;
-  font-size: 14px;
-  line-height: 16px;
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
   white-space: nowrap;
 }
 .admin-contacts-search {
@@ -54,7 +53,7 @@
   color: var(--crm-layout-text);
   background: transparent;
   font-weight: 500;
-  line-height: 16px;
+  line-height: var(--type-caption-leading);
 }
 .admin-contacts-search input::placeholder {
   color: var(--crm-layout-muted);
@@ -78,28 +77,13 @@
   color: inherit;
   background: transparent;
   font-weight: 500;
-  line-height: 16px;
+  line-height: var(--type-caption-leading);
 }
 .admin-contacts-toolbar-divider {
   width: 1px;
   height: 12px;
   flex: 0 0 1px;
   background: var(--crm-layout-border);
-}
-.admin-contacts-control {
-  justify-content: center;
-}
-.admin-contacts-control:hover:not(:disabled) {
-  background: var(--crm-layout-hover);
-}
-.admin-contacts-control-primary {
-  border-color: var(--crm-layout-text);
-  color: var(--crm-layout-white);
-  background: var(--crm-layout-text);
-  box-shadow: 0 1px 2px rgb(40 40 40 / 10%), inset 0 2px 2px rgb(255 255 255 / 16%);
-}
-.admin-contacts-control-primary:hover:not(:disabled) {
-  background: var(--crm-layout-text);
 }
 .admin-contacts-filter-anchor {
   position: relative;
@@ -119,7 +103,7 @@
   border: 1px solid var(--crm-layout-border);
   border-radius: 10px;
   background: var(--crm-layout-white);
-  box-shadow: 0 8px 24px rgb(40 40 40 / 10%);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-ink) 10%, transparent);
 }
 .admin-contacts-filter-popover > p {
   margin-bottom: 12px;
@@ -165,18 +149,6 @@
 .admin-contacts-active-filters > span {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-.admin-contacts-text-button {
-  flex: 0 0 auto;
-  padding: 0;
-  border: 0;
-  color: var(--crm-layout-muted);
-  background: transparent;
-  font-weight: 500;
-}
-.admin-contacts-text-button:hover {
-  color: var(--crm-layout-text);
-  text-decoration: underline;
 }
 .admin-contacts-content {
   display: flex;
@@ -254,7 +226,7 @@
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   background: transparent;
 }
 .admin-contacts-row-open:hover,
@@ -375,11 +347,6 @@
   align-items: center;
   gap: 8px;
 }
-.admin-contacts-pagination .admin-contacts-control {
-  min-height: 30px;
-  padding: 6px 8px;
-  font-size: 12px;
-}
 @media (max-width: 1100px) {
   .admin-contacts-toolbar {
     flex-wrap: wrap;
@@ -399,6 +366,7 @@
 }
 @media (max-width: 600px) {
   .admin-contacts-toolbar-actions {
+    position: relative;
     width: 100%;
   }
   .admin-contacts-search {
@@ -413,9 +381,16 @@
   .admin-contacts-refresh {
     display: none;
   }
+  .admin-contacts-filter-anchor {
+    position: static;
+  }
   .admin-contacts-filter-popover {
-    right: -92px;
-    width: min(320px, calc(100vw - 32px));
+    right: auto;
+    left: 0;
+    width: min(320px, 100%);
+  }
+  .admin-contacts-date-fields {
+    grid-template-columns: minmax(0, 1fr);
   }
   .admin-contacts-pagination {
     flex-direction: column;
@@ -434,3 +409,58 @@
 }
 .admin-contacts-search input:focus-visible,
 .admin-contacts-status-filter select:focus-visible { outline: none; }
+
+.admin-contacts-search > .crm-icon,
+.admin-contacts-status-filter > .crm-icon,
+.admin-contacts-row-open > .crm-icon {
+  width: 14px;
+  height: 14px;
+}
+.admin-tracking-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+}
+.admin-tracking-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 4px 10px 4px 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+  text-decoration: none;
+}
+.admin-tracking-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  min-height: 20px;
+  padding-inline: 4px;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  background: var(--color-surface-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.admin-tracking-status[aria-current='page'] {
+  border-color: var(--color-border-accent);
+  color: var(--color-text);
+  background: var(--color-surface-tint);
+  font-weight: var(--font-weight-semibold);
+}
+.admin-tracking-status[aria-current='page'] .admin-tracking-count {
+  color: var(--color-text-inverse);
+  background: var(--color-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-tracking-status:hover { background: var(--color-surface-hover); }
+}

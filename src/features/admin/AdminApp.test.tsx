@@ -82,6 +82,27 @@ afterEach(() => {
 })
 
 describe('administrative workflow', () => {
+  it('opens one tracking page from the sidebar and filters its four real statuses', async () => {
+    setupFetch((path) => {
+      if (!path.startsWith('/api/admin/leads?')) return undefined
+      const status = new URL(path, 'https://example.test').searchParams.get('status')
+      const items = !status || status === 'new' ? [lead] : []
+      return response({ items, total: items.length, page: 1, counts })
+    })
+    mount('/admin')
+    const navigation = await screen.findByRole('navigation', { name: 'Navegação administrativa' })
+    fireEvent.click(within(navigation).getByRole('link', { name: 'Acompanhamento' }))
+    const stages = await screen.findByRole('navigation', { name: 'Status do acompanhamento' })
+    const first = await within(stages).findByRole('link', { name: 'Novo: 1 contatos' })
+    expect(first).toHaveAttribute('aria-current', 'page')
+    expect(within(stages).getAllByRole('link')).toHaveLength(4)
+    expect(screen.queryByRole('combobox', { name: 'Status' })).not.toBeInTheDocument()
+    fireEvent.click(within(stages).getByRole('link', { name: 'Em contato: 0 contatos' }))
+    expect(await screen.findByText('Nenhum contato encontrado')).toBeInTheDocument()
+    expect(within(stages).getByRole('link', { name: 'Em contato: 0 contatos' })).toHaveAttribute('aria-current', 'page')
+    expect(within(navigation).getByRole('link', { name: 'Acompanhamento' })).toHaveAttribute('aria-current', 'page')
+  })
+
   it('opens the overview first and navigates to the contact register through the sidebar', async () => {
     setupFetch()
     mount('/admin')
@@ -339,7 +360,7 @@ describe('administrative workflow', () => {
     fireEvent.submit(screen.getByRole('form', { name: 'Filtrar contatos' }))
     expect(await screen.findByText('1–25 de 26 contatos')).toBeInTheDocument()
     expect(screen.getByLabelText('Status')).toHaveValue('contacted')
-    expect(screen.getByRole('link', { name: 'Em contato' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Cadastros' })).toHaveAttribute('aria-current', 'page')
     fireEvent.click(screen.getByRole('button', { name: 'Próxima →' }))
     expect(
       await screen.findByRole('button', { name: 'Ver contato de Bruno Lima' })
@@ -483,10 +504,7 @@ describe('administrative workflow', () => {
         })
       }
     })
-    mount()
-    fireEvent.click(
-      await screen.findByRole('link', { name: 'Novo' })
-    )
+    mount('/admin/acompanhamento?status=new')
     await screen.findByText('1–25 de 26 contatos')
     fireEvent.click(screen.getByRole('button', { name: 'Próxima →' }))
     fireEvent.click(
@@ -546,9 +564,7 @@ describe('administrative workflow', () => {
       mount()
       await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
       if (filteredOut) {
-        fireEvent.click(
-          screen.getByRole('link', { name: 'Novo' })
-        )
+        fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'new' } })
         await screen.findByRole('button', { name: 'Ver contato de Ana Souza' })
       }
       const original = screen.getByRole('button', {

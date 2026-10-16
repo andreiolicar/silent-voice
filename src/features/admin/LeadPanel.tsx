@@ -10,6 +10,7 @@ import type {
 import { AdminApiError, apiMessage, isAborted } from './admin-api'
 import { formatAdminDate } from './admin-format'
 import type { AdminRequest as Request } from './admin-api'
+import { AdminButton } from './AdminButton'
 import { AdminIcon } from './AdminIcon'
 import './lead-panel.css'
 
@@ -238,15 +239,14 @@ export function LeadPanel({
         )}
         {!data && !loading && (
           <div className="admin-panel-message">
-            <button
-              className="admin-button"
+            <AdminButton
               onClick={() => {
                 setError('')
                 setRevision((value) => value + 1)
               }}
             >
               Tentar novamente
-            </button>
+            </AdminButton>
           </div>
         )}
         {data && (
@@ -339,13 +339,12 @@ export function LeadPanel({
                 “Demonstração combinada” é um registro manual. Não agenda um
                 evento no calendário.
               </p>
-              <button
-                className="admin-button"
+              <AdminButton
                 type="submit"
                 disabled={pending || loading || status === data.lead.status}
               >
                 {pending ? 'Salvando…' : 'Salvar status'}
-              </button>
+              </AdminButton>
             </form>
             <section
               className="admin-notes"
@@ -370,13 +369,13 @@ export function LeadPanel({
                 </label>
                 <div className="admin-note-submit">
                   <span>{draft.text.length}/2000</span>
-                  <button
+                  <AdminButton
                     type="submit"
-                    className="admin-button admin-button-primary"
+                    variant="primary"
                     disabled={pending || loading || !draft.text.trim()}
                   >
                     Adicionar anotação
-                  </button>
+                  </AdminButton>
                 </div>
               </form>
               {data.notes.length ? (

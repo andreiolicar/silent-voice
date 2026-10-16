@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { leadStatuses, statusLabels } from '../../../shared/leads'
-import type { LeadStatus } from '../../../shared/leads'
 import { Brand } from '../../components/Brand'
 import { AdminIcon } from './AdminIcon'
 import './admin-layout.css'
@@ -15,13 +13,6 @@ type AdminLayoutProps = {
   logoutError?: string
 }
 
-const statusIcons = {
-  new: 'status-new',
-  contacted: 'status-contacted',
-  demo_scheduled: 'status-demo',
-  closed: 'status-closed',
-} as const
-
 export function AdminLayout({
   children,
   email,
@@ -31,12 +22,11 @@ export function AdminLayout({
 }: AdminLayoutProps) {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
-  const requestedStatus = new URLSearchParams(location.search).get('status')
-  const activeStatus = leadStatuses.includes(requestedStatus as LeadStatus)
-    ? requestedStatus
-    : null
   const contactsPage = location.pathname === '/admin/cadastros'
-  const pageName = contactsPage ? 'Cadastros' : 'Visão geral'
+  const trackingPage = location.pathname === '/admin/acompanhamento'
+  const overviewPage = !contactsPage && !trackingPage
+  const pageName = trackingPage ? 'Acompanhamento' : contactsPage ? 'Cadastros' : 'Visão geral'
+  const pageIcon = trackingPage ? 'status-contacted' : contactsPage ? 'contacts' : 'overview'
   const initial = email.trim().slice(0, 1).toLocaleUpperCase('pt-BR') || 'S'
   const toggleLabel = collapsed ? 'Expandir menu' : 'Recolher menu'
 
@@ -71,41 +61,35 @@ export function AdminLayout({
               className="crm-nav-link"
               to="/admin"
               aria-label="Visão geral"
-              aria-current={!contactsPage ? 'page' : undefined}
+              aria-current={overviewPage ? 'page' : undefined}
               title={collapsed ? 'Visão geral' : undefined}
             >
               <AdminIcon name="overview" />
               <span className="crm-nav-label">Visão geral</span>
             </Link>
           </div>
-          <div className="crm-nav-group">
+          <div className="crm-nav-group crm-nav-group--records">
             <p className="crm-nav-group-label">Registros</p>
             <Link
               className="crm-nav-link"
               to="/admin/cadastros"
               aria-label="Cadastros"
-              aria-current={contactsPage && !activeStatus ? 'page' : undefined}
+              aria-current={contactsPage ? 'page' : undefined}
               title={collapsed ? 'Cadastros' : undefined}
             >
               <AdminIcon name="contacts" />
               <span className="crm-nav-label">Cadastros</span>
             </Link>
-          </div>
-          <div className="crm-nav-group crm-nav-group--statuses">
-            <p className="crm-nav-group-label">Acompanhamento</p>
-            {leadStatuses.map((status) => (
-              <Link
-                key={status}
-                className="crm-nav-link"
-                to={`/admin/cadastros?status=${status}`}
-                aria-label={statusLabels[status]}
-                aria-current={contactsPage && activeStatus === status ? 'page' : undefined}
-                title={collapsed ? statusLabels[status] : undefined}
-              >
-                <AdminIcon name={statusIcons[status]} />
-                <span className="crm-nav-label">{statusLabels[status]}</span>
-              </Link>
-            ))}
+            <Link
+              className="crm-nav-link"
+              to="/admin/acompanhamento"
+              aria-label="Acompanhamento"
+              aria-current={trackingPage ? 'page' : undefined}
+              title={collapsed ? 'Acompanhamento' : undefined}
+            >
+              <AdminIcon name="status-contacted" />
+              <span className="crm-nav-label">Acompanhamento</span>
+            </Link>
           </div>
         </nav>
         <div className="crm-layout-account">
@@ -129,10 +113,10 @@ export function AdminLayout({
       <div className="crm-layout-workspace">
         <header className="crm-layout-topbar">
           <nav className="crm-layout-breadcrumb" aria-label="Localização atual">
-            <span className="crm-layout-breadcrumb-parent">{contactsPage ? 'Registros' : 'Geral'}</span>
+            <span className="crm-layout-breadcrumb-parent">{overviewPage ? 'Geral' : 'Registros'}</span>
             <AdminIcon name="chevron-right" />
             <span className="crm-layout-current-page" aria-current="page">
-              <AdminIcon name={contactsPage ? 'contacts' : 'overview'} />
+              <AdminIcon name={pageIcon} />
               <span>{pageName}</span>
             </span>
           </nav>

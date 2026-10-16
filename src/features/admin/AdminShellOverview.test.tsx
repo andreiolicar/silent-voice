@@ -30,9 +30,9 @@ const requestFor = (value: LeadList): AdminRequest =>
 afterEach(cleanup)
 
 describe('administrative shell', () => {
-  it('selects the exact status navigation and supports collapsing the menu', () => {
+  it('groups all tracking statuses under one sidebar item and supports collapsing the menu', () => {
     render(
-      <MemoryRouter initialEntries={['/admin/cadastros?status=contacted']}>
+      <MemoryRouter initialEntries={['/admin/acompanhamento?status=contacted']}>
         <AdminLayout
           email="gestao@example.com"
           onLogout={() => undefined}
@@ -43,12 +43,14 @@ describe('administrative shell', () => {
       </MemoryRouter>
     )
     const navigation = screen.getByRole('navigation', { name: 'Navegação administrativa' })
-    expect(within(navigation).getByRole('link', { name: 'Em contato' })).toHaveAttribute('aria-current', 'page')
+    expect(within(navigation).getByRole('link', { name: 'Acompanhamento' })).toHaveAttribute('aria-current', 'page')
     expect(within(navigation).getByRole('link', { name: 'Cadastros' })).not.toHaveAttribute('aria-current')
+    expect(within(navigation).getAllByRole('link')).toHaveLength(3)
+    expect(within(navigation).queryByRole('link', { name: 'Novo' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Recolher menu' }))
     expect(screen.getByRole('button', { name: 'Expandir menu' })).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByRole('heading', { name: 'Conteúdo' })).toBeVisible()
-    expect(within(navigation).getByRole('link', { name: 'Em contato' })).toHaveAttribute('href', '/admin/cadastros?status=contacted')
+    expect(within(navigation).getByRole('link', { name: 'Acompanhamento' })).toHaveAttribute('href', '/admin/acompanhamento')
   })
 
   it('shows the account and the current logout state', () => {
@@ -73,7 +75,7 @@ describe('administrative overview', () => {
     expect(screen.getByText('Contato 5')).toBeVisible()
     expect(screen.queryByText('Contato 6')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Total de cadastros')).toHaveTextContent('12')
-    expect(screen.getByRole('link', { name: 'Em contato: 3 cadastros' })).toHaveAttribute('href', '/admin/cadastros?status=contacted')
+    expect(screen.getByRole('link', { name: 'Em contato: 3 cadastros' })).toHaveAttribute('href', '/admin/acompanhamento?status=contacted')
   })
 
   it('shows a real empty state for an empty list', async () => {

@@ -77,40 +77,6 @@ body:has(.admin-shell) {
 .admin-shell p {
   margin: 0;
 }
-.admin-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-height: 40px;
-  padding: 9px 17px;
-  border: 1px solid var(--color-border);
-  border-radius: 9px;
-  color: var(--color-ink);
-  background: var(--color-surface);
-  font-size: 13px;
-  font-weight: 600;
-  transition:
-    background 140ms,
-    border-color 140ms;
-}
-.admin-button:hover:not(:disabled) {
-  background: var(--color-surface-hover);
-  border-color: var(--admin-accent-border);
-}
-.admin-button-primary {
-  background: var(--color-brand);
-  color: var(--color-surface);
-  border-color: transparent;
-}
-.admin-button-primary:hover:not(:disabled) {
-  background: var(--admin-accent-hover);
-  border-color: transparent;
-}
-.admin-button-quiet {
-  background: transparent;
-  border-color: transparent;
-}
 .admin-eyebrow {
   color: var(--admin-muted-text);
   font-size: 10px;
@@ -324,7 +290,7 @@ body:has(.admin-shell) {
 .admin-status-form h3 {
   margin: 0 0 4px;
 }
-.admin-status-form > .admin-button {
+.admin-status-form > .crm-button {
   grid-column: 2;
 }
 .admin-help {
@@ -350,10 +316,6 @@ body:has(.admin-shell) {
 .admin-note-submit > span {
   color: var(--admin-muted-text);
   font-size: 10px;
-}
-.admin-note-submit .admin-button {
-  min-height: 35px;
-  font-size: 11px;
 }
 .admin-no-notes {
   margin-top: 24px !important;

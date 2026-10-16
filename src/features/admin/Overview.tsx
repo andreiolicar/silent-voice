@@ -6,6 +6,7 @@ import { AdminApiError, apiMessage, isAborted } from './admin-api'
 import type { AdminRequest } from './admin-api'
 import { formatAdminDate } from './admin-format'
 import { AdminIcon } from './AdminIcon'
+import { AdminButton, adminButtonClassName } from './AdminButton'
 import './overview.css'
 
 export function Overview({ request }: { request: AdminRequest }) {
@@ -57,7 +58,7 @@ export function Overview({ request }: { request: AdminRequest }) {
         {leadStatuses.map((status) => (
           <Link
             key={status}
-            to={`/admin/cadastros?status=${status}`}
+            to={`/admin/acompanhamento?status=${status}`}
             className="crm-overview-summary-link"
             aria-label={`${statusLabels[status]}: ${data ? data.counts[status] : 'carregando'} cadastros`}
           >
@@ -73,7 +74,7 @@ export function Overview({ request }: { request: AdminRequest }) {
       <section className="crm-overview-recent" aria-labelledby="crm-recent-title" aria-busy={loading}>
         <div className="crm-overview-recent-heading">
           <h2 id="crm-recent-title">Cadastros recentes</h2>
-          <Link className="crm-overview-view-all" to="/admin/cadastros">
+          <Link className={adminButtonClassName('secondary', 'crm-overview-view-all')} to="/admin/cadastros">
             Ver todos <AdminIcon name="chevron-right" />
           </Link>
         </div>
@@ -82,9 +83,9 @@ export function Overview({ request }: { request: AdminRequest }) {
         ) : error ? (
           <div className="crm-overview-state">
             <p className="crm-overview-error" role="alert">{error}</p>
-            <button className="crm-overview-retry" type="button" onClick={() => setRetry((value) => value + 1)}>
+            <AdminButton onClick={() => setRetry((value) => value + 1)}>
               Tentar novamente
-            </button>
+            </AdminButton>
           </div>
         ) : data?.items.length ? (
           <div className="crm-overview-table-wrap">
