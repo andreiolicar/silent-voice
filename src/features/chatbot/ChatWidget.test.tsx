@@ -30,6 +30,20 @@ async function open() {
 }
 afterEach(() => vi.unstubAllGlobals())
 describe('public chatbot widget', () => {
+  it('clears the welcome screen when a conversation starts and restores it only for a new conversation', async () => {
+    const { transport } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    const composer = await open()
+    const welcome = screen.getByRole('heading', { level: 3 })
+    expect(welcome).toBeVisible()
+    await userEvent.type(composer, 'Como funciona?{Enter}')
+    expect(welcome).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Solicitar demonstração' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Nova conversa' }))
+    expect(screen.getByRole('heading', { level: 3 })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Solicitar demonstração' })).toBeEnabled()
+  })
+
   it('waits for the intro, opens on demand, focuses composer and restores focus with Escape', async () => {
     const { rerender } = render(<ChatWidget ready={false} />)
     expect(screen.queryByRole('button')).toBeNull()

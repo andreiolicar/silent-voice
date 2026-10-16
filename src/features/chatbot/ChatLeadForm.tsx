@@ -1,5 +1,9 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { Check, ChevronDown } from 'lucide-react'
 import type { LeadInput, LeadProfile, LeadReceipt } from '../../../shared/leads'
+import { Input } from '../../components/ui/Input'
+import { ChatButton } from './ChatButton'
+import './chat-lead-form.css'
 
 type Fields = {
   name: string
@@ -177,17 +181,16 @@ export function ChatLeadForm() {
       {status === 'confirmed' ? (
         <div className="sv-lead-success" role="status">
           <span aria-hidden="true" className="sv-lead-success-icon">
-            ✓
+            <Check className="sv-chat-icon" size={18} strokeWidth={1.75} />
           </span>
           <h3 tabIndex={-1} data-contact-receipt>Seu interesse foi registrado.</h3>
           <p>Nossa equipe poderá entrar em contato pelo e-mail informado.</p>
         </div>
       ) : (
         <>
-          <h3>Vamos conversar?</h3>
+          <h3>Fale com a equipe</h3>
           <p>
-            Usaremos estas informações para conversar com você sobre seu
-            interesse no Silent Voice.
+            Deixe seu contato para conversar com a equipe sobre o Silent Voice.
           </p>
           <form
             onSubmit={submit}
@@ -196,7 +199,7 @@ export function ChatLeadForm() {
           >
             <div className="sv-field">
               <label htmlFor={`${id}-name`}>{labels.name}</label>
-              <input
+              <Input
                 {...fieldProps('name')}
                 autoComplete="name"
                 maxLength={100}
@@ -210,7 +213,7 @@ export function ChatLeadForm() {
             </div>
             <div className="sv-field">
               <label htmlFor={`${id}-email`}>{labels.email}</label>
-              <input
+              <Input
                 {...fieldProps('email')}
                 type="email"
                 autoComplete="email"
@@ -237,54 +240,62 @@ export function ChatLeadForm() {
                 </span>
               )}
             </div>
-            <div className="sv-field">
-              <label htmlFor={`${id}-profile`}>{labels.profile}</label>
-              <select
-                id={`${id}-profile`}
-                name="profile"
-                disabled={locked}
-                value={fields.profile}
-                onChange={(event) =>
-                  setFields((current) => ({
-                    ...current,
-                    profile: event.target.value as Fields['profile'],
-                  }))
-                }
-              >
-                <option value="">Selecione, se desejar</option>
-                <option value="self">Pessoa interessada</option>
-                <option value="family">Familiar ou cuidador</option>
-                <option value="professional">
-                  Profissional ou instituição
-                </option>
-                <option value="partner">Parceiro</option>
-              </select>
-            </div>
-            <div className="sv-field">
-              <label htmlFor={`${id}-organization`}>
-                {labels.organization}
-              </label>
-              <input
-                {...fieldProps('organization')}
-                autoComplete="organization"
-                maxLength={150}
-              />
-              {errors.organization && (
-                <span
-                  id={`${id}-organization-error`}
-                  className="sv-field-error"
-                >
-                  {errors.organization}
-                </span>
-              )}
-            </div>
+            <details className="sv-lead-options">
+              <summary>Informações opcionais<ChevronDown className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" /></summary>
+              <div className="sv-field">
+                <label htmlFor={`${id}-profile`}>{labels.profile}</label>
+                <div className="sv-select-control">
+                  <select
+                    id={`${id}-profile`}
+                    name="profile"
+                    disabled={locked}
+                    value={fields.profile}
+                    onChange={(event) =>
+                      setFields((current) => ({
+                        ...current,
+                        profile: event.target.value as Fields['profile'],
+                      }))
+                    }
+                  >
+                    <option value="">Selecione, se desejar</option>
+                    <option value="self">Pessoa interessada</option>
+                    <option value="family">Familiar ou cuidador</option>
+                    <option value="professional">
+                      Profissional ou instituição
+                    </option>
+                    <option value="partner">Parceiro</option>
+                  </select>
+                  <ChevronDown className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
+                </div>
+              </div>
+              <div className="sv-field">
+                <label htmlFor={`${id}-organization`}>
+                  {labels.organization}
+                </label>
+                <Input
+                  {...fieldProps('organization')}
+                  autoComplete="organization"
+                  maxLength={150}
+                />
+                {errors.organization && (
+                  <span
+                    id={`${id}-organization-error`}
+                    className="sv-field-error"
+                  >
+                    {errors.organization}
+                  </span>
+                )}
+              </div>
+            </details>
             {notice && (
               <p className="sv-chat-notice" role="alert">
                 {notice}
               </p>
             )}
-            <button
+            <ChatButton
               className="sv-primary-button"
+              tone="green"
+              size="regular"
               type="submit"
               disabled={status === 'pending'}
             >
@@ -293,7 +304,7 @@ export function ChatLeadForm() {
                 : status === 'unknown'
                   ? 'Tentar confirmar novamente'
                   : 'Registrar interesse'}
-            </button>
+            </ChatButton>
           </form>
           <p className="sv-lead-privacy">
             Esses campos não são enviados automaticamente à IA. Não inclua

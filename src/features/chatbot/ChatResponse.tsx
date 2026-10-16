@@ -4,6 +4,7 @@ import { ContactContext, silentVoiceLibrary } from './response-library'
 import '@openuidev/react-ui/styles/card.css'
 import '@openuidev/react-ui/styles/button.css'
 import '@openuidev/react-ui/styles/steps.css'
+import './chat-response.css'
 
 const parser = createParser(silentVoiceLibrary.toJSONSchema(), 'Answer')
 const allowed = new Set(['Text', 'HowTo', 'BulletList', 'ContactAction'])

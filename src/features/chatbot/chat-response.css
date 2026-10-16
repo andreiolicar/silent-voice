@@ -1,0 +1,72 @@
+#silent-voice-chat .openui-card {
+  width: 100%;
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--sv-chat-border);
+  border-radius: 18px;
+  box-shadow: none;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+#silent-voice-chat .sv-response-title {
+  margin: 0;
+  font-size: var(--type-control-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--type-control-leading);
+}
+#silent-voice-chat .sv-response-text {
+  margin: 0;
+  font-size: var(--type-control-size);
+  line-height: var(--type-control-leading);
+  white-space: pre-wrap;
+}
+#silent-voice-chat .sv-response-list { margin: 0; padding-left: 18px; list-style: disc; }
+#silent-voice-chat .sv-response-list li { margin: 6px 0; }
+#silent-voice-chat .openui-steps-container,
+#silent-voice-chat .openui-steps { width: 100%; min-width: 0; }
+#silent-voice-chat .openui-step-item { gap: 10px; }
+#silent-voice-chat .openui-step-content { min-width: 0; gap: 4px; margin-bottom: 16px; }
+#silent-voice-chat .openui-step-number-inner {
+  width: 22px;
+  height: 22px;
+  border-color: var(--color-border-accent);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--type-caption-size);
+}
+#silent-voice-chat .openui-connector-line { background: var(--sv-chat-border); }
+#silent-voice-chat .openui-step-title {
+  color: var(--color-text);
+  font-size: var(--type-control-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--type-control-leading);
+}
+#silent-voice-chat .openui-step-details {
+  align-items: flex-start;
+  color: var(--sv-chat-muted);
+  font-family: var(--font-sans);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+}
+#silent-voice-chat .openui-button-base {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 5px 12px;
+  border: 1px solid var(--sv-chat-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: none;
+  font-family: var(--font-sans);
+  font-size: var(--type-caption-size);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--type-caption-leading);
+  white-space: normal;
+}
+@media (hover: hover) and (pointer: fine) {
+  #silent-voice-chat .openui-button-base:hover:not(:disabled) { border-color: var(--color-border-accent); background: var(--color-surface-hover); }
+}

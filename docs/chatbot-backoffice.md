@@ -43,6 +43,12 @@ O proxy usa o SDK oficial Mistral, temperatura 0,2, até 1.400 tokens, 16 mensag
 
 ## Fluxos e dados
 
+### Interface do assistente
+
+O painel usa os mesmos tokens de fonte, cor e borda da landing e da administração, com cantos de 24 px, controles em pílula e foco turquesa discreto. Os ajustes ficam isolados em `#silent-voice-chat`; os botões públicos da landing não são alterados. O launcher mantém a marca branca e sua entrada em bolha.
+
+`ChatButton` concentra ações e tamanhos do chat; `ChatComposer` controla o campo de mensagem, que cresce até quatro linhas e se reajusta quando a largura muda. A saudação e as sugestões aparecem apenas antes da primeira mensagem e retornam ao iniciar uma nova conversa. O formulário mostra nome, e-mail e objetivo primeiro; perfil e organização ficam em “Informações opcionais”, preservando os valores ao recolher. `chat-response.css` adapta os componentes oficiais do OpenUI à mesma hierarquia visual, sem mudar o contrato das respostas.
+
 O launcher aparece depois da abertura da landing, sem abrir o painel automaticamente. Minimizar preserva conversa e envio. Nova conversa e mudança de rota cancelam a geração e ignoram respostas obsoletas. Enter envia, Shift+Enter quebra a linha e composição IME não envia acidentalmente.
 
 O chat envia texto ao Mistral para responder; não persiste transcrições completas no banco ou no localStorage. Campos do formulário não são enviados automaticamente ao modelo. As condições de retenção/treinamento do provedor dependem da conta e devem ser conferidas antes de publicar; não há promessa de retenção zero.

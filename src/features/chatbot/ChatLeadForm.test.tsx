@@ -19,6 +19,21 @@ afterEach(() => {
   vi.useRealTimers()
 })
 describe('explicit lead registration', () => {
+  it('keeps optional details collapsed without losing fields when they are reopened', async () => {
+    render(<ChatLeadForm />)
+    const user = userEvent.setup()
+    expect(screen.getByLabelText('Nome')).toBeVisible()
+    expect(screen.getByLabelText('Perfil (opcional)')).not.toBeVisible()
+    await user.click(screen.getByText('Informações opcionais'))
+    await user.selectOptions(screen.getByLabelText('Perfil (opcional)'), 'partner')
+    await user.type(screen.getByLabelText('Organização (opcional)'), 'Equipe de tecnologia')
+    await user.click(screen.getByText('Informações opcionais'))
+    expect(screen.getByLabelText('Organização (opcional)')).not.toBeVisible()
+    await user.click(screen.getByText('Informações opcionais'))
+    expect(screen.getByLabelText('Perfil (opcional)')).toHaveValue('partner')
+    expect(screen.getByLabelText('Organização (opcional)')).toHaveValue('Equipe de tecnologia')
+  })
+
   it('associates local validation and only confirms a valid committed receipt', async () => {
     const fetcher = vi
       .fn()

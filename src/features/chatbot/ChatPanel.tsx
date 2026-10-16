@@ -1,24 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
+import { ArrowLeft, ArrowUpRight, ChevronDown, Minus, RotateCcw } from 'lucide-react'
 import { ThemeProvider, createTheme } from '@openuidev/react-ui/ThemeProvider'
 import type { ChatTransport } from './chat-client'
 import { useChatConversation } from './useChatConversation'
 import { ChatResponse } from './ChatResponse'
 import { ChatLeadForm } from './ChatLeadForm'
+import { ChatButton } from './ChatButton'
+import { ChatComposer } from './ChatComposer'
 const theme = createTheme({
-  background: 'var(--color-surface, #fff)',
-  foreground: 'var(--color-surface, #fff)',
-  textNeutralPrimary: 'var(--color-ink, #051b34)',
-  textNeutralSecondary: 'var(--color-text-muted, #536272)',
+  background: 'var(--color-surface)',
+  foreground: 'var(--color-surface)',
+  textNeutralPrimary: 'var(--color-text)',
+  textNeutralSecondary: 'var(--color-text-muted)',
   textBrand: 'var(--sv-chat-accent)',
-  interactiveAccentDefault: 'var(--color-brand, #1aa99b)',
+  interactiveAccentDefault: 'var(--color-brand)',
   interactiveAccentHover:
-    'color-mix(in srgb, var(--color-brand, #1aa99b) 88%, var(--color-ink, #051b34))',
+    'color-mix(in srgb, var(--color-brand) 88%, var(--color-ink))',
   interactiveAccentPressed:
-    'color-mix(in srgb, var(--color-brand, #1aa99b) 75%, var(--color-ink, #051b34))',
-  borderAccent: 'var(--color-brand, #1aa99b)',
-  fontBody: 'Inter Variable, Inter, sans-serif',
-  fontHeading: 'Inter Variable, Inter, sans-serif',
-  fontLabel: 'Inter Variable, Inter, sans-serif',
+    'color-mix(in srgb, var(--color-brand) 75%, var(--color-ink))',
+  borderAccent: 'var(--color-border-accent)',
+  fontBody: 'var(--font-sans)',
+  fontHeading: 'var(--font-sans)',
+  fontLabel: 'var(--font-sans)',
 })
 const questions = [
   'O que é o Silent Voice?',
@@ -85,51 +88,44 @@ export default function ChatPanel({
         inert={hidden}
       >
         <header className="sv-chat-header">
-          <span className="sv-chat-brand">
-            <img src="/assets/icone.svg" width="28" height="28" alt="" />
+          <span className="sv-chat-brand" aria-hidden="true">
+            <span className="sv-chat-brand-mark" />
           </span>
           <div>
-            <h2 id="sv-chat-title">Assistente Silent Voice</h2>
-            <p>
-              <span className="sv-ai-badge">IA</span> Para conhecer e conectar
-            </p>
+            <h2 id="sv-chat-title"><span className="sv-sr-only">Assistente</span>{' '}Silent Voice</h2>
+            <p>Assistente de IA</p>
           </div>
-          <button
-            type="button"
-            className="sv-chat-icon-button"
+          <ChatButton
+            tone="quiet"
+            size="icon"
+            className="sv-chat-minimize"
             aria-label="Minimizar assistente"
             onClick={onMinimize}
           >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M6 12h12"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
+            <Minus className="sv-chat-icon" size={16} strokeWidth={1.65} aria-hidden="true" />
+          </ChatButton>
         </header>
         <nav className="sv-chat-toolbar" aria-label="Ações da conversa">
-          <button type="button" onClick={reset}>
+          <ChatButton tone="quiet" onClick={reset}>
+            <RotateCcw className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
             Nova conversa
-          </button>
+          </ChatButton>
           {mode === 'chat' ? (
-            <button
-              type="button"
+            <ChatButton
               className="sv-chat-contact-button"
               onClick={openContact}
             >
-              Falar com a equipe <span aria-hidden="true">↗</span>
-            </button>
+              Falar com a equipe
+              <ArrowUpRight className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
+            </ChatButton>
           ) : (
-            <button
-              type="button"
+            <ChatButton
               className="sv-chat-contact-button"
               onClick={() => setMode('chat')}
             >
-              Voltar à conversa <span aria-hidden="true">↩</span>
-            </button>
+              <ArrowLeft className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
+              Voltar à conversa
+            </ChatButton>
           )}
         </nav>
         <div
@@ -146,30 +142,28 @@ export default function ChatPanel({
           hidden={mode !== 'chat'}
           inert={mode !== 'chat'}
         >
-          <div className="sv-chat-greeting">
-            <span className="sv-chat-eyebrow">Olá, como podemos ajudar?</span>
-            <h3>Vamos dar voz às suas dúvidas.</h3>
-            <p>
-              Posso explicar como funciona e ajudar você a conversar com a
-              equipe. O que gostaria de saber?
-            </p>
-          </div>
           {chat.messages.length === 0 && (
-            <div className="sv-chat-suggestions">
-              {questions.map((question) => (
-                <button
-                  type="button"
-                  key={question}
-                  onClick={() => chat.send(question)}
-                >
-                  {question}
-                  <span aria-hidden="true">↗</span>
-                </button>
-              ))}
-              <button type="button" onClick={openContact}>
-                Solicitar demonstração<span aria-hidden="true">↗</span>
-              </button>
-            </div>
+            <>
+              <div className="sv-chat-greeting">
+                <h3>Como podemos ajudar?</h3>
+                <p>Tire suas dúvidas sobre o Silent Voice ou converse com nossa equipe.</p>
+              </div>
+              <div className="sv-chat-suggestions">
+                {questions.map((question) => (
+                  <ChatButton
+                    key={question}
+                    onClick={() => chat.send(question)}
+                  >
+                    {question}
+                    <ArrowUpRight className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
+                  </ChatButton>
+                ))}
+                <ChatButton onClick={openContact}>
+                  Solicitar demonstração
+                  <ArrowUpRight className="sv-chat-icon" size={14} strokeWidth={1.65} aria-hidden="true" />
+                </ChatButton>
+              </div>
+            </>
           )}
           <div className="sv-chat-messages" aria-label="Mensagens da conversa">
             {chat.messages.map((message, index) =>
@@ -181,6 +175,9 @@ export default function ChatPanel({
               ) : (
                 <div className="sv-chat-assistant-message" key={message.id}>
                   <span className="sv-sr-only">Assistente IA: </span>
+                  <div className="sv-chat-message-author" aria-hidden="true">
+                    <span className="sv-chat-brand-mark" />Silent Voice
+                  </div>
                   <ChatResponse
                     content={message.content}
                     streaming={busy && index === chat.messages.length - 1}
@@ -195,8 +192,8 @@ export default function ChatPanel({
             <p className="sv-chat-progress" aria-label="Resposta em andamento">
               <span aria-hidden="true" />
               {chat.phase === 'sending'
-                ? 'Enviando sua pergunta…'
-                : 'Recebendo resposta…'}
+                ? 'Preparando resposta…'
+                : 'Respondendo…'}
             </p>
           )}
           {chat.phase === 'stopped' && (
@@ -208,15 +205,15 @@ export default function ChatPanel({
             <div className="sv-chat-error" role="alert">
               <p>{chat.error}</p>
               {lastQuestion && (
-                <button
-                  type="button"
+                <ChatButton
+                  tone="quiet"
                   onClick={() => {
                     chat.setDraft(lastQuestion)
                     composer.current?.focus()
                   }}
                 >
                   Rever pergunta
-                </button>
+                </ChatButton>
               )}
             </div>
           )}
@@ -236,69 +233,17 @@ export default function ChatPanel({
           hidden={mode !== 'chat'}
           inert={mode !== 'chat'}
         >
-          <form
-            className="sv-chat-composer"
-            onSubmit={(event) => {
-              event.preventDefault()
-              chat.send()
-            }}
-          >
-            <label className="sv-sr-only" htmlFor="sv-chat-message">
-              Sua mensagem
-            </label>
-            <textarea
-              ref={composer}
-              id="sv-chat-message"
-              rows={2}
-              value={chat.draft}
-              maxLength={2000}
-              placeholder="Escreva sua dúvida…"
-              onChange={(event) => chat.setDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (
-                  event.key === 'Enter' &&
-                  !event.shiftKey &&
-                  !event.nativeEvent.isComposing &&
-                  event.keyCode !== 229
-                ) {
-                  event.preventDefault()
-                  if (!busy) chat.send()
-                }
-              }}
-            />
-            <div className="sv-chat-composer-actions">
-              <span>{chat.draft.length}/2000</span>
-              {busy ? (
-                <button
-                  type="button"
-                  className="sv-chat-stop"
-                  aria-label="Parar resposta"
-                  onClick={chat.stop}
-                >
-                  <span aria-hidden="true">■</span> Parar
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className="sv-chat-send"
-                  aria-label="Enviar mensagem"
-                  disabled={!chat.draft.trim()}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M12 18V6m-5 5 5-5 5 5"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              )}
-            </div>
-          </form>
+          <ChatComposer
+            inputRef={composer}
+            active={!hidden && mode === 'chat'}
+            draft={chat.draft}
+            busy={busy}
+            onChange={chat.setDraft}
+            onSend={chat.send}
+            onStop={chat.stop}
+          />
           <details className="sv-chat-privacy">
-            <summary>Sobre a IA e seus dados</summary>
+            <summary>Sobre a IA e seus dados<ChevronDown className="sv-chat-icon" size={12} strokeWidth={1.65} aria-hidden="true" /></summary>
             <p>
               O texto da conversa é enviado ao provedor de IA Mistral para gerar
               respostas. A IA pode cometer erros. Evite dados clínicos e outras

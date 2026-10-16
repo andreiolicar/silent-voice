@@ -1,0 +1,55 @@
+#silent-voice-chat .sv-chat-composer {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  transition: border-color var(--interaction-duration) var(--interaction-easing),
+    box-shadow var(--interaction-duration) var(--interaction-easing);
+}
+#silent-voice-chat .sv-chat-composer:focus-within {
+  border-color: var(--sv-chat-focus);
+  box-shadow: 0 0 0 2px var(--sv-chat-focus-halo);
+}
+#silent-voice-chat .sv-chat-composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  max-height: 96px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--type-control-size);
+  line-height: 24px;
+}
+#silent-voice-chat .sv-chat-composer textarea:focus:not(:disabled) {
+  outline: none;
+  box-shadow: none;
+}
+#silent-voice-chat .sv-chat-composer textarea::placeholder { color: var(--sv-chat-muted); }
+#silent-voice-chat .sv-chat-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+#silent-voice-chat .sv-chat-composer-actions > span {
+  color: var(--sv-chat-muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+}
+@media (hover: hover) and (pointer: fine) {
+  #silent-voice-chat .sv-chat-composer:hover:not(:focus-within) {
+    border-color: var(--sv-chat-hover-border);
+  }
+}
+@media (forced-colors: active) {
+  #silent-voice-chat .sv-chat-composer:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
