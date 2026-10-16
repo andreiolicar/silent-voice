@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { leadStatuses, statusLabels } from '../../../shared/leads'
 import type { LeadList, LeadStatus } from '../../../shared/leads'
 import { AdminApiError, apiMessage, isAborted } from './admin-api'
@@ -166,33 +166,29 @@ export function ContactsPage({
           />
         </label>
         <div className="admin-contacts-toolbar-actions">
-          {!tracking && (
-            <>
-              <label className="admin-contacts-status-filter">
-                <span className="admin-visually-hidden">Status</span>
-                <AdminIcon name="file" />
-                <select
-                  value={status}
-                  onChange={(event) => {
-                    const value = event.target.value
-                    setStatus(value)
-                    setPage(1)
-                    setFilters((previous) => ({ ...previous, status: value }))
-                    syncStatus(value)
-                  }}
-                >
-                  <option value="">Todos os status</option>
-                  {leadStatuses.map((item) => (
-                    <option key={item} value={item}>
-                      {statusLabels[item]}
-                    </option>
-                  ))}
-                </select>
-                <AdminIcon name="chevron-down" />
-              </label>
-              <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
-            </>
-          )}
+          <label className="admin-contacts-status-filter">
+            <span className="admin-visually-hidden">Status</span>
+            <AdminIcon name="file" />
+            <select
+              value={status}
+              onChange={(event) => {
+                const value = event.target.value
+                setStatus(value)
+                setPage(1)
+                setFilters((previous) => ({ ...previous, status: value }))
+                syncStatus(value)
+              }}
+            >
+              {!tracking && <option value="">Todos os status</option>}
+              {leadStatuses.map((item) => (
+                <option key={item} value={item}>
+                  {statusLabels[item]}
+                </option>
+              ))}
+            </select>
+            <AdminIcon name="chevron-down" />
+          </label>
+          <span className="admin-contacts-toolbar-divider" aria-hidden="true" />
           <div
             className="admin-contacts-filter-anchor"
             onKeyDown={(event) => {
@@ -279,22 +275,6 @@ export function ContactsPage({
           </AdminButton>
         </div>
       </form>
-      {tracking && (
-        <nav className="admin-tracking-statuses" aria-label="Status do acompanhamento" aria-busy={loading}>
-          {leadStatuses.map((item) => (
-            <Link
-              key={item}
-              className="admin-tracking-status"
-              to={`/admin/acompanhamento?status=${item}`}
-              aria-current={sidebarStatus === item ? 'page' : undefined}
-              aria-label={`${statusLabels[item]}: ${data ? data.counts[item] : 'carregando'} contatos`}
-            >
-              <span>{statusLabels[item]}</span>
-              <span className="admin-tracking-count" aria-hidden="true">{data ? data.counts[item] : '—'}</span>
-            </Link>
-          ))}
-        </nav>
-      )}
       {hasFilters && (
         <div className="admin-contacts-active-filters">
           <span>

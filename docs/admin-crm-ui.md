@@ -14,7 +14,7 @@ Referência: quarta tela, **CRM Dashboard**, no [arquivo editável do Figma](htt
 
 `/admin` apresenta os totais globais por status e os cinco cadastros mais recentes. `/admin/cadastros` oferece busca, filtros de status e data, paginação de 25 registros, exportação CSV da página e detalhes com status e anotações.
 
-`/admin/acompanhamento` centraliza Novo, Em contato, Demonstração combinada e Encerrado numa única entrada da sidebar. Os quatro filtros internos mostram contadores globais e usam o parâmetro `status`; voltar e avançar no navegador atualiza a seleção, mantendo busca e datas aplicadas. Sem status válido, a seleção inicial é Novo. Limpar os filtros conserva o status de acompanhamento. A Visão geral aponta seus totais para essa rota; Cadastros continua mostrando a lista completa.
+`/admin/acompanhamento` centraliza Novo, Em contato, Demonstração combinada e Encerrado numa única entrada da sidebar. A seleção de status fica no filtro da toolbar, sem faixa adicional de botões e contadores, e usa o parâmetro `status`; voltar e avançar no navegador atualiza a seleção, mantendo busca e datas aplicadas. Sem status válido, a seleção inicial é Novo. Limpar os filtros conserva o status de acompanhamento. A Visão geral aponta seus totais para essa rota; Cadastros continua mostrando a lista completa.
 
 Exportação escapa o CSV e mantém fórmulas de planilha como texto. Nenhum cadastro ilustrativo foi inserido na base real.
 
@@ -34,7 +34,7 @@ A entrada reutiliza `useSectionEntrance`, `LazyMotion` e os componentes `m.*` da
 
 ## Verificação
 
-- Suíte completa: `npm test` (69 testes Node + 79 testes UI). Inclui os quatro status, histórico do navegador, preservação de busca/datas, limpeza na segunda página, contadores, integração da sidebar e revelação do login por foco/movimento reduzido.
+- Suíte completa: `npm test` (69 testes Node + 79 testes UI). Inclui os quatro status, histórico do navegador, preservação de busca/datas, limpeza na segunda página, contadores da visão geral, integração da sidebar e revelação do login por foco/movimento reduzido.
 - Tipagem: `npm run typecheck`; compilação: `npm run build`.
 - Chromium: conferência visual em 1920, 1440 e 1280 px; sidebar, tabela, inspector, navegação por status, histórico do navegador e foco dos filtros. Botões medidos em 28 px, fonte 12 px e ícones 14 px; sem rolagem horizontal global. O filtro de datas também foi conferido em 390 px e ficou contido na área disponível. Dados de conferência foram respondidos apenas na aba de teste, sem alterar o banco.
 - Safari: nesta revisão a sessão existente estava expirada e levou ao login. A tela protegida com os novos filtros foi validada no Chromium e nos testes de componentes; nenhuma credencial ou conta foi alterada.

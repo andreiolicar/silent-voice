@@ -66,15 +66,15 @@ function applySearchAndDates(query: string) {
 
 afterEach(cleanup)
 
-it('defaults missing and invalid tracking statuses to new without a duplicate status selector', async () => {
+it('defaults missing and invalid tracking statuses to new in one toolbar selector without a status strip', async () => {
   for (const path of ['/admin/acompanhamento', '/admin/acompanhamento?status=invalid']) {
     const { request, paths } = fakeRequest(() => list([contact()]))
     const view = mount(request, path)
     await screen.findByRole('button', { name: 'Ver contato de Ana nova' })
-    const navigation = screen.getByRole('navigation', { name: 'Status do acompanhamento' })
-    expect(within(navigation).getAllByRole('link')).toHaveLength(4)
-    expect(within(navigation).getByRole('link', { name: 'Novo: 14 contatos' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.queryByRole('combobox', { name: 'Status' })).not.toBeInTheDocument()
+    const selector = screen.getByRole('combobox', { name: 'Status' })
+    expect(selector).toHaveValue('new')
+    expect(within(selector).getAllByRole('option')).toHaveLength(4)
+    expect(screen.queryByRole('navigation', { name: 'Status do acompanhamento' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Acompanhamento de contatos 1' })).toBeInTheDocument()
     expect(paths.at(-1)?.pathname).toBe('/admin/leads')
     expect(paths.at(-1)?.searchParams.get('status')).toBe('new')
@@ -83,7 +83,7 @@ it('defaults missing and invalid tracking statuses to new without a duplicate st
   }
 })
 
-it('navigates all four status links and browser history while preserving applied search and dates', async () => {
+it('selects all four statuses and follows browser history while preserving applied search and dates', async () => {
   const { request, paths } = fakeRequest((url) => {
     const stage = stages.find((item) => item.status === url.searchParams.get('status'))
     return list(stage ? [contact(stage.status, stage.name)] : [])
@@ -93,18 +93,16 @@ it('navigates all four status links and browser history while preserving applied
   applySearchAndDates('Equipe')
   await waitFor(() => expect(paths.at(-1)?.searchParams.get('q')).toBe('Equipe'))
 
-  const navigation = screen.getByRole('navigation', { name: 'Status do acompanhamento' })
+  const selector = screen.getByRole('combobox', { name: 'Status' })
   for (const stage of stages) {
-    expect(within(navigation).getByRole('link', { name: `${stage.label}: ${stage.count} contatos` }))
-      .toHaveAttribute('href', `/admin/acompanhamento?status=${stage.status}`)
+    expect(within(selector).getByRole('option', { name: stage.label })).toHaveValue(stage.status)
   }
 
   for (const stage of [stages[1], stages[2], stages[3], stages[0]]) {
-    fireEvent.click(within(navigation).getByRole('link', { name: `${stage.label}: ${stage.count} contatos` }))
+    fireEvent.change(selector, { target: { value: stage.status } })
     await screen.findByRole('button', { name: `Ver contato de ${stage.name}` })
     expect(screen.getByLabelText('Rota atual')).toHaveTextContent(`/admin/acompanhamento?status=${stage.status}`)
-    expect(within(navigation).getByRole('link', { name: `${stage.label}: ${stage.count} contatos` })).toHaveAttribute('aria-current', 'page')
-    expect(within(navigation).getAllByRole('link').filter((link) => link.getAttribute('aria-current') === 'page')).toHaveLength(1)
+    expect(selector).toHaveValue(stage.status)
     expect(paths.at(-1)?.pathname).toBe('/admin/leads')
     expect(Object.fromEntries(paths.at(-1)!.searchParams)).toEqual({
       page: '1', q: 'Equipe', status: stage.status, from: '2026-10-01', to: '2026-10-15',
@@ -113,7 +111,7 @@ it('navigates all four status links and browser history while preserving applied
 
   fireEvent.click(screen.getByRole('button', { name: 'Voltar no histórico' }))
   await screen.findByRole('button', { name: 'Ver contato de Diego encerrado' })
-  expect(within(navigation).getByRole('link', { name: 'Encerrado: 5 contatos' })).toHaveAttribute('aria-current', 'page')
+  expect(selector).toHaveValue('closed')
   expect(paths.at(-1)?.searchParams.get('status')).toBe('closed')
   expect(paths.at(-1)?.searchParams.get('q')).toBe('Equipe')
   expect(screen.getByLabelText('Buscar')).toHaveValue('Equipe')
@@ -145,7 +143,7 @@ it('clears search and dates from page two while retaining the tracking status an
   await screen.findByRole('button', { name: 'Ver contato de Sem filtros de busca' })
   expect(Object.fromEntries(paths.at(-1)!.searchParams)).toEqual({ page: '1', status: 'demo_scheduled' })
   expect(screen.getByLabelText('Rota atual')).toHaveTextContent('/admin/acompanhamento?status=demo_scheduled')
-  expect(screen.getByRole('link', { name: 'Demonstração combinada: 32 contatos' })).toHaveAttribute('aria-current', 'page')
+  expect(screen.getByRole('combobox', { name: 'Status' })).toHaveValue('demo_scheduled')
   expect(screen.getByLabelText('Buscar')).toHaveValue('')
   expect(screen.getByLabelText('Buscar')).toHaveFocus()
   expect(screen.queryByRole('button', { name: 'Limpar filtros' })).not.toBeInTheDocument()
@@ -155,21 +153,25 @@ it('clears search and dates from page two while retaining the tracking status an
   expect(screen.getByLabelText('Até')).toHaveValue('')
 })
 
-it('announces loading counts then displays global status counts independently of the filtered total', async () => {
+it('keeps the toolbar status selector available during loading and with an empty status', async () => {
   let complete: ((value: LeadList) => void) | undefined
-  const { request } = fakeRequest(() => new Promise<LeadList>((resolve) => { complete = resolve }))
+  const { request, paths } = fakeRequest(() => new Promise<LeadList>((resolve) => { complete = resolve }))
   mount(request, '/admin/acompanhamento?status=new')
-  const navigation = screen.getByRole('navigation', { name: 'Status do acompanhamento' })
-  for (const stage of stages) {
-    expect(within(navigation).getByRole('link', { name: `${stage.label}: carregando contatos` })).toBeInTheDocument()
-  }
+  const selector = screen.getByRole('combobox', { name: 'Status' })
+  expect(selector).toHaveValue('new')
+  expect(selector).toBeEnabled()
+  expect(screen.queryByRole('navigation', { name: 'Status do acompanhamento' })).not.toBeInTheDocument()
   await act(async () => {
     complete!({ items: [contact()], total: 1, page: 1, counts: { new: 12, contacted: 0, demo_scheduled: 8, closed: 3 } })
   })
-  expect(within(navigation).getByRole('link', { name: 'Novo: 12 contatos' })).toHaveAttribute('aria-current', 'page')
-  expect(within(navigation).getByRole('link', { name: 'Em contato: 0 contatos' })).toBeInTheDocument()
-  expect(within(navigation).getByRole('link', { name: 'Demonstração combinada: 8 contatos' })).toBeInTheDocument()
-  expect(within(navigation).getByRole('link', { name: 'Encerrado: 3 contatos' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Acompanhamento de contatos 1' })).toBeInTheDocument()
-  expect(screen.getByText('1–1 de 1 contatos')).toBeInTheDocument()
+  expect(within(selector).getAllByRole('option')).toHaveLength(4)
+  fireEvent.change(selector, { target: { value: 'contacted' } })
+  await act(async () => {
+    complete!({ items: [], total: 0, page: 1, counts })
+  })
+  expect(screen.getByText('Nenhum contato encontrado')).toBeInTheDocument()
+  expect(selector).toHaveValue('contacted')
+  expect(paths.at(-1)?.searchParams.get('status')).toBe('contacted')
+  expect(screen.getByRole('button', { name: 'Exportar página' })).toBeDisabled()
 })
