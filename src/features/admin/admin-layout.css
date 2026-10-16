@@ -160,30 +160,19 @@
   min-width: 0;
   padding: 0 4px;
 }
-.crm-layout-avatar,
-.crm-layout-topbar-avatar {
+.crm-layout-avatar {
   display: inline-flex;
-  flex: 0 0 30px;
+  flex: 0 0 26px;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--crm-layout-accent-border);
-  border-radius: 8px;
-  background: var(--crm-layout-brand-soft);
-  color: var(--crm-layout-text);
-  font-size: 14px;
-  line-height: 1;
-}
-.crm-layout-avatar {
-  flex-basis: 26px;
   width: 26px;
   height: 26px;
-  border-color: var(--color-brand);
+  border: 1px solid var(--color-brand);
   border-radius: 50%;
   background: var(--color-brand);
   color: var(--crm-layout-surface);
   font-size: 12px;
+  line-height: 1;
 }
 .crm-layout-email {
   min-width: 0;

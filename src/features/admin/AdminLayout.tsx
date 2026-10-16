@@ -120,9 +120,6 @@ export function AdminLayout({
               <span>{pageName}</span>
             </span>
           </nav>
-          <span className="crm-layout-topbar-avatar" title={email} aria-label={`Conta: ${email}`}>
-            {initial}
-          </span>
         </header>
         {logoutError && <p className="crm-layout-error" role="alert">{logoutError}</p>}
         <main className="crm-layout-content" id="admin-content" tabIndex={-1}>
