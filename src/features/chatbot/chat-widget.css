@@ -140,6 +140,8 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-border) transparent;
 }
+#silent-voice-chat .sv-chat-header:has(+ .sv-chat-scroll) { padding-bottom: 0; }
+#silent-voice-chat .sv-chat-header + .sv-chat-scroll { padding-top: 20px; }
 #silent-voice-chat .sv-chat-greeting { margin-bottom: 20px; }
 #silent-voice-chat .sv-chat-greeting h3 {
   margin: 0 0 8px;
@@ -261,6 +263,7 @@
   #silent-voice-chat .sv-chat-header { padding-inline: 16px; }
   #silent-voice-chat .sv-chat-toolbar { padding-inline: 16px; }
   #silent-voice-chat .sv-chat-scroll { padding: 20px 16px; }
+  #silent-voice-chat .sv-chat-header + .sv-chat-scroll { padding-top: 16px; }
   #silent-voice-chat .sv-chat-bottom { padding-inline: 16px; }
 }
 @media (hover: hover) and (pointer: fine) {
