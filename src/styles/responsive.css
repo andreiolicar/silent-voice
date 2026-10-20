@@ -90,9 +90,9 @@
   .audience-card { gap: 12px; }
   .audience-card .section-heading { font-size: 28px; line-height: 34px; }
   .faq-section { padding-block: 48px; }
-  .faq-section__aside { align-items: flex-start; gap: 20px; }
-  .faq-section__intro { flex: 1; gap: 20px; min-width: 0; }
-  .faq-section__aside .contact-card { flex-shrink: 0; }
+  .faq-section__aside { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .faq-section__intro { width: 100%; gap: 20px; min-width: 0; }
+  .faq-section__aside .contact-card { flex-shrink: 0; align-self: flex-end; }
   .faq-section .contact-pill { width: auto; max-width: 100%; padding-inline: 14px; font-size: 12px; }
   .accordion-item__trigger { gap: 16px; }
   .site-footer { padding-top: 40px; padding-bottom: 24px; }
@@ -121,6 +121,3 @@
   .faq-section .contact-card__message { left: auto; right: 0; bottom: 0; }
 }
 
-@media (max-width: 359px) {
-  .faq-section .contact-card { margin-left: 48px; }
-}
