@@ -10,6 +10,9 @@ services:
     staticPublishPath: dist
     routes:
       - type: rewrite
+        source: /api/*
+        destination: https://silent-voice-api.onrender.com/api/*
+      - type: rewrite
         source: /*
         destination: /index.html
     headers:
@@ -24,7 +27,7 @@ services:
     name: silent-voice-api
     repo: https://github.com/andreiolicar/silent-voice-site
     branch: deploy/static-frontend
-    region: ohio
+    region: oregon
     plan: free
     autoDeployTrigger: commit
     buildCommand: npm ci --include=dev && npm run build
