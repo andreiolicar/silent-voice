@@ -42,10 +42,10 @@ export function AppSection() {
             <div className="communication-section__intro">
               <SectionEyebrow {...enter(.1, 10)}>Conectado a você</SectionEyebrow>
               <SectionHeading id="app-heading" {...enter(.18, 18)}>
-                Seu celular, um centro<br />de acessibilidade e voz
+                Seu celular, um centro<br />{' '}de acessibilidade e voz
               </SectionHeading>
               <m.p className="communication-section__description" {...enter(.28)}>
-                Conecte o Silent Voice ao seu celular e tenha a comunicação<br />
+                Conecte o Silent Voice ao seu celular e tenha a comunicação<br />{' '}
                 ao seu alcance, com mais autonomia em cada conversa.
               </m.p>
             </div>

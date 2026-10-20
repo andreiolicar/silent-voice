@@ -11,8 +11,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Desktop is the approved scope. Mobile composition will be implemented next. */
-body { margin: 0; min-width: 1280px; }
+body { margin: 0; min-width: 0; }
 
 .page-container {
   width: calc(100% - var(--page-gutter) * 2);

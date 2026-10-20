@@ -30,10 +30,10 @@ export function CommunicationSection() {
             <div className="communication-section__intro">
             <SectionEyebrow {...enter(.1, 10)}>Comunicação assistiva</SectionEyebrow>
             <SectionHeading id="communication-heading" {...enter(.18, 18)}>
-              Transforme suas intenções<br />em fala, em tempo real
+              Transforme suas intenções<br />{' '}em fala, em tempo real
             </SectionHeading>
             <m.p className="communication-section__description" {...enter(.28)}>
-              O Silent Voice combina EMG, visão computacional e<br />
+              O Silent Voice combina EMG, visão computacional e<br />{' '}
               IA de borda para transformar suas intenções em palavras.
             </m.p>
             </div>

@@ -19,13 +19,13 @@ export function Hero() {
               <span>Revolução da Fala Assistiva</span>
             </m.p>
             <m.h1 id="hero-heading" className="hero__heading" data-node-id="10:97" {...enter('heading')}>
-              A inteligência biomédica<br />
-              que <span className="font-semibold text-accent">transforma intenções<br />em fala</span> em tempo real.
+              A inteligência biomédica<br />{' '}
+              que <span className="font-semibold text-accent">transforma intenções<br />{' '}em fala</span> em tempo real.
             </m.h1>
             <m.p className="hero__description" data-node-id="10:98" {...enter('description')}>
               Combinando EMG, visão computacional e IA de borda, o Silent Voice decodifica micro-sinais musculares em palavras em tempo real, com latência inferior a 300ms.
             </m.p>
-            <div className="flex items-center gap-[6px]" data-node-id="10:112">
+            <div className="hero__actions flex items-center gap-[6px]" data-node-id="10:112">
               <m.div className="entrance-control shrink-0" {...enter('primaryCta')}>
                 <GreenButton href={siteLinks.saibaMais}>Saiba mais</GreenButton>
               </m.div>

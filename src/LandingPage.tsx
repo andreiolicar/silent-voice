@@ -8,6 +8,7 @@ import { FaqSection } from './components/FaqSection'
 import { Footer } from './components/Footer'
 import { LoadBoundary } from './components/LoadBoundary'
 import { IntroProvider, useIntroState } from './intro/IntroProvider'
+import './styles/responsive.css'
 
 const ChatWidget = lazy(() =>
   import('./features/chatbot/ChatWidget').then((module) => ({
