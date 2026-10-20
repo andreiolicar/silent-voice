@@ -46,6 +46,21 @@ describe('public chatbot widget', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toBeEnabled()
   })
+  it('can reopen during closing without losing the draft or exposing closed controls', async () => {
+    render(<ChatWidget />)
+    const composer = await open()
+    await userEvent.type(composer, 'Minha dúvida ainda não enviada')
+    await userEvent.click(screen.getByRole('button', { name: 'Minimizar assistente' }))
+    const panel = document.getElementById('silent-voice-chat-panel')!
+    expect(panel).not.toHaveAttribute('hidden')
+    expect(panel).toHaveAttribute('aria-hidden', 'true')
+    expect(panel).toHaveAttribute('inert')
+    expect(screen.queryByRole('dialog')).toBeNull()
+    const reopened = await open()
+    expect(reopened).toHaveValue('Minha dúvida ainda não enviada')
+    expect(reopened).toHaveFocus()
+    expect(panel).toHaveAttribute('aria-hidden', 'false')
+  })
   it('keeps the welcome screen dismissed when minimizing an existing conversation', async () => {
     const { transport } = controlledTransport()
     render(<ChatWidget transport={transport} />)
@@ -92,7 +107,7 @@ describe('public chatbot widget', () => {
     )
     expect(calls[0].signal.aborted).toBe(false)
     expect(document.getElementById('silent-voice-chat-panel')).toHaveAttribute(
-      'hidden'
+      'aria-hidden', 'true'
     )
     expect(document.getElementById('silent-voice-chat-panel')).toHaveAttribute(
       'inert'

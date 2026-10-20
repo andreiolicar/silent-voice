@@ -77,7 +77,8 @@ export default function ChatPanel({
         role="dialog"
         aria-modal="false"
         aria-labelledby="sv-chat-title"
-        hidden={hidden}
+        aria-hidden={hidden}
+        data-state={hidden ? 'closed' : 'open'}
         inert={hidden}
       >
         <header className="sv-chat-header">
