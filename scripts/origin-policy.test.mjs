@@ -14,6 +14,7 @@ function configured(mode, origin) {
     NODE_ENV: mode,
     APP_ORIGIN: origin,
     SQLITE_PATH: ':memory:',
+    DATABASE_URL: 'postgresql://fixture:fixture@localhost/fixture',
     SESSION_SECRET: 'test-origin-policy-secret-at-least-thirty-two-characters',
   }
   const previous = Object.fromEntries(

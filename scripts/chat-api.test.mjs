@@ -7,7 +7,7 @@ const config = {
   databasePath: ':memory:',
   sessionSecret: 'test-secret-at-least-thirty-two-characters',
   secureCookies: false,
-  mistralModel: 'test',
+  zaiModel: 'test',
   chatTimeoutMs: 300,
   idleTimeoutMs: 150,
 }
@@ -106,6 +106,12 @@ test('upstream rate limits remain distinct from a generic provider failure witho
       assert.doesNotMatch(r.body, /private-provider-detail|"type":"done"/)
     }
   ))
+test('Z.ai quota errors are reported as upstream limits', () =>
+  withApp({ async *stream() { throw Object.assign(new Error('private-google-detail'), { status: 429 }) } }, async app => {
+    const r = await post(app)
+    assert.match(r.body, /"code":"provider_rate_limited"/)
+    assert.doesNotMatch(r.body, /private-google-detail|"type":"done"/)
+  }))
 test('truncated provider never becomes a success', () =>
   withApp(
     {

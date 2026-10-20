@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto'
-import type Database from 'better-sqlite3'
+import { asSqlDatabase } from '../db/sql.ts'
+import type { DatabaseInput } from '../db/sql.ts'
 import { z } from 'zod'
 
 const params = { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 }
@@ -32,14 +33,15 @@ export async function verifyPassword(
   return timingSafeEqual(key, expected) && valid
 }
 export async function provisionAdmin(
-  db: Database.Database,
+  database: DatabaseInput,
   email: string,
   password: string
 ): Promise<{ id: string; email: string }> {
+  const db = asSqlDatabase(database)
   const normalized = z.email().max(254).parse(email.trim().toLowerCase())
   const passwordHash = await hashPassword(password)
   const id = randomUUID()
-  db.prepare(
+  await db.prepare(
     'INSERT INTO admin_users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)'
   ).run(id, normalized, passwordHash, new Date().toISOString())
   return { id, email: normalized }

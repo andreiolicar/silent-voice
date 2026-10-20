@@ -33,3 +33,4 @@ coverage/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+.neon

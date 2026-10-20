@@ -4,7 +4,7 @@
 
 Requer Node.js 24 LTS e npm. `npm ci` instala o driver SQLite nativo; em uma plataforma sem binário pré-compilado, o npm precisará das ferramentas de compilação da plataforma.
 
-1. Copie `.env.example` para `.env`. Defina `MISTRAL_API_KEY` no arquivo local, nunca no chat, em código ou com prefixo `VITE_`. O modelo é configurável por `MISTRAL_MODEL` (inicial: `mistral-small-2603`).
+1. Copie `.env.example` para `.env`. Defina `ZAI_API_KEY` no arquivo local, nunca no chat, em código ou com prefixo `VITE_`. O modelo é configurável por `ZAI_MODEL` (inicial: `glm-4.5-flash`).
 2. Defina `SESSION_SECRET` com ao menos 32 caracteres aleatórios antes de qualquer publicação. O modo local usa um fallback apenas para desenvolvimento se esse campo estiver vazio.
 3. Execute em dois terminais:
 
@@ -15,9 +15,9 @@ npm run dev
 
 A landing está em http://127.0.0.1:5173 e a API local em http://127.0.0.1:3001. O Vite encaminha `/api`. `APP_ORIGIN` define a origem permitida, incluindo protocolo e porta. No desenvolvimento local, `localhost` e `127.0.0.1` são aceitos como alternativas somente no mesmo protocolo e porta configurados. Em produção, e para domínios que não sejam loopback, a origem deve corresponder exatamente à configurada. O processo da API precisa ser reiniciado após alterar o `.env`.
 
-Sem chave Mistral, o assistente informa indisponibilidade real; o formulário de interesse e o backoffice continuam funcionando. Não há respostas simuladas habilitadas no produto. A qualidade, a latência e o acesso ao modelo precisam ser validados com a conta configurada.
+Sem chave Z.ai, o assistente informa indisponibilidade real; o formulário de interesse e o backoffice continuam funcionando. Não há respostas simuladas habilitadas no produto. A qualidade, a latência e o acesso ao modelo precisam ser validados com a conta configurada.
 
-Um `429` do Mistral é repassado como `provider_rate_limited` e explicado no chat, sem retry automático ou exposição da resposta privada do provedor. Ter uma chave configurada não garante cota: confira o modelo de `MISTRAL_MODEL` em [API › Limits](https://admin.mistral.ai/plateforme/limits). No diagnóstico local de 2026-10-16, `mistral-small-2603` retornou código 1300 e `x-ratelimit-limit-req-minute: 0`, mesmo numa requisição mínima. A liberação depende dos limites da organização/modelo; não pode ser resolvida por CSS ou por repetição das chamadas. Após ajustar a conta ou trocar a configuração por um modelo com acesso confirmado, reinicie apenas a API e valide uma conversa real.
+Um `429` da Z.ai é repassado como `provider_rate_limited`, sem retry automático ou exposição da resposta privada do provedor. Use uma **Standard API Key** da API comum, não uma chave de Coding Plan ou BigModel. O modelo padrão `glm-4.5-flash` consta como gratuito na [tabela oficial](https://docs.z.ai/guides/overview/pricing); confirme os limites da conta no [painel da Z.ai](https://z.ai/manage-apikey/rate-limits). Não há fallback para outro modelo nem ativação de faturamento. Alterar `ZAI_MODEL` manualmente pode selecionar um modelo pago.
 
 ## Administrador
 
@@ -31,7 +31,7 @@ O comando solicita senha e confirmação sem mostrar os caracteres. A senha deve
 
 O painel permite pesquisar, filtrar por status/data, paginar, consultar dados completos, adicionar notas e atualizar o status. “Demonstração combinada” é uma marcação manual, sem reserva de agenda ou envio de e-mail. Conflitos de edição retornam 409 e preservam o rascunho da nota. O rascunho permanece apenas na memória da aba; logout explícito ou recarregamento o descarta.
 
-Sessões duram oito horas, ficam em SQLite e usam cookie HttpOnly/SameSite Strict. O login troca ID e token CSRF; logout invalida a sessão no servidor. Senhas são armazenadas com scrypt e salt aleatório.
+Sessões duram oito horas, ficam no PostgreSQL e usam cookie HttpOnly/SameSite Strict. O login troca ID e token CSRF; logout invalida a sessão no servidor. Senhas são armazenadas com scrypt e salt aleatório.
 
 ## Respostas visuais
 
@@ -41,7 +41,9 @@ A biblioteca controlada está em `src/features/chatbot/response-library.tsx`: An
 
 `npm run generate:chat` gera `shared/openui-spec.json` a partir da biblioteca real. A API deriva desse contrato as instruções da linguagem visual. Regere após alterar componentes; o prebuild faz isso automaticamente. O gerador usa o caminho CJS dos componentes publicados para contornar os imports ESM sem extensão do pacote, enquanto o browser importa componentes individuais para reduzir o bundle.
 
-O proxy usa o SDK oficial Mistral, temperatura 0,2, até 1.400 tokens, 16 mensagens e 16 mil caracteres de contexto. Mensagens do visitante têm até 2.000 caracteres. O servidor controla modelo, prompt e fatos; o cliente não pode enviar instruções de sistema. Câmera/leitura labial e EMG com três eletrodos trabalham juntos; o microfone fornece contexto e o alto-falante do dispositivo reproduz áudio. Não são prometidos preço, disponibilidade, latência, precisão ou resultado clínico sem confirmação.
+O proxy usa `fetch` nativo do Node na API padrão `https://api.z.ai/api/paas/v4/chat/completions`, com `glm-4.5-flash`, streaming SSE, thinking desativado e até 2.048 tokens de saída. Não há SDK extra ou retry automático. O adapter preserva os papéis da conversa, envia fatos e contrato OpenUI como instrução de sistema e repassa somente texto visível; raciocínio e ferramentas ficam excluídos. Valida limites de frames, UTF-8, término explícito e cancelamento do leitor. EOF ou `[DONE]` sem `finish_reason` não são convertidos em sucesso.
+
+O contexto admite 16 mensagens e 16 mil caracteres; cada mensagem do visitante tem até 2.000 caracteres. O servidor controla modelo, prompt e fatos; o cliente não pode enviar instruções de sistema. Não são prometidos preço, disponibilidade, latência, precisão, transcrição em tempo real ou resultado clínico sem confirmação.
 
 ## Fluxos e dados
 
@@ -53,22 +55,19 @@ O painel usa os mesmos tokens de fonte, cor e borda da landing e da administraç
 
 O launcher aparece depois da abertura da landing, sem abrir o painel automaticamente. No primeiro clique, o módulo é carregado sem container intermediário; falhas reais ainda exibem a alternativa de contato. Minimizar preserva conversa e envio. Mudar de rota desmonta o assistente, cancela a geração e ignora respostas obsoletas. Enter envia, Shift+Enter quebra a linha e composição IME não envia acidentalmente. O hover não desloca os controles; as marcas do cabeçalho e do launcher compartilham a mesma proporção interna.
 
-O chat envia texto ao Mistral para responder; não persiste transcrições completas no banco ou no localStorage. Campos do formulário não são enviados automaticamente ao modelo. As condições de retenção/treinamento do provedor dependem da conta e devem ser conferidas antes de publicar; não há promessa de retenção zero.
+O chat envia texto à API Z.ai; não persiste transcrições completas no banco ou no localStorage. Campos do formulário não são enviados automaticamente ao modelo. Os [termos para API](https://docs.z.ai/legal-agreement/terms-of-use) informam que o conteúdo de desenvolvedores não é usado para aprimorar os serviços sem concordância explícita; isso não é uma promessa de retenção zero. Revisar o aviso de privacidade antes de publicar e não enviar dados clínicos.
 
-Contatos são registrados por `POST /api/leads`, independentemente da IA. Nome, e-mail e objetivo são obrigatórios; perfil e organização são opcionais. A confirmação exige recibo após commit SQLite. Timeout de 15 segundos mantém payload/chave imutáveis; tentar novamente recupera o mesmo recibo e não duplica o registro. O mesmo e-mail pode ter solicitações distintas. Registros incluem status, versão, datas e notas com autor.
+Contatos são registrados por `POST /api/leads`, independentemente da IA. Nome, e-mail e objetivo são obrigatórios; perfil e organização são opcionais. A confirmação exige recibo após commit PostgreSQL. Timeout de 15 segundos mantém payload/chave imutáveis; tentar novamente recupera o mesmo recibo e não duplica o registro. O mesmo e-mail pode ter solicitações distintas. Registros incluem status, versão, datas e notas com autor.
 
-Limites locais: chat 10 mensagens/minuto/IP, duas gerações/IP e dez globais; leads e login cinco tentativas/15 minutos/IP. Requisições têm body máximo de 64 KiB. A geração encerra após 45 segundos ou 15 segundos sem progresso, propagando cancelamento ao provedor, sem retry automático. Logs não registram texto, contatos, cookies, senhas ou chaves.
+Limites locais: chat 10 mensagens/minuto/IP, duas gerações/IP e dez globais; leads e login cinco tentativas/15 minutos/IP. Requisições têm body máximo de 64 KiB. A geração encerra após 45 segundos ou 15 segundos sem progresso, propagando o sinal de cancelamento à requisição HTTP e ao leitor de streaming, sem retry automático. O cancelamento local não garante interrupção de processamento ou cobrança de uma requisição já aceita pela Z.ai. Logs não registram texto, contatos, cookies, senhas ou chaves.
 
 ## Banco e backup
 
-Banco padrão `data/silent-voice.sqlite`, fora de `public`, ignorado pelo Git. O Vite bloqueia por HTTP os arquivos privados, WAL/SHM, backups e fontes do backend, incluindo caminhos `/@fs/`. O bootstrap recusa um banco configurado sob `public/`, que deve conter apenas assets públicos. `SQLITE_PATH` permite mudar o local. Migrações numeradas são transacionais; foreign keys, WAL e busy timeout estão ativos.
+O runtime usa PostgreSQL no Neon: DATABASE_URL com pool para consultas e DATABASE_URL_UNPOOLED para migrações. Nenhum arquivo SQLite é usado pelo servidor publicado. Migrações versionadas são transacionais e verificadas por checksum; sessões, recibos e cadastros persistem no banco externo.
 
-```sh
-mkdir -p backups
-npm run db:backup -- backups/silent-voice-backup.sqlite
-```
+Execute npm run db:migrate antes de validar uma nova versão. A inicialização também executa as migrações sob advisory lock. Para importar um snapshot SQLite privado consistente, use npm run db:import:sqlite -- caminho-do-backup.sqlite. A importação preserva IDs, hashes de senha e datas; conflitos revertem a transação, sem sobrescrever dados. Sessões antigas não são importadas.
 
-O destino deve ser novo. O comando usa a API de backup do driver, incluindo páginas confirmadas no WAL. Para restaurar, pare a API, preserve o banco atual e seus arquivos WAL/SHM e aponte `SQLITE_PATH` para o snapshot restaurado; inicie a API e confira integridade e registros antes de substituir qualquer banco. Não copie somente o `.sqlite` aberto.
+O comando db:backup mantém apenas a função de snapshot do SQLite legado. Para o PostgreSQL, utilize pg_dump com conexão direta e destino privado, ou os recursos de recuperação do Neon conforme a retenção disponível no plano. Nunca publique dumps ou URLs de conexão.
 
 ## Validação
 
@@ -83,4 +82,4 @@ A suíte mantém os testes anteriores e acrescenta streaming UTF-8/cancelamento,
 
 ## Publicação futura
 
-Entrega local, sem deploy. Um frontend estático isolado não executa estas APIs. Hospedagem requer processo Node, uma instância inicial, volume SQLite persistente, backup, HTTPS, origem correta e segredo de sessão próprio. O servidor local usa `trustProxy:false` e bind em `127.0.0.1`; atrás de terminação TLS será necessário configurar proxy confiável de forma restrita para cookies Secure e IPs de rate limit, além da escuta adequada. Não habilitar `trustProxy:true` indiscriminadamente. Definir e revisar retenção, aviso de privacidade e operação do contato antes de disponibilizar publicamente.
+Produção: frontend estático no Render, API Node no Render Free e PostgreSQL no Neon Free. Segredos pertencem apenas ao ambiente do backend. O processo escuta em 0.0.0.0 e PORT; confia apenas no proxy imediatamente anterior, usa cookies Secure/HttpOnly/SameSite Strict e exige origem exata para mutações. /api/health consulta o banco. Instâncias gratuitas podem suspender por inatividade; os dados permanecem no Neon.

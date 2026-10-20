@@ -1,3 +1,4 @@
+import type { OutgoingHttpHeaders } from 'node:http'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import type { ServerConfig } from '../config.ts'
@@ -73,6 +74,7 @@ export async function registerChatRoute(
       reply.raw.on('close', closed)
       reply.hijack()
       reply.raw.writeHead(200, {
+        ...(reply.getHeaders() as OutgoingHttpHeaders),
         'Content-Type': 'text/event-stream; charset=utf-8',
         'Cache-Control': 'no-store',
         'X-Accel-Buffering': 'no',
@@ -129,7 +131,7 @@ export async function registerChatRoute(
           })
       } catch (error) {
         const rateLimited = error !== null && typeof error === 'object' &&
-          'statusCode' in error && error.statusCode === 429
+          (('statusCode' in error && error.statusCode === 429) || ('status' in error && error.status === 429))
         send({
           type: 'error',
           requestId,

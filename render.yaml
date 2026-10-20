@@ -1,4 +1,4 @@
-# Frontend only. Backend and database are intentionally not provisioned here.
+# Free Render frontend + Node API. PostgreSQL is managed externally by Neon.
 services:
   - type: web
     runtime: static
@@ -19,3 +19,31 @@ services:
       - path: /*
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
+  - type: web
+    runtime: node
+    name: silent-voice-api
+    repo: https://github.com/andreiolicar/silent-voice-site
+    branch: deploy/static-frontend
+    region: ohio
+    plan: free
+    autoDeployTrigger: commit
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ORIGIN
+        value: https://www.silentvoice.com.br
+      - key: ADDITIONAL_APP_ORIGINS
+        value: https://silentvoice.com.br,https://silent-voice-site.onrender.com,https://silent-voice-api.onrender.com
+      - key: ZAI_MODEL
+        value: glm-4.5-flash
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: ZAI_API_KEY
+        sync: false

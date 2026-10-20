@@ -1,5 +1,5 @@
 import { pathToFileURL } from 'node:url'
-import { createDatabase } from '../db/database.ts'
+import { createPostgresDatabase } from '../db/sql.ts'
 import { provisionAdmin } from '../auth/password.ts'
 
 /** Read from a private TTY only: never accept credentials as arguments or env. */
@@ -47,14 +47,13 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
   const password = await promptPassword('Senha (12 a 256 caracteres): ')
   const confirmation = await promptPassword('Confirme a senha: ')
   if (password !== confirmation) throw new Error('As senhas não coincidem.')
-  const db = createDatabase(
-    process.env.SQLITE_PATH || 'data/silent-voice.sqlite'
-  )
+  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL required')
+  const db = createPostgresDatabase(process.env.DATABASE_URL)
   try {
     await provisionAdmin(db, args[1], password)
     process.stdout.write('Administrador criado.\n')
   } finally {
-    db.close()
+    await db.close()
   }
 }
 if (

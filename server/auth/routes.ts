@@ -3,7 +3,7 @@ import session from '@fastify/session'
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import type Database from 'better-sqlite3'
+import type { SqlDatabase } from '../db/sql.ts'
 import type { ServerConfig } from '../config.ts'
 import { isAllowedOrigin } from '../origin.ts'
 import { createSessionStore } from './store.ts'
@@ -55,7 +55,7 @@ export async function requireAdmin(
 }
 export async function registerAuthRoutes(
   app: FastifyInstance,
-  db: Database.Database,
+  db: SqlDatabase,
   config: ServerConfig
 ): Promise<void> {
   await app.register(cookie)
@@ -106,7 +106,7 @@ export async function registerAuthRoutes(
       const parsed = login.safeParse(request.body)
       if (!parsed.success)
         return reply.code(400).send({ error: 'Dados inválidos.' })
-      const user = findUser.get(parsed.data.email) as
+      const user = await findUser.get(parsed.data.email) as
         { id: string; email: string; password_hash: string } | undefined
       const valid = await verifyPassword(
         parsed.data.password,

@@ -23,7 +23,7 @@ export async function fixture(t) {
     sessionSecret: 'test-session-secret-at-least-thirty-two-characters',
     secureCookies: false,
     port: 0,
-    mistralModel: 'unused',
+    zaiModel: 'unused',
     chatTimeoutMs: 45000,
     idleTimeoutMs: 15000,
   }

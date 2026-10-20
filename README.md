@@ -64,8 +64,8 @@ As fontes editáveis das mídias, capturas e registros de produção em `docs/re
 
 ## Chatbot e backoffice
 
-Assistente fixo no canto inferior direito, com Mistral no servidor e respostas visuais em OpenUI, seguindo os tokens atuais. Contatos são gravados em SQLite e consultados em `/admin`, com login obrigatório no servidor. Não há usuário/senha padrão.
+Assistente fixo no canto inferior direito, com GLM-4.5-Flash da Z.ai no servidor e respostas visuais em OpenUI, seguindo os tokens atuais. Contatos são gravados em PostgreSQL no Neon e consultados em `/admin`, com login obrigatório no servidor. Não há usuário/senha padrão.
 
-Leia [setup, administração, limites e backup](docs/chatbot-backoffice.md). A chave Mistral é configurada somente no `.env` do servidor; sem ela, contato e administração continuam disponíveis. Não há persistência de transcrição completa.
+Leia [setup, administração, limites e backup](docs/chatbot-backoffice.md). A chave Z.ai (`ZAI_API_KEY`) é configurada somente no `.env` do servidor; sem ela, contato e administração continuam disponíveis. Não há persistência de transcrição completa.
 
 Código: `src/features/chatbot/`, `src/features/admin/`, `server/` e contratos em `shared/`. A API de desenvolvimento usa porta 3001, com proxy pelo Vite5173. Esta entrega não inclui publicação.

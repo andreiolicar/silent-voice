@@ -7,7 +7,7 @@ const config = {
   databasePath: ':memory:',
   sessionSecret: 'test-secret-thirty-two-characters-long',
   secureCookies: false,
-  mistralModel: 'test',
+  zaiModel: 'test',
   chatTimeoutMs: 5000,
   idleTimeoutMs: 4000,
 }

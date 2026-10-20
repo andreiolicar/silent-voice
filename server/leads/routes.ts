@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import type { FastifyInstance } from 'fastify'
-import type Database from 'better-sqlite3'
+import type { SqlDatabase } from '../db/sql.ts'
 import type { ServerConfig } from '../config.ts'
 import type {
   AdminLead,
@@ -98,7 +98,7 @@ const selectLead = `SELECT l.*, EXISTS(SELECT 1 FROM leads duplicate WHERE dupli
 
 export async function registerDataRoutes(
   app: FastifyInstance,
-  db: Database.Database,
+  db: SqlDatabase,
   config: ServerConfig
 ): Promise<void> {
   await registerAuthRoutes(app, db, config)
@@ -112,8 +112,9 @@ export async function registerDataRoutes(
     'INSERT INTO lead_submissions (idempotency_key, fingerprint, lead_id, created_at) VALUES (?, ?, ?, ?)'
   )
   const saveLead = db.transaction(
-    (key: string, fingerprint: string, data: z.infer<typeof inputSchema>) => {
-      const existing = findSubmission.get(key) as
+    async (key: string, fingerprint: string, data: z.infer<typeof inputSchema>) => {
+      await db.lock(key)
+      const existing = await findSubmission.get(key) as
         { fingerprint: string; lead_id: string; created_at: string } | undefined
       if (existing)
         return existing.fingerprint === fingerprint
@@ -123,13 +124,13 @@ export async function registerDataRoutes(
             }
           : { status: 422 }
       const receipt = { id: randomUUID(), createdAt: new Date().toISOString() }
-      insertLead.run({
+      await insertLead.run({
         ...data,
         ...receipt,
         profile: data.profile || null,
         organization: data.organization || null,
       })
-      insertSubmission.run(key, fingerprint, receipt.id, receipt.createdAt)
+      await insertSubmission.run(key, fingerprint, receipt.id, receipt.createdAt)
       return { status: 201, receipt }
     }
   )
@@ -145,7 +146,7 @@ export async function registerDataRoutes(
       const fingerprint = createHash('sha256')
         .update(JSON.stringify(parsed.data))
         .digest('hex')
-      const result = saveLead.immediate(
+      const result = await saveLead.immediate(
         key.data.toLowerCase(),
         fingerprint,
         parsed.data
@@ -160,7 +161,7 @@ export async function registerDataRoutes(
 
   const findLead = db.prepare(`${selectLead} WHERE l.id = ?`)
   const notes = db.prepare(
-    'SELECT n.id, n.text, u.email author, n.created_at createdAt FROM lead_notes n JOIN admin_users u ON n.author_id = u.id WHERE n.lead_id = ? ORDER BY n.created_at, n.rowid'
+    'SELECT n.id, n.text, u.email author, n.created_at "createdAt" FROM lead_notes n JOIN admin_users u ON n.author_id = u.id WHERE n.lead_id = ? ORDER BY n.created_at, n.rowid'
   )
   const changeStatus = db.prepare(
     'UPDATE leads SET status = ?, version = version + 1, updated_at = ?, status_updated_by = ? WHERE id = ? AND version = ?'
@@ -181,7 +182,7 @@ export async function registerDataRoutes(
       const params: (string | number)[] = []
       if (query.q) {
         conditions.push(
-          "(l.name LIKE ? ESCAPE '\\' OR l.email LIKE ? ESCAPE '\\' OR l.objective LIKE ? ESCAPE '\\')"
+          "(lower(l.name) LIKE lower(?) ESCAPE '\\' OR lower(l.email) LIKE lower(?) ESCAPE '\\' OR lower(l.objective) LIKE lower(?) ESCAPE '\\')"
         )
         const pattern = `%${query.q.replace(/[\\%_]/g, '\\$&')}%`
         params.push(pattern, pattern, pattern)
@@ -201,14 +202,14 @@ export async function registerDataRoutes(
       const where = conditions.length
         ? ` WHERE ${conditions.join(' AND ')}`
         : ''
-      const rows = db
+      const rows = await db
         .prepare(
           `${selectLead}${where} ORDER BY l.created_at DESC, l.rowid DESC LIMIT 25 OFFSET ?`
         )
         .all(...params, (page - 1) * 25) as LeadRow[]
       const total = (
-        db
-          .prepare(`SELECT count(*) total FROM leads l${where}`)
+        await db
+          .prepare(`SELECT CAST(count(*) AS INTEGER) total FROM leads l${where}`)
           .get(...params) as { total: number }
       ).total
       const counts: LeadList['counts'] = {
@@ -217,8 +218,8 @@ export async function registerDataRoutes(
         demo_scheduled: 0,
         closed: 0,
       }
-      for (const row of db
-        .prepare('SELECT status, count(*) total FROM leads GROUP BY status')
+      for (const row of await db
+        .prepare('SELECT status, CAST(count(*) AS INTEGER) total FROM leads GROUP BY status')
         .all() as { status: LeadStatus; total: number }[])
         counts[row.status] = row.total
       return { items: rows.map(toLead), total, page, counts } satisfies LeadList
@@ -228,10 +229,10 @@ export async function registerDataRoutes(
     '/api/admin/leads/:id',
     { preHandler: requireAdmin },
     async (request, reply) => {
-      const row = findLead.get(request.params.id) as LeadRow | undefined
+      const row = await findLead.get(request.params.id) as LeadRow | undefined
       if (!row)
         return reply.code(404).send({ error: 'Registro não encontrado.' })
-      return { lead: toLead(row), notes: notes.all(row.id) as LeadNote[] }
+      return { lead: toLead(row), notes: await notes.all(row.id) as LeadNote[] }
     }
   )
   app.patch<{ Params: { id: string } }>(
@@ -246,24 +247,24 @@ export async function registerDataRoutes(
       const parsed = statusSchema.safeParse(request.body)
       if (!parsed.success)
         return reply.code(400).send({ error: 'Dados inválidos.' })
-      const result = db
-        .transaction(() => {
-          const existing = findLead.get(request.params.id) as
+      const result = await db
+        .transaction(async () => {
+          const existing = await findLead.get(request.params.id) as
             LeadRow | undefined
           if (!existing) return { status: 404 as const }
           if (
-            !changeStatus.run(
+            !(await changeStatus.run(
               parsed.data.status,
               new Date().toISOString(),
               request.session.adminId!,
               existing.id,
               parsed.data.version
-            ).changes
+            )).changes
           )
             return { status: 409 as const }
           return {
             status: 200 as const,
-            lead: toLead(findLead.get(existing.id) as LeadRow),
+            lead: toLead(await findLead.get(existing.id) as LeadRow),
           }
         })
         .immediate()
@@ -291,7 +292,7 @@ export async function registerDataRoutes(
       const parsed = noteSchema.safeParse(request.body)
       if (!parsed.success)
         return reply.code(400).send({ error: 'Dados inválidos.' })
-      if (!findLead.get(request.params.id))
+      if (!await findLead.get(request.params.id))
         return reply.code(404).send({ error: 'Registro não encontrado.' })
       const note: LeadNote = {
         id: randomUUID(),
@@ -299,7 +300,7 @@ export async function registerDataRoutes(
         author: request.session.adminEmail!,
         createdAt: new Date().toISOString(),
       }
-      insertNote.run(
+      await insertNote.run(
         note.id,
         request.params.id,
         note.text,
