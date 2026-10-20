@@ -66,11 +66,11 @@ export function HeroArtwork() {
         <img className="hero-artwork__woman" src="/assets/woman-hero.png" alt="" fetchPriority="high" />
       </m.div>
 
-      <m.div className="scene-layer artwork-menu" style={box(67, 508.5, 44, 158)} data-node-id="23:116" {...enter('artworkMenu')}>
+      <m.div className="scene-layer artwork-menu" style={box(67, 508.5, 44, 176)} data-node-id="23:116" {...enter('artworkMenu')}>
         <div className="artwork-menu__active"><img src="/assets/lucide-house.svg" alt="" /></div>
-        <img className="artwork-menu__icon artwork-menu__icon--drive" src="/assets/lucide-hard-drive.svg" alt="" />
-        <img className="artwork-menu__icon artwork-menu__icon--audio" src="/assets/lucide-audio-lines.svg" alt="" />
-        <img className="artwork-menu__icon artwork-menu__icon--settings" src="/assets/lucide-settings.svg" alt="" />
+        <img className="artwork-menu__icon" src="/assets/lucide-hard-drive.svg" alt="" />
+        <img className="artwork-menu__icon" src="/assets/lucide-audio-lines.svg" alt="" />
+        <img className="artwork-menu__icon" src="/assets/lucide-settings.svg" alt="" />
       </m.div>
 
       <svg className="scene-layer artwork-connectors" viewBox="0 0 695 771" fill="none" stroke="var(--color-surface)" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
