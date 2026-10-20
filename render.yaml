@@ -1,0 +1,21 @@
+# Frontend only. Backend and database are intentionally not provisioned here.
+services:
+  - type: web
+    runtime: static
+    name: silent-voice-site
+    repo: https://github.com/andreiolicar/silent-voice-site
+    branch: deploy/static-frontend
+    autoDeployTrigger: commit
+    buildCommand: npm ci --include=dev && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

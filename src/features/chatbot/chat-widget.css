@@ -80,6 +80,8 @@
 #silent-voice-chat .sv-chat-panel {
   display: flex;
   flex-direction: column;
+  /* Only the conversation scrolls; focus must never scroll the outer panel. */
+  overflow: clip;
   animation: sv-chat-enter 240ms var(--interaction-easing);
 }
 #silent-voice-chat .sv-chat-loading { height: auto; padding: 24px; }
@@ -131,7 +133,8 @@
   border-bottom: 1px solid var(--sv-chat-border);
 }
 #silent-voice-chat .sv-chat-scroll {
-  flex: 1 1 auto;
+  position: relative;
+  flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -190,7 +193,12 @@
   line-height: var(--type-caption-leading);
 }
 #silent-voice-chat .sv-chat-message-author .sv-chat-brand-mark { width: 14px; height: 14px; color: var(--color-brand); }
-#silent-voice-chat .sv-chat-bottom { flex-shrink: 0; padding: 12px 20px 14px; }
+#silent-voice-chat .sv-chat-bottom {
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 12px 20px 14px;
+}
 #silent-voice-chat .sv-lead-options summary {
   display: flex;
   width: fit-content;
@@ -237,6 +245,8 @@
 #silent-voice-chat .sv-chat-error p { margin: 0 0 8px; }
 #silent-voice-chat .sv-sr-only {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 1px;
   height: 1px;
   padding: 0;
