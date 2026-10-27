@@ -1,0 +1,5 @@
+node_modules/
+.expo/
+dist/
+assets/expo.icon/icon.json
+AGENTS.md
