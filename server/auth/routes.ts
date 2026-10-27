@@ -53,15 +53,27 @@ export async function registerAuthRoutes(app: FastifyInstance, auth: SilentVoice
     method: ['GET','POST'], url:'/api/auth/*',
     async handler(request, reply) {
       const url = new URL(request.url, auth.options.baseURL as string)
+      const headers = fromNodeHeaders(request.headers)
+      // Fastify already applies the server's bounded trustProxy policy. Give the
+      // SDK that single resolved address, never an untrusted forwarded chain.
+      // Otherwise Better Auth rejects multi-hop headers and shares one bucket.
+      headers.set('x-forwarded-for', request.ip)
       const response = await auth.handler(new Request(url, {
-        method:request.method, headers:fromNodeHeaders(request.headers),
+        method:request.method, headers,
         ...(request.body ? {body:JSON.stringify(request.body)} : {}),
       }))
       reply.code(response.status)
       for (const [key,value] of response.headers) if(key.toLowerCase() !== 'set-cookie') reply.header(key,value)
       const cookies=response.headers.getSetCookie()
       if(cookies.length) reply.header('Set-Cookie',cookies)
-      return reply.send(response.body ? Buffer.from(await response.arrayBuffer()) : null)
+      const body = response.body ? Buffer.from(await response.arrayBuffer()) : null
+      const retryAfter = Number(response.headers.get('x-retry-after') || response.headers.get('retry-after'))
+      if (response.status === 429 && Number.isFinite(retryAfter) && retryAfter > 0 && body) {
+        reply.header('Retry-After', String(Math.ceil(retryAfter)))
+        reply.removeHeader('Content-Length')
+        return reply.send({ ...JSON.parse(body.toString()), retryAfterSeconds: Math.ceil(retryAfter) })
+      }
+      return reply.send(body)
     },
   })
 }

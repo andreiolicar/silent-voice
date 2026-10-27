@@ -28,6 +28,8 @@ Comando interno, sem senha por argumento, variável ou log. Provisiona o adminis
 
 Senhas têm 12–128 caracteres. Confirmação expira em 24h e recuperação em 1h. Sessões duram sete dias e são renovadas após um dia, com consulta ao banco e sem cache de autorização. Recuperação revoga sessões sem remover 2FA; troca de senha revoga as outras sessões e atualiza a identidade da sessão atual. Configuração/reconfiguração de 2FA revoga todas as sessões e exige novo login. Códigos de recuperação são de uso único, mostrados temporariamente; não são persistidos pela interface.
 
+Os limites usam o endereço resolvido pelo Fastify, com confiança limitada a um salto do proxy em produção. A ponte entrega esse único endereço ao Better Auth, substituindo a cadeia de encaminhamento recebida; não aceita um endereço arbitrário escolhido pelo cliente. Isso evita o contador global de fallback quando o SDK rejeita cabeçalhos com múltiplos proxies. Login e cadastro continuam limitados a cinco requisições por endereço em uma janela de 15 minutos, incluindo requisições bem-sucedidas. Respostas 429 preservam o limite e informam `Retry-After`/`retryAfterSeconds`; a interface mostra o tempo restante. Uma tentativa já bloqueada não prolonga a janela.
+
 `/admin/seguranca` permite configurar/reconfigurar TOTP, trocar senha, consultar e encerrar sessões. QR Code é gerado localmente. Nenhuma senha, cookie, código, chave ou link secreto é registrado nos logs. Login/cadastro, recuperação, reenvio e códigos possuem limites próprios de tentativas.
 
 ## Aplicativo

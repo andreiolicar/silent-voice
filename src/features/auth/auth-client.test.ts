@@ -136,3 +136,15 @@ it('describes a rejected TOTP code as a code error even when the SDK returns HTT
     )
   ).rejects.toThrow('Código inválido')
 })
+
+it('shows the server-provided remaining cooldown without replaying a blocked login', async () => {
+  let posts = 0
+  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).includes('/api/health')) return json({ status: 'ok' })
+    posts += 1
+    return json({ message: 'Too many requests', retryAfterSeconds: 313 }, 429)
+  }))
+  const { authAction, authClient } = await import('./auth-client')
+  await expect(authAction(() => authClient.signIn.email({ email: 'admin@example.com', password: 'a-strong-password' }), new AbortController().signal)).rejects.toThrow('Tente novamente em 6 minutos')
+  expect(posts).toBe(1)
+})

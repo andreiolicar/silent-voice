@@ -20,21 +20,26 @@ export type AuthSession = {
 }
 type Result<T> = {
   data: T | null
-  error: { code?: string; status?: number; message?: string } | null
+  error: { code?: string; status?: number; message?: string; retryAfterSeconds?: number } | null
 }
 export class AuthError extends Error {
   constructor(
     public code?: string,
-    public status?: number
+    public status?: number,
+    retryAfterSeconds?: number
   ) {
-    super(authMessage(code, status))
+    super(authMessage(code, status, retryAfterSeconds))
   }
 }
-export function authMessage(code?: string, status?: number) {
+export function authMessage(code?: string, status?: number, retryAfterSeconds?: number) {
   if (code === 'EMAIL_NOT_VERIFIED')
     return 'Confirme seu e-mail antes de entrar.'
   if (code === 'INVALID_TWO_FACTOR_COOKIE')
     return 'Sua verificação expirou. Volte para entrar novamente.'
+  if (status === 429 && typeof retryAfterSeconds === 'number' && Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+    const minutes = Math.ceil(retryAfterSeconds / 60)
+    return `Muitas tentativas. Tente novamente em ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}.`
+  }
   if (status === 429 || code === 'ACCOUNT_TEMPORARILY_LOCKED')
     return 'Muitas tentativas. Aguarde um pouco e tente novamente.'
   if (code?.includes('TOKEN'))
@@ -53,7 +58,7 @@ export function authMessage(code?: string, status?: number) {
 }
 export async function authResult<T>(operation: Promise<Result<T>>): Promise<T> {
   const result = await operation
-  if (result.error) throw new AuthError(result.error.code, result.error.status)
+  if (result.error) throw new AuthError(result.error.code, result.error.status, result.error.retryAfterSeconds)
   return result.data as T
 }
 /** Warm only the read-only health route; never replay an uncertain auth POST. */
