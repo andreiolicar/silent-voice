@@ -180,7 +180,7 @@ export function ChatLeadForm() {
     ) => setFields((current) => ({ ...current, [name]: event.target.value })),
   })
   return (
-    <div className="sv-lead">
+    <div className={`sv-lead${status === 'confirmed' ? ' sv-lead--confirmed' : ''}`}>
       {status === 'confirmed' ? (
         <div className="sv-lead-success" role="status">
           <span aria-hidden="true" className="sv-lead-success-icon">

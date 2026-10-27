@@ -54,19 +54,35 @@
   overflow-wrap: anywhere;
 }
 #silent-voice-chat .sv-contact-email a { color: var(--sv-chat-accent); text-decoration: none; }
-#silent-voice-chat .sv-lead-success { padding: 8px 0; }
+#silent-voice-chat .sv-lead--confirmed {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  text-align: center;
+}
+#silent-voice-chat .sv-lead-success {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+}
+#silent-voice-chat .sv-lead-success h3 { margin: 0; }
+#silent-voice-chat .sv-lead--confirmed .sv-contact-email { margin-top: 24px; }
 #silent-voice-chat .sv-lead-success-icon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-bottom: 16px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
   border-radius: 50%;
   background: var(--color-brand);
   color: var(--color-surface);
 }
-#silent-voice-chat .sv-lead-success-icon .sv-chat-icon { width: 18px; height: 18px; }
-#silent-voice-chat .sv-lead-success p { margin: 12px 0 0; color: var(--sv-chat-muted); }
+#silent-voice-chat .sv-lead-success-icon .sv-chat-icon { width: 24px; height: 24px; }
+#silent-voice-chat .sv-lead-success p { max-width: 32ch; margin: 10px 0 0; color: var(--sv-chat-muted); text-wrap: pretty; }
 @media (hover: hover) and (pointer: fine) {
   #silent-voice-chat .sv-field :is(input, select, textarea):hover:not(:focus):not(:disabled):not([readonly]) { border-color: var(--sv-chat-hover-border); }
   #silent-voice-chat .sv-contact-email a:hover { text-decoration: underline; text-underline-offset: 3px; }
