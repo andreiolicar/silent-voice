@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import type { PropsWithChildren } from 'react';
+import { Children, type PropsWithChildren } from 'react';
 import {
   Platform,
   ScrollView,
@@ -14,16 +14,19 @@ import {
   type BottomNavigationItem,
   Screen,
 } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { spacing } from '@/theme';
 
 type MainAppScreenProps = PropsWithChildren<{
   activeItem?: BottomNavigationItem;
+  animateSections?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   showBottomNavigation?: boolean;
 }>;
 
 export function MainAppScreen({
   activeItem = 'home',
+  animateSections = true,
   children,
   contentStyle,
   showBottomNavigation = true,
@@ -52,7 +55,13 @@ export function MainAppScreen({
           showsVerticalScrollIndicator={false}
           style={styles.scroll}
         >
-          {children}
+          <AnimatedEntrance style={styles.entrance} variant="screen">
+            {animateSections
+              ? Children.map(children, (child, index) => (
+                  <AnimatedEntrance index={index}>{child}</AnimatedEntrance>
+                ))
+              : children}
+          </AnimatedEntrance>
         </ScrollView>
         {showBottomNavigation ? (
           <View style={styles.navigation}>
@@ -71,6 +80,7 @@ const styles = StyleSheet.create({
   screen: { width: '100%', flex: 1, alignItems: 'center' },
   frame: { width: '100%', maxWidth: 402, minHeight: 0, flex: 1 },
   scroll: { minHeight: 0, flex: 1 },
+  entrance: { flexGrow: 1 },
   content: {
     flexGrow: 1,
     paddingTop: Platform.select({ web: 75, default: 18 }),

@@ -8,6 +8,7 @@ import {
   PrivacyNotice,
   StatusBadge,
 } from '@/components/silent-voice';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { AppText, Button, Card } from '@/components/ui';
 import type { DeviceConnectionState } from '@/domain/device';
 import {
@@ -87,7 +88,7 @@ export default function Connection() {
     <InitialFlowScreen background={null} contentStyle={styles.content}>
       <BrandLogo style={styles.logo} />
 
-      <View style={styles.header}>
+      <AnimatedEntrance index={0} style={styles.header}>
         <View style={styles.headingCopy}>
           <AppText style={styles.title} variant="screenTitle">
             Conectar{`\n`}dispositivo
@@ -99,25 +100,27 @@ export default function Connection() {
         <View style={styles.headerIcon}>
           <Cable color={colors.accent} size={46} strokeWidth={1.4} />
         </View>
-      </View>
+      </AnimatedEntrance>
 
-      <Card style={styles.statusCard}>
-        <View style={styles.statusIcon}>
-          <Usb
-            color={copy.tone === 'error' ? colors.error : colors.accent}
-            size={24}
-          />
-        </View>
-        <View style={styles.statusCopy}>
-          <AppText style={styles.statusTitle}>{copy.title}</AppText>
-          <AppText style={styles.statusDescription} tone="secondary">
-            {copy.description}
-          </AppText>
-        </View>
-        <StatusBadge label="USB" size="compact" tone={copy.tone} />
-      </Card>
+      <AnimatedEntrance index={1}>
+        <Card style={styles.statusCard}>
+          <View style={styles.statusIcon}>
+            <Usb
+              color={copy.tone === 'error' ? colors.error : colors.accent}
+              size={24}
+            />
+          </View>
+          <View style={styles.statusCopy}>
+            <AppText style={styles.statusTitle}>{copy.title}</AppText>
+            <AppText style={styles.statusDescription} tone="secondary">
+              {copy.description}
+            </AppText>
+          </View>
+          <StatusBadge label="USB" size="compact" tone={copy.tone} />
+        </Card>
+      </AnimatedEntrance>
 
-      <View style={styles.deviceSection}>
+      <AnimatedEntrance index={2} style={styles.deviceSection}>
         <AppText style={styles.sectionLabel} tone="secondary">
           MÓDULO SILENT VOICE
         </AppText>
@@ -128,7 +131,7 @@ export default function Connection() {
           status={copy.moduleStatus}
           statusTone={copy.tone}
         />
-      </View>
+      </AnimatedEntrance>
 
       <View style={styles.spacer} />
       <View style={styles.footer}>

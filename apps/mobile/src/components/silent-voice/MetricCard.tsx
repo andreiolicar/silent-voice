@@ -7,12 +7,15 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { usePressScale } from '@/components/motion/usePressScale';
 import {
   colors,
   focusRing,
   fontFamilies,
   isFocusVisible,
+  motion,
   radii,
   spacing,
   webNoOutline,
@@ -41,6 +44,7 @@ export function MetricCard({
   value,
 }: MetricCardProps) {
   const [focused, setFocused] = useState(false);
+  const pressScale = usePressScale(motion.cardScale);
   const card = (
     <Card
       accessibilityLabel={`${label}: ${value}. ${description}`}
@@ -66,22 +70,25 @@ export function MetricCard({
   if (!onPress) return card;
 
   return (
-    <Pressable
-      accessibilityLabel={`${label}: ${value}. ${description}`}
-      accessibilityRole="button"
-      onBlur={() => setFocused(false)}
-      onFocus={(event) => setFocused(isFocusVisible(event))}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.pressable,
-        style,
-        webNoOutline,
-        focused && focusRing,
-        pressed && styles.pressed,
-      ]}
-    >
-      {card}
-    </Pressable>
+    <Animated.View style={[style, pressScale.animatedStyle]}>
+      <Pressable
+        accessibilityLabel={`${label}: ${value}. ${description}`}
+        accessibilityRole="button"
+        onBlur={() => setFocused(false)}
+        onFocus={(event) => setFocused(isFocusVisible(event))}
+        onPressIn={pressScale.pressIn}
+        onPressOut={pressScale.pressOut}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.pressable,
+          webNoOutline,
+          focused && focusRing,
+          pressed && styles.pressed,
+        ]}
+      >
+        {card}
+      </Pressable>
+    </Animated.View>
   );
 }
 

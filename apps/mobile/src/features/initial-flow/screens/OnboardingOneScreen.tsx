@@ -4,9 +4,11 @@ import {
   SlidersVertical,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useRouter } from 'expo-router';
 import { Image, Platform, StyleSheet, View } from 'react-native';
 
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { AppText, Card } from '@/components/ui';
 import {
   BrandLogo,
@@ -43,6 +45,10 @@ const features: {
 
 export default function OnboardingOne() {
   const router = useRouter();
+  const { finishOnboarding } = useAuth();
+  const complete = () => {
+    void finishOnboarding().then(() => router.replace('/auth/login'));
+  };
 
   return (
     <InitialFlowScreen
@@ -52,7 +58,7 @@ export default function OnboardingOne() {
     >
       <Image source={decor} style={styles.decor} />
       <BrandLogo style={styles.logo} />
-      <View style={styles.intro}>
+      <AnimatedEntrance index={0} style={styles.intro}>
         <View style={styles.heading}>
           <AppText style={styles.title} variant="screenTitle">
             Seu centro de{`\n`}comando para{`\n`}comunicação assistiva
@@ -68,8 +74,8 @@ export default function OnboardingOne() {
         <View style={styles.heroFrame}>
           <Image source={hero} style={styles.hero} />
         </View>
-      </View>
-      <View style={styles.features}>
+      </AnimatedEntrance>
+      <AnimatedEntrance index={1} style={styles.features}>
         {features.map(({ description, icon: Icon, title }) => (
           <Card key={title} style={styles.featureCard}>
             <View style={styles.featureIcon}>
@@ -87,12 +93,12 @@ export default function OnboardingOne() {
             </AppText>
           </Card>
         ))}
-      </View>
+      </AnimatedEntrance>
       <View style={styles.spacer} />
       <OnboardingFooter
         currentPage={1}
         onContinue={() => router.push('/onboarding/2')}
-        onSkip={() => router.replace('/permissions')}
+        onSkip={complete}
       />
     </InitialFlowScreen>
   );

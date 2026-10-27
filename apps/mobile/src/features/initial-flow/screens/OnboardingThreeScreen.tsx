@@ -1,7 +1,9 @@
 import { Check } from 'lucide-react-native';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useRouter } from 'expo-router';
 import { Image, Platform, StyleSheet, View } from 'react-native';
 
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { AppText } from '@/components/ui';
 import {
   BrandLogo,
@@ -22,6 +24,10 @@ const guarantees = [
 
 export default function OnboardingThree() {
   const router = useRouter();
+  const { finishOnboarding } = useAuth();
+  const complete = () => {
+    void finishOnboarding().then(() => router.replace('/auth/login'));
+  };
 
   return (
     <InitialFlowScreen
@@ -31,7 +37,7 @@ export default function OnboardingThree() {
     >
       <Image source={waves} style={styles.waves} />
       <BrandLogo style={styles.logo} />
-      <View style={styles.heading}>
+      <AnimatedEntrance index={0} style={styles.heading}>
         <AppText style={styles.title} variant="screenTitle">
           Privacidade e{`\n`}segurança em{`\n`}primeiro lugar
           <AppText style={styles.period} variant="screenTitle">
@@ -42,13 +48,13 @@ export default function OnboardingThree() {
           A interpretação acontece no celular,{`\n`}sem depender de serviços em
           nuvem.
         </AppText>
-      </View>
+      </AnimatedEntrance>
 
-      <View style={styles.shieldFrame}>
+      <AnimatedEntrance index={1} style={styles.shieldFrame}>
         <Image resizeMode="contain" source={shield} style={styles.shield} />
-      </View>
+      </AnimatedEntrance>
 
-      <View style={styles.guarantees}>
+      <AnimatedEntrance index={2} style={styles.guarantees}>
         {guarantees.map((guarantee) => (
           <View key={guarantee} style={styles.guarantee}>
             <View style={styles.check}>
@@ -59,13 +65,13 @@ export default function OnboardingThree() {
             </AppText>
           </View>
         ))}
-      </View>
+      </AnimatedEntrance>
 
       <View style={styles.spacer} />
       <OnboardingFooter
         currentPage={3}
-        onContinue={() => router.push('/permissions')}
-        onSkip={() => router.replace('/permissions')}
+        onContinue={complete}
+        onSkip={complete}
       />
     </InitialFlowScreen>
   );

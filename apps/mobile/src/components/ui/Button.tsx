@@ -10,13 +10,16 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { usePressScale } from '@/components/motion/usePressScale';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
   colors,
   focusRing,
   getWebTransitionStyle,
   isFocusVisible,
+  motion,
   radii,
   spacing,
 } from '@/theme';
@@ -47,6 +50,8 @@ export function Button({
   onFocus,
   onHoverIn,
   onHoverOut,
+  onPressIn,
+  onPressOut,
   label,
   labelStyle,
   contentStyle,
@@ -64,6 +69,7 @@ export function Button({
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const reduceMotion = useReducedMotion();
+  const pressScale = usePressScale(motion.buttonScale);
   const isDisabled = disabled || loading;
   const foreground =
     foregroundColor ??
@@ -74,81 +80,93 @@ export function Button({
         : colors.primary);
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={{ busy: loading, disabled: isDisabled }}
-      disabled={isDisabled}
-      onBlur={(event) => {
-        setFocused(false);
-        onBlur?.(event);
-      }}
-      onFocus={(event) => {
-        setFocused(isFocusVisible(event));
-        onFocus?.(event);
-      }}
-      onHoverIn={(event) => {
-        setHovered(true);
-        onHoverIn?.(event);
-      }}
-      onHoverOut={(event) => {
-        setHovered(false);
-        onHoverOut?.(event);
-      }}
-      style={({ pressed }) => [
-        styles.base,
-        styles[variant],
-        getWebTransitionStyle(
-          reduceMotion,
-          'background-color, border-color, opacity',
-        ),
-        hovered && styles[`${variant}Hovered`],
-        focused && focusRing,
-        pressed && styles.pressed,
-        isDisabled && styles.disabled,
-        style,
-      ]}
-      {...props}
-    >
-      {loading ? (
-        <ActivityIndicator color={foreground} size="small" />
-      ) : (
-        <View style={[styles.content, contentStyle]}>
-          {LeftIcon ? (
-            leftIconBackgroundColor ? (
-              <View
-                style={[
-                  styles.leftIconContainer,
-                  {
-                    width: leftIconContainerSize,
-                    height: leftIconContainerSize,
-                    backgroundColor: leftIconBackgroundColor,
-                  },
-                ]}
-              >
+    <Animated.View style={pressScale.animatedStyle}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? label}
+        accessibilityState={{ busy: loading, disabled: isDisabled }}
+        disabled={isDisabled}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
+        onFocus={(event) => {
+          setFocused(isFocusVisible(event));
+          onFocus?.(event);
+        }}
+        onHoverIn={(event) => {
+          setHovered(true);
+          onHoverIn?.(event);
+        }}
+        onHoverOut={(event) => {
+          setHovered(false);
+          onHoverOut?.(event);
+        }}
+        onPressIn={(event) => {
+          pressScale.pressIn();
+          onPressIn?.(event);
+        }}
+        onPressOut={(event) => {
+          pressScale.pressOut();
+          onPressOut?.(event);
+        }}
+        style={({ pressed }) => [
+          styles.base,
+          styles[variant],
+          getWebTransitionStyle(
+            reduceMotion,
+            'background-color, border-color, opacity',
+          ),
+          hovered && styles[`${variant}Hovered`],
+          focused && focusRing,
+          pressed && styles.pressed,
+          isDisabled && styles.disabled,
+          style,
+        ]}
+        {...props}
+      >
+        {loading ? (
+          <ActivityIndicator color={foreground} size="small" />
+        ) : (
+          <View style={[styles.content, contentStyle]}>
+            {LeftIcon ? (
+              leftIconBackgroundColor ? (
+                <View
+                  style={[
+                    styles.leftIconContainer,
+                    {
+                      width: leftIconContainerSize,
+                      height: leftIconContainerSize,
+                      backgroundColor: leftIconBackgroundColor,
+                    },
+                  ]}
+                >
+                  <LeftIcon color={foreground} size={iconSize} />
+                </View>
+              ) : (
                 <LeftIcon color={foreground} size={iconSize} />
-              </View>
-            ) : (
-              <LeftIcon color={foreground} size={iconSize} />
-            )
-          ) : null}
-          <AppText
-            style={labelStyle}
-            tone={
-              variant === 'primary'
-                ? 'inverse'
-                : variant === 'danger'
-                  ? 'error'
-                  : 'primary'
-            }
-            variant="button"
-          >
-            {label}
-          </AppText>
-          {RightIcon ? <RightIcon color={foreground} size={iconSize} /> : null}
-        </View>
-      )}
-    </Pressable>
+              )
+            ) : null}
+            <AppText
+              style={labelStyle}
+              tone={
+                variant === 'primary'
+                  ? 'inverse'
+                  : variant === 'danger'
+                    ? 'error'
+                    : 'primary'
+              }
+              variant="button"
+            >
+              {label}
+            </AppText>
+            {RightIcon ? (
+              <RightIcon color={foreground} size={iconSize} />
+            ) : null}
+          </View>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }
 

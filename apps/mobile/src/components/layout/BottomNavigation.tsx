@@ -6,8 +6,13 @@ import {
   Settings2,
   type LucideIcon,
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View, type TextStyle } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
@@ -87,39 +92,15 @@ export function BottomNavigation({
               pressed && styles.pressed,
             ]}
           >
-            <View
-              style={[
-                styles.iconContainer,
-                isCommunication && styles.communication,
-                hasHoverFeedback &&
-                  isCommunication &&
-                  styles.communicationHovered,
-                isFocused && isCommunication && styles.communicationFocused,
-                getWebTransitionStyle(
-                  reduceMotion,
-                  'background-color, opacity',
-                ),
-              ]}
-            >
-              <Icon
-                color={
-                  isCommunication
-                    ? colors.white
-                    : isFocused
-                      ? colors.accent
-                      : isActive || hasTextHoverFeedback
-                        ? colors.primary
-                        : colors.textSecondary
-                }
-                size={20}
-                style={getWebTransitionStyle(
-                  reduceMotion,
-                  'color, stroke',
-                  motion.normal,
-                )}
-                strokeWidth={isActive || isFocused ? 2.5 : 2}
-              />
-            </View>
+            <NavigationIcon
+              hasHoverFeedback={hasHoverFeedback}
+              hasTextHoverFeedback={hasTextHoverFeedback}
+              Icon={Icon}
+              isActive={isActive}
+              isCommunication={isCommunication}
+              isFocused={isFocused}
+              reduceMotion={reduceMotion}
+            />
             {isCommunication ? null : (
               <AppText
                 style={[
@@ -146,6 +127,72 @@ export function BottomNavigation({
         );
       })}
     </View>
+  );
+}
+
+type NavigationIconProps = {
+  hasHoverFeedback: boolean;
+  hasTextHoverFeedback: boolean;
+  Icon: LucideIcon;
+  isActive: boolean;
+  isCommunication: boolean;
+  isFocused: boolean;
+  reduceMotion: boolean;
+};
+
+function NavigationIcon({
+  hasHoverFeedback,
+  hasTextHoverFeedback,
+  Icon,
+  isActive,
+  isCommunication,
+  isFocused,
+  reduceMotion,
+}: NavigationIconProps) {
+  const scale = useSharedValue(1);
+  const selectedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  useEffect(() => {
+    scale.set(
+      withTiming(isActive && !reduceMotion ? motion.selectedScale : 1, {
+        duration: reduceMotion ? 0 : motion.press,
+        easing: motion.easing,
+      }),
+    );
+  }, [isActive, reduceMotion, scale]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.iconContainer,
+        isCommunication && styles.communication,
+        hasHoverFeedback && isCommunication && styles.communicationHovered,
+        isFocused && isCommunication && styles.communicationFocused,
+        getWebTransitionStyle(reduceMotion, 'background-color, opacity'),
+        selectedStyle,
+      ]}
+    >
+      <Icon
+        color={
+          isCommunication
+            ? colors.white
+            : isFocused
+              ? colors.accent
+              : isActive || hasTextHoverFeedback
+                ? colors.primary
+                : colors.textSecondary
+        }
+        size={20}
+        style={getWebTransitionStyle(
+          reduceMotion,
+          'color, stroke',
+          motion.normal,
+        )}
+        strokeWidth={isActive || isFocused ? 2.5 : 2}
+      />
+    </Animated.View>
   );
 }
 

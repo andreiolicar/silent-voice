@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { ScreenHeading } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { AppText } from '@/components/ui';
 import { spacing } from '@/theme';
 import { MainAppScreen } from '@/features/system-overview/components/MainAppScreen';
@@ -34,7 +35,7 @@ export default function HubScreen() {
   };
 
   return (
-    <MainAppScreen activeItem="hub">
+    <MainAppScreen activeItem="hub" animateSections={false}>
       <SystemAppHeader />
 
       <View style={styles.heading}>
@@ -45,19 +46,22 @@ export default function HubScreen() {
       </View>
 
       <View style={styles.section}>
-        <HubDeviceCard {...hubDeviceMock} />
+        <AnimatedEntrance>
+          <HubDeviceCard {...hubDeviceMock} />
+        </AnimatedEntrance>
 
         <View style={styles.resources}>
           <AppText variant="cardTitle">Recursos</AppText>
           <View style={styles.resourceList}>
-            {hubResourcesMock.map((resource) => (
-              <HubResourceItem
-                description={resource.description}
-                icon={resourceIcons[resource.id]}
-                key={resource.id}
-                onPress={resourceActions[resource.id]}
-                title={resource.title}
-              />
+            {hubResourcesMock.map((resource, index) => (
+              <AnimatedEntrance index={index + 1} key={resource.id}>
+                <HubResourceItem
+                  description={resource.description}
+                  icon={resourceIcons[resource.id]}
+                  onPress={resourceActions[resource.id]}
+                  title={resource.title}
+                />
+              </AnimatedEntrance>
             ))}
           </View>
         </View>

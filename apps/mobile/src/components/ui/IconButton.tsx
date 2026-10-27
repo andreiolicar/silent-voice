@@ -7,13 +7,16 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { usePressScale } from '@/components/motion/usePressScale';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
   colors,
   focusRing,
   getWebTransitionStyle,
   isFocusVisible,
+  motion,
   radii,
 } from '@/theme';
 
@@ -37,6 +40,8 @@ export function IconButton({
   onFocus,
   onHoverIn,
   onHoverOut,
+  onPressIn,
+  onPressOut,
   size = 'medium',
   style,
   variant = 'surface',
@@ -45,6 +50,7 @@ export function IconButton({
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const reduceMotion = useReducedMotion();
+  const pressScale = usePressScale(motion.buttonScale);
   const iconColor =
     variant === 'accent'
       ? colors.white
@@ -55,46 +61,56 @@ export function IconButton({
     customIconSize ?? (size === 'compact' ? 14 : size === 'large' ? 22 : 20);
 
   return (
-    <Pressable
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: Boolean(disabled) }}
-      disabled={Boolean(disabled)}
-      hitSlop={size === 'compact' ? 10 : 4}
-      onBlur={(event) => {
-        setFocused(false);
-        onBlur?.(event);
-      }}
-      onFocus={(event) => {
-        setFocused(isFocusVisible(event));
-        onFocus?.(event);
-      }}
-      onHoverIn={(event) => {
-        setHovered(true);
-        onHoverIn?.(event);
-      }}
-      onHoverOut={(event) => {
-        setHovered(false);
-        onHoverOut?.(event);
-      }}
-      style={({ pressed }) => [
-        styles.base,
-        styles[size],
-        styles[variant],
-        getWebTransitionStyle(
-          reduceMotion,
-          'background-color, border-color, opacity',
-        ),
-        hovered && styles[`${variant}Hovered`],
-        focused && focusRing,
-        pressed && styles.pressed,
-        disabled && styles.disabled,
-        style,
-      ]}
-      {...props}
-    >
-      <Icon color={iconColor} size={iconSize} />
-    </Pressable>
+    <Animated.View style={pressScale.animatedStyle}>
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: Boolean(disabled) }}
+        disabled={Boolean(disabled)}
+        hitSlop={size === 'compact' ? 10 : 4}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
+        onFocus={(event) => {
+          setFocused(isFocusVisible(event));
+          onFocus?.(event);
+        }}
+        onHoverIn={(event) => {
+          setHovered(true);
+          onHoverIn?.(event);
+        }}
+        onHoverOut={(event) => {
+          setHovered(false);
+          onHoverOut?.(event);
+        }}
+        onPressIn={(event) => {
+          pressScale.pressIn();
+          onPressIn?.(event);
+        }}
+        onPressOut={(event) => {
+          pressScale.pressOut();
+          onPressOut?.(event);
+        }}
+        style={({ pressed }) => [
+          styles.base,
+          styles[size],
+          styles[variant],
+          getWebTransitionStyle(
+            reduceMotion,
+            'background-color, border-color, opacity',
+          ),
+          hovered && styles[`${variant}Hovered`],
+          focused && focusRing,
+          pressed && styles.pressed,
+          disabled && styles.disabled,
+          style,
+        ]}
+        {...props}
+      >
+        <Icon color={iconColor} size={iconSize} />
+      </Pressable>
+    </Animated.View>
   );
 }
 

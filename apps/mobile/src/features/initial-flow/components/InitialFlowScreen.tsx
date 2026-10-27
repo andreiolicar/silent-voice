@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 
 import { Screen } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { spacing } from '@/theme';
 
 type InitialFlowScreenProps = PropsWithChildren<{
   background?: ImageSourcePropType | null;
   backgroundStyle?: StyleProp<ImageStyle>;
+  animate?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   scroll?: boolean;
 }>;
@@ -23,6 +25,7 @@ type InitialFlowScreenProps = PropsWithChildren<{
 export function InitialFlowScreen({
   background = null,
   backgroundStyle,
+  animate = true,
   children,
   contentStyle,
   scroll = true,
@@ -36,7 +39,16 @@ export function InitialFlowScreen({
           style={[StyleSheet.absoluteFill, backgroundStyle]}
         />
       ) : null}
-      <View style={[styles.content, contentStyle]}>{children}</View>
+      {animate ? (
+        <AnimatedEntrance
+          style={[styles.content, contentStyle]}
+          variant="screen"
+        >
+          {children}
+        </AnimatedEntrance>
+      ) : (
+        <View style={[styles.content, contentStyle]}>{children}</View>
+      )}
     </View>
   );
 

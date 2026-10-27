@@ -6,12 +6,19 @@ import {
   RotateCcw,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { StatusBadge } from '@/components/silent-voice';
 import { AppText, Card } from '@/components/ui';
 import type { CalibrationCaptureState } from '@/domain/calibration';
-import { colors, radii, spacing } from '@/theme';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { colors, motion, radii, spacing } from '@/theme';
 
 import { calibrationStateProgress } from '../data/calibration.mock';
 
@@ -37,6 +44,20 @@ export function CalibrationCapturePanel({
   const presentation = getCapturePresentation(variant, state);
   const Icon = presentation.icon;
   const progress = calibrationStateProgress[state];
+  const reduceMotion = useReducedMotion();
+  const animatedProgress = useSharedValue(progress * 100);
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${animatedProgress.value}%` as `${number}%`,
+  }));
+
+  useEffect(() => {
+    animatedProgress.set(
+      withTiming(progress * 100, {
+        duration: reduceMotion ? 0 : motion.normal,
+        easing: motion.easing,
+      }),
+    );
+  }, [animatedProgress, progress, reduceMotion]);
 
   return (
     <Card
@@ -68,11 +89,11 @@ export function CalibrationCapturePanel({
           accessibilityValue={{ max: 100, min: 0, now: progress * 100 }}
           style={styles.track}
         >
-          <View
+          <Animated.View
             style={[
               styles.fill,
               state === 'retry' && styles.retryFill,
-              { width: `${progress * 100}%` },
+              fillStyle,
             ]}
           />
         </View>

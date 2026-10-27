@@ -8,6 +8,7 @@ import {
   Volume2,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -34,6 +35,7 @@ const settingIcons: Record<SettingsItemId, LucideIcon> = {
 };
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   return (
@@ -55,6 +57,13 @@ export default function SettingsScreen() {
               {section.items.map((item, index) => (
                 <SettingsItem
                   description={item.description}
+                  onPress={
+                    item.id === 'profile'
+                      ? () => router.push('/account')
+                      : item.id === 'security'
+                        ? () => router.push('/account/security')
+                        : undefined
+                  }
                   icon={settingIcons[item.id]}
                   key={item.id}
                   onValueChange={

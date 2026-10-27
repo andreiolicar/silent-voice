@@ -1,6 +1,12 @@
 import { Check } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
@@ -31,28 +37,28 @@ export function Toggle({
   const [hovered, setHovered] = useState(false);
   const reduceMotion = useReducedMotion();
   const compact = size === 'compact';
-  const [progress] = useState(() => new Animated.Value(value ? 1 : 0));
+  const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    const animation = Animated.timing(progress, {
-      toValue: value ? 1 : 0,
-      duration: reduceMotion ? 0 : motion.toggle,
-      easing: motion.easing,
-      useNativeDriver: false,
-    });
-
-    animation.start();
-    return () => animation.stop();
+    progress.set(
+      withTiming(value ? 1 : 0, {
+        duration: reduceMotion ? 0 : motion.toggle,
+        easing: motion.easing,
+      }),
+    );
   }, [progress, reduceMotion, value]);
 
-  const trackColor = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [compact ? colors.background : colors.disabled, colors.accent],
-  });
-  const thumbLeft = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: compact ? [2, 16.5] : [3, 21],
-  });
+  const trackStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [compact ? colors.background : colors.disabled, colors.accent],
+    ),
+  }));
+  const thumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: progress.value * (compact ? 14.5 : 18) }],
+  }));
+  const checkStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
 
   return (
     <Pressable
@@ -78,7 +84,7 @@ export function Toggle({
           style={[
             styles.track,
             compact && styles.trackCompact,
-            { backgroundColor: trackColor },
+            trackStyle,
             getWebTransitionStyle(reduceMotion, 'outline-color, opacity'),
             hovered && styles.trackHovered,
             focused && styles.trackFocused,
@@ -86,13 +92,9 @@ export function Toggle({
           ]}
         >
           <Animated.View
-            style={[
-              styles.thumb,
-              compact && styles.thumbCompact,
-              { left: thumbLeft },
-            ]}
+            style={[styles.thumb, compact && styles.thumbCompact, thumbStyle]}
           >
-            <Animated.View style={{ opacity: progress }}>
+            <Animated.View style={checkStyle}>
               <Check
                 color={colors.accent}
                 size={compact ? 8 : 12}
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
   trackCompact: { width: 30, height: 15.5 },
   thumb: {
     position: 'absolute',
+    left: 3,
     top: 3,
     width: 18,
     height: 18,
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     backgroundColor: colors.surface,
   },
-  thumbCompact: { top: 2, width: 11.5, height: 11.5 },
+  thumbCompact: { top: 2, left: 2, width: 11.5, height: 11.5 },
   trackHovered: { opacity: 0.88 },
   trackFocused: {
     outlineColor: colors.primary,

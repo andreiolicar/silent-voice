@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ScreenHeading } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { PrivacyNotice, StatusBadge } from '@/components/silent-voice';
 import { Button } from '@/components/ui';
 import { spacing } from '@/theme';
@@ -63,10 +64,12 @@ export default function LiveCommunicationScreen() {
           />
         </View>
 
-        <LiveInterpretationCard
-          onRetry={() => setPhase('ready')}
-          session={session}
-        />
+        <AnimatedEntrance>
+          <LiveInterpretationCard
+            onRetry={() => setPhase('ready')}
+            session={session}
+          />
+        </AnimatedEntrance>
 
         <ContextWindowCard entries={session.contextWindow} />
 

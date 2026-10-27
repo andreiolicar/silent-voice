@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { PrivacyNotice } from '@/components/silent-voice';
 import { AppText, Button } from '@/components/ui';
 import {
@@ -10,27 +11,28 @@ import {
   InitialFlowScreen,
   PermissionCard,
 } from '@/features/initial-flow/components';
-import { fontFamilies, webNoOutline } from '@/theme';
+import { focusRing, fontFamilies, isFocusVisible, webNoOutline } from '@/theme';
 
 export default function Permissions() {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [skipFocused, setSkipFocused] = useState(false);
 
   const goToConnection = () => router.replace('/connection');
 
   return (
     <InitialFlowScreen background={null} contentStyle={styles.content}>
       <BrandLogo style={styles.logo} />
-      <View style={styles.heading}>
+      <AnimatedEntrance index={0} style={styles.heading}>
         <AppText style={styles.title} variant="screenTitle">
           Permissões e{`\n`}conectividade
         </AppText>
         <AppText style={styles.subtitle} tone="secondary">
           Ative notificações e confira como o acesso{`\n`}ao módulo funciona.
         </AppText>
-      </View>
+      </AnimatedEntrance>
 
-      <View style={styles.cards}>
+      <AnimatedEntrance index={1} style={styles.cards}>
         <PermissionCard
           description="Receba alertas e lembretes importantes."
           enabled={notificationsEnabled}
@@ -47,7 +49,7 @@ export default function Permissions() {
           label="Dispositivo USB"
           variant="informational"
         />
-      </View>
+      </AnimatedEntrance>
 
       <View style={styles.spacer} />
       <View style={styles.footer}>
@@ -66,10 +68,13 @@ export default function Permissions() {
           <Pressable
             accessibilityRole="button"
             hitSlop={8}
+            onBlur={() => setSkipFocused(false)}
+            onFocus={(event) => setSkipFocused(isFocusVisible(event))}
             onPress={goToConnection}
             style={({ pressed }) => [
               styles.skip,
               webNoOutline,
+              skipFocused && focusRing,
               pressed && styles.pressed,
             ]}
           >

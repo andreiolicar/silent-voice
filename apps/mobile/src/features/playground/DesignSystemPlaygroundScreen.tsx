@@ -9,6 +9,7 @@ import {
   Screen,
   ScreenHeading,
 } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import {
   DeviceCard,
   MetricCard,
@@ -33,7 +34,7 @@ export default function DesignSystemPlayground() {
 
   return (
     <Screen contentStyle={styles.screen} scroll>
-      <View style={styles.content}>
+      <AnimatedEntrance style={styles.content} variant="screen">
         <AppHeader
           logo={<AppText variant="label">SILENT VOICE</AppText>}
           onBack={() => undefined}
@@ -154,7 +155,7 @@ export default function DesignSystemPlayground() {
             onItemPress={setActiveItem}
           />
         </PlaygroundSection>
-      </View>
+      </AnimatedEntrance>
     </Screen>
   );
 }
@@ -164,10 +165,10 @@ function PlaygroundSection({
   title,
 }: PropsWithChildren<{ title: string }>) {
   return (
-    <View style={styles.section}>
+    <AnimatedEntrance style={styles.section}>
       <AppText variant="sectionTitle">{title}</AppText>
       {children}
-    </View>
+    </AnimatedEntrance>
   );
 }
 

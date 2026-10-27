@@ -1,12 +1,15 @@
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { usePressScale } from '@/components/motion/usePressScale';
 import { AppText, Card } from '@/components/ui';
 import {
   colors,
   focusRing,
   isFocusVisible,
+  motion,
   radii,
   spacing,
   webNoOutline,
@@ -26,6 +29,7 @@ export function HubResourceItem({
   title,
 }: HubResourceItemProps) {
   const [focused, setFocused] = useState(false);
+  const pressScale = usePressScale(motion.cardScale);
   const content = (
     <Card style={styles.card}>
       <View style={styles.iconFrame}>
@@ -44,21 +48,25 @@ export function HubResourceItem({
   if (!onPress) return content;
 
   return (
-    <Pressable
-      accessibilityLabel={`${title}. ${description}`}
-      accessibilityRole="button"
-      onBlur={() => setFocused(false)}
-      onFocus={(event) => setFocused(isFocusVisible(event))}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.pressable,
-        webNoOutline,
-        focused && focusRing,
-        pressed && styles.pressed,
-      ]}
-    >
-      {content}
-    </Pressable>
+    <Animated.View style={pressScale.animatedStyle}>
+      <Pressable
+        accessibilityLabel={`${title}. ${description}`}
+        accessibilityRole="button"
+        onBlur={() => setFocused(false)}
+        onFocus={(event) => setFocused(isFocusVisible(event))}
+        onPressIn={pressScale.pressIn}
+        onPressOut={pressScale.pressOut}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.pressable,
+          webNoOutline,
+          focused && focusRing,
+          pressed && styles.pressed,
+        ]}
+      >
+        {content}
+      </Pressable>
+    </Animated.View>
   );
 }
 

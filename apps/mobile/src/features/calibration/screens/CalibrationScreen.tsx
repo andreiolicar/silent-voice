@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { ScreenHeading } from '@/components/layout';
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { StatusBadge } from '@/components/silent-voice';
 import { AppText, Button, Card } from '@/components/ui';
 import type {
@@ -65,12 +66,23 @@ export default function CalibrationScreen() {
     }
   };
 
+  const handleAdvance = () => {
+    flow.advance();
+    if (inspection) {
+      router.setParams({ state: undefined, step: undefined });
+    }
+  };
+
   const handleComplete = () => {
     router.replace(origin === 'setup' ? '/home' : '/hub');
   };
 
   return (
-    <MainAppScreen contentStyle={styles.content} showBottomNavigation={false}>
+    <MainAppScreen
+      animateSections={false}
+      contentStyle={styles.content}
+      showBottomNavigation={false}
+    >
       <SystemAppHeader onBack={handleBack} />
 
       <View style={styles.heading}>
@@ -85,15 +97,17 @@ export default function CalibrationScreen() {
       </View>
 
       <View style={styles.stage}>
-        <CalibrationStage
-          captureState={flow.captureState}
-          onAdvance={flow.advance}
-          onComplete={handleComplete}
-          onRetry={handleRetry}
-          origin={origin}
-          result={flow.result}
-          step={flow.step}
-        />
+        <AnimatedEntrance key={flow.step}>
+          <CalibrationStage
+            captureState={flow.captureState}
+            onAdvance={handleAdvance}
+            onComplete={handleComplete}
+            onRetry={handleRetry}
+            origin={origin}
+            result={flow.result}
+            step={flow.step}
+          />
+        </AnimatedEntrance>
       </View>
     </MainAppScreen>
   );

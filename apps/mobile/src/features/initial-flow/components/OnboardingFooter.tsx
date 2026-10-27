@@ -1,8 +1,16 @@
 import { ChevronRight } from 'lucide-react-native';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button } from '@/components/ui';
-import { colors, radii, spacing, webNoOutline } from '@/theme';
+import {
+  colors,
+  focusRing,
+  isFocusVisible,
+  radii,
+  spacing,
+  webNoOutline,
+} from '@/theme';
 
 type OnboardingFooterProps = {
   currentPage: 1 | 2 | 3;
@@ -15,6 +23,8 @@ export function OnboardingFooter({
   onContinue,
   onSkip,
 }: OnboardingFooterProps) {
+  const [skipFocused, setSkipFocused] = useState(false);
+
   return (
     <View style={styles.container}>
       <View style={styles.buttonFrame}>
@@ -34,8 +44,14 @@ export function OnboardingFooter({
       <Pressable
         accessibilityRole="button"
         hitSlop={8}
+        onBlur={() => setSkipFocused(false)}
+        onFocus={(event) => setSkipFocused(isFocusVisible(event))}
         onPress={onSkip}
-        style={({ pressed }) => [webNoOutline, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          webNoOutline,
+          skipFocused && focusRing,
+          pressed && styles.pressed,
+        ]}
       >
         <AppText style={styles.skip} tone="accent" variant="button">
           Pular

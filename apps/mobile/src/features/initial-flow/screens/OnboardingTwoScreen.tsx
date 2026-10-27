@@ -4,9 +4,11 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useRouter } from 'expo-router';
 import { Image, Platform, StyleSheet, View } from 'react-native';
 
+import { AnimatedEntrance } from '@/components/motion/AnimatedEntrance';
 import { AppText } from '@/components/ui';
 import {
   BrandLogo,
@@ -50,11 +52,15 @@ const benefits: {
 
 export default function OnboardingTwo() {
   const router = useRouter();
+  const { finishOnboarding } = useAuth();
+  const complete = () => {
+    void finishOnboarding().then(() => router.replace('/auth/login'));
+  };
 
   return (
     <InitialFlowScreen background={null} contentStyle={styles.content}>
       <BrandLogo style={styles.logo} />
-      <View style={styles.heading}>
+      <AnimatedEntrance index={0} style={styles.heading}>
         <AppText style={styles.title} variant="screenTitle">
           Comunicação{`\n`}em tempo real
           <AppText style={styles.period} variant="screenTitle">
@@ -65,9 +71,9 @@ export default function OnboardingTwo() {
           Validação da fala decodificada e controle{`\n`}dos módulos IoT em uma
           experiência fluída.
         </AppText>
-      </View>
+      </AnimatedEntrance>
 
-      <View style={styles.pipeline}>
+      <AnimatedEntrance index={1} style={styles.pipeline}>
         <View style={styles.concentricRings} pointerEvents="none">
           {[132, 118, 104, 90].map((size, index) => (
             <View
@@ -103,9 +109,9 @@ export default function OnboardingTwo() {
             </View>
           </View>
         ))}
-      </View>
+      </AnimatedEntrance>
 
-      <View style={styles.benefits}>
+      <AnimatedEntrance index={2} style={styles.benefits}>
         {benefits.map(({ description, icon: Icon, title }, index) => (
           <View key={title}>
             {index > 0 ? <View style={styles.divider} /> : null}
@@ -122,13 +128,13 @@ export default function OnboardingTwo() {
             </View>
           </View>
         ))}
-      </View>
+      </AnimatedEntrance>
 
       <View style={styles.spacer} />
       <OnboardingFooter
         currentPage={2}
         onContinue={() => router.push('/onboarding/3')}
-        onSkip={() => router.replace('/permissions')}
+        onSkip={complete}
       />
     </InitialFlowScreen>
   );

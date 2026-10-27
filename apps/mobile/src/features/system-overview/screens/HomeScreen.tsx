@@ -9,7 +9,9 @@ import {
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
+import { usePressScale } from '@/components/motion/usePressScale';
 import { MetricCard, RadarIndicator } from '@/components/silent-voice';
 import { AppText, Card } from '@/components/ui';
 import {
@@ -17,6 +19,7 @@ import {
   focusRing,
   fontFamilies,
   isFocusVisible,
+  motion,
   radii,
   spacing,
   webNoOutline,
@@ -44,6 +47,7 @@ const metricIcons: Record<SystemMetricId, LucideIcon> = {
 export default function HomeScreen() {
   const router = useRouter();
   const [statusFocused, setStatusFocused] = useState(false);
+  const statusScale = usePressScale(motion.cardScale);
 
   return (
     <MainAppScreen contentStyle={styles.content}>
@@ -64,41 +68,45 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.overviewSection}>
-        <Pressable
-          accessibilityLabel="Abrir saúde do sistema"
-          accessibilityRole="button"
-          onBlur={() => setStatusFocused(false)}
-          onFocus={(event) => setStatusFocused(isFocusVisible(event))}
-          onPress={() => router.push('/system-health')}
-          style={({ pressed }) => [
-            styles.cardPressable,
-            webNoOutline,
-            statusFocused && focusRing,
-            pressed && styles.pressed,
-          ]}
-        >
-          <Card style={styles.statusCard}>
-            <View style={styles.statusLeft}>
-              <View style={styles.statusIcon}>
-                <CircleCheck color={colors.accent} size={28} />
+        <Animated.View style={statusScale.animatedStyle}>
+          <Pressable
+            accessibilityLabel="Abrir saúde do sistema"
+            accessibilityRole="button"
+            onBlur={() => setStatusFocused(false)}
+            onFocus={(event) => setStatusFocused(isFocusVisible(event))}
+            onPressIn={statusScale.pressIn}
+            onPressOut={statusScale.pressOut}
+            onPress={() => router.push('/system-health')}
+            style={({ pressed }) => [
+              styles.cardPressable,
+              webNoOutline,
+              statusFocused && focusRing,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Card style={styles.statusCard}>
+              <View style={styles.statusLeft}>
+                <View style={styles.statusIcon}>
+                  <CircleCheck color={colors.accent} size={28} />
+                </View>
+                <View style={styles.statusCopy}>
+                  <AppText style={styles.cardTitle}>
+                    {homeOverviewMock.status.title}
+                  </AppText>
+                  <AppText style={styles.cardDescription} tone="secondary">
+                    {homeOverviewMock.status.description}
+                  </AppText>
+                </View>
               </View>
-              <View style={styles.statusCopy}>
-                <AppText style={styles.cardTitle}>
-                  {homeOverviewMock.status.title}
-                </AppText>
-                <AppText style={styles.cardDescription} tone="secondary">
-                  {homeOverviewMock.status.description}
-                </AppText>
-              </View>
-            </View>
-            <RadarIndicator
-              accessibilityLabel="Sistema operacional"
-              center="dot"
-              rings={3}
-              size={55}
-            />
-          </Card>
-        </Pressable>
+              <RadarIndicator
+                accessibilityLabel="Sistema operacional"
+                center="dot"
+                rings={3}
+                size={55}
+              />
+            </Card>
+          </Pressable>
+        </Animated.View>
 
         <View style={styles.metrics}>
           {homeOverviewMock.metrics.map((metric) => (

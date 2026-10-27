@@ -7,6 +7,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { IdentityBoundary } from '@/features/auth/IdentityBoundary';
+import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -29,7 +31,33 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <AuthProvider>
+        <AuthenticatedStack />
+      </AuthProvider>
     </SafeAreaProvider>
+  );
+}
+
+function AuthenticatedStack() {
+  const { ready, session, onboarding } = useAuth();
+  if (!ready) return null;
+  return (
+    <IdentityBoundary identityKey={session?.user.id || 'guest'}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="auth" />
+        <Stack.Protected guard={!onboarding}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+        <Stack.Protected guard={Boolean(session)}>
+          <Stack.Screen name="permissions" />
+          <Stack.Screen name="connection" />
+          <Stack.Screen name="calibration" />
+          <Stack.Screen name="(main)" />
+          <Stack.Screen name="playground" />
+          <Stack.Screen name="account" />
+        </Stack.Protected>
+      </Stack>
+    </IdentityBoundary>
   );
 }
