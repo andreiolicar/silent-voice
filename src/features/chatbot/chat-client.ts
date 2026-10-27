@@ -1,11 +1,14 @@
 import type { ChatRequest, ChatStreamEvent } from '../../../shared/chat'
 import { consumeChatStream } from './sse-parser'
+import { waitForApi } from './api-readiness'
 export type ChatTransport = (
   request: ChatRequest,
   signal: AbortSignal,
   onEvent: (event: ChatStreamEvent) => void
 ) => Promise<void>
 export const streamChat: ChatTransport = async (request, signal, onEvent) => {
+  await waitForApi(signal)
+  signal.throwIfAborted()
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

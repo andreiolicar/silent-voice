@@ -3,6 +3,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import type { LeadInput, LeadProfile, LeadReceipt } from '../../../shared/leads'
 import { Input } from '../../components/ui/Input'
 import { ChatButton } from './ChatButton'
+import { waitForApi } from './api-readiness'
 import './chat-lead-form.css'
 
 type Fields = {
@@ -115,12 +116,14 @@ export function ChatLeadForm() {
         timer = setTimeout(() => {
           aborter.abort()
           reject(new Error('confirmation-timeout'))
-        }, 15000)
+        }, 105_000)
       })
       // Race the whole receipt operation: a response whose body stalls is also unknown.
       const result = await Promise.race([
         timeout,
         (async () => {
+          await waitForApi(aborter.signal)
+          aborter.signal.throwIfAborted()
           const response = await fetch('/api/leads', {
             method: 'POST',
             headers: {

@@ -29,6 +29,13 @@ async function open() {
   )
 }
 afterEach(() => vi.unstubAllGlobals())
+function stubApiFetch(submit: (url: string, init: RequestInit) => Promise<Response>) {
+  vi.stubGlobal('fetch', (url: string, init: RequestInit = {}) =>
+    url === '/api/health'
+      ? Promise.resolve(new Response('{"status":"ok"}', { headers: { 'Content-Type': 'application/json' } }))
+      : submit(url, init))
+}
+
 describe('public chatbot widget', () => {
   it.each(['O que é o Silent Voice?', 'Como o dispositivo funciona?', 'O que posso ver no aplicativo?'])('sends the suggested question "%s" and renders the streamed answer', async question => {
     const { transport, calls } = controlledTransport()
@@ -262,7 +269,7 @@ describe('public chatbot widget', () => {
           complete = resolve
         })
     )
-    vi.stubGlobal('fetch', fetcher)
+    stubApiFetch(fetcher)
     const { transport, calls } = controlledTransport()
     render(<ChatWidget transport={transport} />)
     await open()
@@ -302,7 +309,7 @@ describe('public chatbot widget', () => {
     expect(calls).toHaveLength(0)
   })
   it('focuses the confirmed contact receipt after reopening and after returning from chat',async()=>{
-    vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({id:'receipt-1',createdAt:'2026-10-15T12:00:00.000Z'}),{status:201})))
+    stubApiFetch(vi.fn().mockResolvedValue(new Response(JSON.stringify({id:'receipt-1',createdAt:'2026-10-15T12:00:00.000Z'}),{status:201})))
     render(<ChatWidget/>)
     await open()
     await userEvent.click(screen.getByRole('button',{name:'Solicitar demonstração'}))

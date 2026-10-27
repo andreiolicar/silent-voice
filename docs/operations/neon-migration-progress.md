@@ -27,3 +27,11 @@ A consistent private SQLite backup was created before import. Imported 1 admin, 
 Render Free sleeps when idle; the first request can take 50 seconds or more. Neon may also suspend idle compute. No paid instance, disk or Render Postgres was created. Data persists independently of backend restarts in Neon. Startup failures are sanitized so connection strings and provider credentials are not logged.
 
 Deploys follow commits on `deploy/static-frontend`. The checked-in render.yaml mirrors both services; it is not a newly applied duplicate Blueprint. Existing UI and the mobile work are preserved. For recovery, use Neon restore within the plan's retention or a private PostgreSQL dump; never copy live SQLite files as a PostgreSQL backup.
+
+## Cold-start handling — 2026-10-27
+
+Production diagnosis: both health routes initially exceeded 25 seconds without a response; once the Free Render instance started, health returned 200, GLM streaming completed, and a browser-submitted contact was confirmed in PostgreSQL. The contact form's former 15-second deadline was shorter than normal free-tier startup.
+
+Chat and contact submission now wait for `/api/health` to return a real JSON readiness response before sending their POST. Readiness tolerates temporary hosting loading pages, 503 responses and network errors for up to 90 seconds, and is canceled with its caller. Only the read-only health request is retried; messages and contact submissions are never automatically replayed. Contact confirmation allows 105 seconds total, retaining the existing idempotency key and immutable payload on explicit retry. No periodic keep-alive or paid service was added.
+
+Regression coverage includes a minute-long startup, temporary HTML/503 responses, cancellation, bounded waiting, and eventual confirmed contact receipt. Ordinary API and UI tests, typecheck and build must pass before release. Free hosting can still impose an initial wait after inactivity; this change handles that wait rather than eliminating the platform's sleep policy.
