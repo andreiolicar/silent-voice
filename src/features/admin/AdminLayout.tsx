@@ -11,6 +11,7 @@ type AdminLayoutProps = {
   onLogout: () => void
   loggingOut: boolean
   logoutError?: string
+  securityOnly?: boolean
 }
 
 export function AdminLayout({
@@ -19,14 +20,28 @@ export function AdminLayout({
   onLogout,
   loggingOut,
   logoutError,
+  securityOnly = false,
 }: AdminLayoutProps) {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const contactsPage = location.pathname === '/admin/cadastros'
   const trackingPage = location.pathname === '/admin/acompanhamento'
-  const overviewPage = !contactsPage && !trackingPage
-  const pageName = trackingPage ? 'Acompanhamento' : contactsPage ? 'Cadastros' : 'Visão geral'
-  const pageIcon = trackingPage ? 'status-contacted' : contactsPage ? 'contacts' : 'overview'
+  const securityPage = location.pathname === '/admin/seguranca'
+  const overviewPage = !contactsPage && !trackingPage && !securityPage
+  const pageName = securityPage
+    ? 'Segurança'
+    : trackingPage
+      ? 'Acompanhamento'
+      : contactsPage
+        ? 'Cadastros'
+        : 'Visão geral'
+  const pageIcon = securityPage
+    ? 'security'
+    : trackingPage
+      ? 'status-contacted'
+      : contactsPage
+        ? 'contacts'
+        : 'overview'
   const initial = email.trim().slice(0, 1).toLocaleUpperCase('pt-BR') || 'S'
   const toggleLabel = collapsed ? 'Expandir menu' : 'Recolher menu'
 
@@ -55,46 +70,65 @@ export function AdminLayout({
           id="admin-sidebar-navigation"
           aria-label="Navegação administrativa"
         >
+          {!securityOnly && (
+            <div className="crm-nav-group">
+              <p className="crm-nav-group-label">Geral</p>
+              <Link
+                className="crm-nav-link"
+                to="/admin"
+                aria-label="Visão geral"
+                aria-current={overviewPage ? 'page' : undefined}
+                title={collapsed ? 'Visão geral' : undefined}
+              >
+                <AdminIcon name="overview" />
+                <span className="crm-nav-label">Visão geral</span>
+              </Link>
+            </div>
+          )}
+          {!securityOnly && (
+            <div className="crm-nav-group crm-nav-group--records">
+              <p className="crm-nav-group-label">Registros</p>
+              <Link
+                className="crm-nav-link"
+                to="/admin/cadastros"
+                aria-label="Cadastros"
+                aria-current={contactsPage ? 'page' : undefined}
+                title={collapsed ? 'Cadastros' : undefined}
+              >
+                <AdminIcon name="contacts" />
+                <span className="crm-nav-label">Cadastros</span>
+              </Link>
+              <Link
+                className="crm-nav-link"
+                to="/admin/acompanhamento"
+                aria-label="Acompanhamento"
+                aria-current={trackingPage ? 'page' : undefined}
+                title={collapsed ? 'Acompanhamento' : undefined}
+              >
+                <AdminIcon name="status-contacted" />
+                <span className="crm-nav-label">Acompanhamento</span>
+              </Link>
+            </div>
+          )}
           <div className="crm-nav-group">
-            <p className="crm-nav-group-label">Geral</p>
+            <p className="crm-nav-group-label">Conta</p>
             <Link
               className="crm-nav-link"
-              to="/admin"
-              aria-label="Visão geral"
-              aria-current={overviewPage ? 'page' : undefined}
-              title={collapsed ? 'Visão geral' : undefined}
+              to="/admin/seguranca"
+              aria-label="Segurança"
+              aria-current={securityPage ? 'page' : undefined}
+              title={collapsed ? 'Segurança' : undefined}
             >
-              <AdminIcon name="overview" />
-              <span className="crm-nav-label">Visão geral</span>
-            </Link>
-          </div>
-          <div className="crm-nav-group crm-nav-group--records">
-            <p className="crm-nav-group-label">Registros</p>
-            <Link
-              className="crm-nav-link"
-              to="/admin/cadastros"
-              aria-label="Cadastros"
-              aria-current={contactsPage ? 'page' : undefined}
-              title={collapsed ? 'Cadastros' : undefined}
-            >
-              <AdminIcon name="contacts" />
-              <span className="crm-nav-label">Cadastros</span>
-            </Link>
-            <Link
-              className="crm-nav-link"
-              to="/admin/acompanhamento"
-              aria-label="Acompanhamento"
-              aria-current={trackingPage ? 'page' : undefined}
-              title={collapsed ? 'Acompanhamento' : undefined}
-            >
-              <AdminIcon name="status-contacted" />
-              <span className="crm-nav-label">Acompanhamento</span>
+              <AdminIcon name="security" />
+              <span className="crm-nav-label">Segurança</span>
             </Link>
           </div>
         </nav>
         <div className="crm-layout-account">
           <div className="crm-layout-account-identity" title={email}>
-            <span className="crm-layout-avatar" aria-hidden="true">{initial}</span>
+            <span className="crm-layout-avatar" aria-hidden="true">
+              {initial}
+            </span>
             <span className="crm-layout-email">{email}</span>
           </div>
           <button
@@ -106,14 +140,18 @@ export function AdminLayout({
             title={collapsed ? (loggingOut ? 'Saindo…' : 'Sair') : undefined}
           >
             <AdminIcon name="logout" />
-            <span className="crm-layout-logout-label">{loggingOut ? 'Saindo…' : 'Sair'}</span>
+            <span className="crm-layout-logout-label">
+              {loggingOut ? 'Saindo…' : 'Sair'}
+            </span>
           </button>
         </div>
       </aside>
       <div className="crm-layout-workspace">
         <header className="crm-layout-topbar">
           <nav className="crm-layout-breadcrumb" aria-label="Localização atual">
-            <span className="crm-layout-breadcrumb-parent">{overviewPage ? 'Geral' : 'Registros'}</span>
+            <span className="crm-layout-breadcrumb-parent">
+              {securityPage ? 'Conta' : overviewPage ? 'Geral' : 'Registros'}
+            </span>
             <AdminIcon name="chevron-right" />
             <span className="crm-layout-current-page" aria-current="page">
               <AdminIcon name={pageIcon} />
@@ -121,7 +159,11 @@ export function AdminLayout({
             </span>
           </nav>
         </header>
-        {logoutError && <p className="crm-layout-error" role="alert">{logoutError}</p>}
+        {logoutError && (
+          <p className="crm-layout-error" role="alert">
+            {logoutError}
+          </p>
+        )}
         <main className="crm-layout-content" id="admin-content" tabIndex={-1}>
           {children}
         </main>

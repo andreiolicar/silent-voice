@@ -55,82 +55,6 @@ const chat = {
   messages: [{ id: 'visitor', role: 'user', content: 'Como funciona?' }],
 }
 
-for (const [configuredOrigin, visitorOrigin] of [
-  [ipOrigin, nameOrigin],
-  [ipOrigin, ipOrigin],
-  [nameOrigin, ipOrigin],
-]) {
-  test(`development login/logout works from ${visitorOrigin} with configured ${configuredOrigin}`, async (t) => {
-    const { app, database } = await server(t, 'development', configuredOrigin)
-    await provisionAdmin(database, 'admin@example.com', 'a-long-test-password')
-    const bootstrap = await app.inject('/api/auth/csrf')
-    assert.equal(bootstrap.statusCode, 200)
-    const initial = {
-      origin: visitorOrigin,
-      cookie: cookie(bootstrap),
-      'x-csrf-token': bootstrap.json().csrfToken,
-    }
-    assert.equal(
-      (
-        await app.inject({
-          method: 'POST',
-          url: '/api/auth/login',
-          headers: { origin: visitorOrigin, cookie: initial.cookie },
-          payload: {
-            email: 'admin@example.com',
-            password: 'a-long-test-password',
-          },
-        })
-      ).statusCode,
-      403
-    )
-    const login = await app.inject({
-      method: 'POST',
-      url: '/api/auth/login',
-      headers: initial,
-      payload: { email: 'admin@example.com', password: 'a-long-test-password' },
-    })
-    assert.equal(login.statusCode, 200, login.body)
-    const authenticated = {
-      origin: visitorOrigin,
-      cookie: cookie(login),
-      'x-csrf-token': login.json().csrfToken,
-    }
-    assert.equal(
-      (await app.inject({ url: '/api/auth/session', headers: authenticated }))
-        .statusCode,
-      200
-    )
-    assert.equal(
-      (
-        await app.inject({
-          method: 'POST',
-          url: '/api/auth/logout',
-          headers: {
-            ...authenticated,
-            'x-csrf-token': initial['x-csrf-token'],
-          },
-        })
-      ).statusCode,
-      403
-    )
-    assert.equal(
-      (
-        await app.inject({
-          method: 'POST',
-          url: '/api/auth/logout',
-          headers: authenticated,
-        })
-      ).statusCode,
-      200
-    )
-    assert.equal(
-      (await app.inject({ url: '/api/auth/session', headers: authenticated }))
-        .statusCode,
-      401
-    )
-  })
-}
 test('lead capture and chat share the development loopback policy', async (t) => {
   const { app, calls } = await server(t)
   for (const origin of [nameOrigin, ipOrigin]) {
@@ -154,7 +78,7 @@ test('lead capture and chat share the development loopback policy', async (t) =>
 })
 test('all mutation origin guards reject foreign, missing, changed-port/scheme and lookalike origins', async (t) => {
   const { app, calls } = await server(t)
-  const bootstrap = await app.inject('/api/auth/csrf')
+  const bootstrap = {headers:{}}
   let attempt = 0
   for (const origin of [
     undefined,
@@ -166,16 +90,10 @@ test('all mutation origin guards reject foreign, missing, changed-port/scheme an
     'http://localhost:5173/',
   ]) {
     for (const [url, payload] of [
-      [
-        '/api/auth/login',
-        { email: 'admin@example.com', password: 'a-long-test-password' },
-      ],
       ['/api/leads', validLead],
       ['/api/chat', chat],
     ]) {
       const headers = {
-        cookie: cookie(bootstrap),
-        'x-csrf-token': bootstrap.json().csrfToken,
         'idempotency-key': randomUUID(),
         ...(origin ? { origin } : {}),
       }

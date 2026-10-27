@@ -2,10 +2,10 @@
 
 ## Execução local
 
-Requer Node.js 24 LTS e npm. `npm ci` instala o driver SQLite nativo; em uma plataforma sem binário pré-compilado, o npm precisará das ferramentas de compilação da plataforma.
+Requer Node.js 24 LTS e npm. `npm ci --legacy-peer-deps` instala o driver SQLite nativo; em uma plataforma sem binário pré-compilado, o npm precisará das ferramentas de compilação da plataforma.
 
 1. Copie `.env.example` para `.env`. Defina `ZAI_API_KEY` no arquivo local, nunca no chat, em código ou com prefixo `VITE_`. O modelo é configurável por `ZAI_MODEL` (inicial: `glm-4.5-flash`).
-2. Defina `SESSION_SECRET` com ao menos 32 caracteres aleatórios antes de qualquer publicação. O modo local usa um fallback apenas para desenvolvimento se esse campo estiver vazio.
+2. Configure `BETTER_AUTH_SECRET` (ao menos 32 caracteres), `BETTER_AUTH_URL`, `RESEND_API_KEY` e `AUTH_EMAIL_FROM` conforme [autenticação unificada](unified-auth.md).
 3. Execute em dois terminais:
 
 ```sh
@@ -21,17 +21,17 @@ Um `429` da Z.ai é repassado como `provider_rate_limited`, sem retry automátic
 
 ## Administrador
 
-Não existe usuário ou senha padrão. Em terminal privado interativo:
+Não existe usuário ou senha padrão. O provisionamento é feito internamente:
 
 ```sh
 npm run admin:create -- --email seu-email@exemplo.com
 ```
 
-O comando solicita senha e confirmação sem mostrar os caracteres. A senha deve ter de 12 a 256 caracteres; não é aceita por argumento ou variável de ambiente. Entre em http://127.0.0.1:5173/admin. A rota não aparece na navegação pública.
+O comando provisiona a identidade administrativa e envia um link de definição de senha. O proprietário confirma o e-mail e configura o autenticador antes de acessar o CRM. Senhas são de 12 a 128 caracteres e gerenciadas pelo Better Auth. Entre em http://127.0.0.1:5173/admin. A rota não aparece na navegação pública.
 
 O painel permite pesquisar, filtrar por status/data, paginar, consultar dados completos, adicionar notas e atualizar o status. “Demonstração combinada” é uma marcação manual, sem reserva de agenda ou envio de e-mail. Conflitos de edição retornam 409 e preservam o rascunho da nota. O rascunho permanece apenas na memória da aba; logout explícito ou recarregamento o descarta.
 
-Sessões duram oito horas, ficam no PostgreSQL e usam cookie HttpOnly/SameSite Strict. O login troca ID e token CSRF; logout invalida a sessão no servidor. Senhas são armazenadas com scrypt e salt aleatório.
+Sessões do Better Auth duram sete dias, renovadas após um dia, com consulta ao PostgreSQL e sem cache de autorização no cookie. Cookies web são Secure em produção, HttpOnly, SameSite Lax e restritos ao host. Administradores precisam de e-mail confirmado e TOTP. Logout revoga a sessão. A proteção de origem e CSRF da autenticação é a oficial do framework.
 
 ## Respostas visuais
 
@@ -65,7 +65,7 @@ Limites locais: chat 10 mensagens/minuto/IP, duas gerações/IP e dez globais; l
 
 O runtime usa PostgreSQL no Neon: DATABASE_URL com pool para consultas e DATABASE_URL_UNPOOLED para migrações. Nenhum arquivo SQLite é usado pelo servidor publicado. Migrações versionadas são transacionais e verificadas por checksum; sessões, recibos e cadastros persistem no banco externo.
 
-Execute npm run db:migrate antes de validar uma nova versão. A inicialização também executa as migrações sob advisory lock. Para importar um snapshot SQLite privado consistente, use npm run db:import:sqlite -- caminho-do-backup.sqlite. A importação preserva IDs, hashes de senha e datas; conflitos revertem a transação, sem sobrescrever dados. Sessões antigas não são importadas.
+Execute npm run db:migrate antes de validar uma nova versão. A inicialização também executa as migrações sob advisory lock. A ferramenta db:import:sqlite permanece apenas para o esquema legado anterior à migração de identidade; não deve ser usada sobre o esquema Better Auth. A migração versionada preserva IDs e vínculos do CRM sem importar hashes de senha.
 
 O comando db:backup mantém apenas a função de snapshot do SQLite legado. Para o PostgreSQL, utilize pg_dump com conexão direta e destino privado, ou os recursos de recuperação do Neon conforme a retenção disponível no plano. Nunca publique dumps ou URLs de conexão.
 
@@ -82,4 +82,4 @@ A suíte mantém os testes anteriores e acrescenta streaming UTF-8/cancelamento,
 
 ## Publicação futura
 
-Produção: frontend estático no Render, API Node no Render Free e PostgreSQL no Neon Free. Segredos pertencem apenas ao ambiente do backend. O processo escuta em 0.0.0.0 e PORT; confia apenas no proxy imediatamente anterior, usa cookies Secure/HttpOnly/SameSite Strict e exige origem exata para mutações. /api/health consulta o banco. Instâncias gratuitas podem suspender por inatividade; os dados permanecem no Neon.
+Produção: frontend estático no Render, API Node no Render Free e PostgreSQL no Neon Free. Segredos pertencem apenas ao ambiente do backend. O processo escuta em 0.0.0.0 e PORT; confia apenas no proxy imediatamente anterior, usa cookies Secure/HttpOnly/SameSite Lax e exige origem exata para mutações. /api/health consulta o banco. Instâncias gratuitas podem suspender por inatividade; os dados permanecem no Neon.

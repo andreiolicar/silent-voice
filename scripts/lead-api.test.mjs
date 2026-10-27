@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { fixture, origin, validLead } from './helpers/api-fixture.mjs'
+import {testAuth} from './helpers/test-auth.mjs'
 import { createServer } from '../server/app.ts'
 import { createDatabase } from '../server/db/database.ts'
 import { backupDatabase } from '../server/db/backup.ts'
@@ -149,7 +150,7 @@ test('simultaneous retries produce one durable lead and a failed receipt insert 
   assert.equal(database.prepare('SELECT count(*) n FROM leads').get().n, 1)
 })
 
-test('database opens with all six tables and enforced constraints; backup CLI creates a usable snapshot', async (t) => {
+test('database opens with application and authentication tables and enforced constraints; backup CLI creates a usable snapshot', async (t) => {
   const { app, database, directory, config } = await fixture(t)
   assert.equal(database.pragma('journal_mode', { simple: true }), 'wal')
   assert.equal(database.pragma('foreign_keys', { simple: true }), 1)
@@ -164,6 +165,12 @@ test('database opens with all six tables and enforced constraints; backup CLI cr
     [
       'admin_sessions',
       'admin_users',
+      'auth_account',
+      'auth_rate_limit',
+      'auth_session',
+      'auth_two_factor',
+      'auth_user',
+      'auth_verification',
       'lead_notes',
       'lead_submissions',
       'leads',

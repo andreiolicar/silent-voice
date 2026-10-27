@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { runInNewContext } from 'node:vm'
 
 // Exercise the actual early browser script with deterministic browser timing.
-async function createBrowser({ reduced = false, fontsReady = true, cssReady = true, parsedReady = true, hash = '', navigation = 'navigate' } = {}) {
+async function createBrowser({ reduced = false, fontsReady = true, cssReady = true, parsedReady = true, hash = '', pathname = '/', navigation = 'navigate' } = {}) {
   const source = await readFile(new URL('../public/intro-bootstrap.js', import.meta.url), 'utf8')
   let time = 0
   let nextId = 0
@@ -26,7 +26,7 @@ async function createBrowser({ reduced = false, fontsReady = true, cssReady = tr
   window.matchMedia = () => preference
   window.getComputedStyle = () => ({ display: cssReady ? 'grid' : 'block' })
   window.performance = { now: () => time, getEntriesByType: () => [{ type: navigation }] }
-  window.location = { hash }
+  window.location = { hash, pathname }
   window.history = { scrollRestoration: 'auto' }
   window.scrollX = 0
   window.scrollY = 0
@@ -199,4 +199,15 @@ test('skipping in the DOMContentLoaded task cannot recreate readiness timers', a
   await browser.advance(0)
   assert.equal(browser.window.__silentVoiceIntro.phase, 'complete')
   assert.equal(browser.jobs.size, 0)
+})
+
+
+test('account and admin routes bypass the early curtain without installing scroll guards', async () => {
+  for (const pathname of ['/admin', '/admin/security', '/conta/redefinir-senha', '/conta/email-confirmado']) {
+    const browser = await createBrowser({ pathname })
+    assert.equal(browser.window.__silentVoiceIntro, undefined, pathname)
+    assert.equal(browser.classes.size, 0)
+    assert.equal(browser.jobs.size, 0)
+    assert.equal(browser.emit(browser.window, 'wheel').defaultPrevented, false)
+  }
 })

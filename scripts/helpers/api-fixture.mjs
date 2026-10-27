@@ -4,7 +4,7 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { createServer } from '../../server/app.ts'
 import { createDatabase } from '../../server/db/database.ts'
-import { provisionAdmin } from '../../server/auth/password.ts'
+import {testAuth,signInAdmin} from './test-auth.mjs'
 
 export const origin = 'http://127.0.0.1:5173'
 export const validLead = {
@@ -33,7 +33,8 @@ export async function fixture(t) {
       throw new Error('Data endpoints must never call the model')
     },
   }
-  const app = await createServer({ config, database, chatProvider })
+  const auth=await testAuth(database,config)
+  const app = await createServer({ config, database, chatProvider,auth })
   t.after(async () => {
     await app.close()
     if (database.open) database.close()
@@ -46,31 +47,5 @@ export function cookie(response) {
   return (Array.isArray(value) ? value[0] : value)?.split(';')[0]
 }
 export async function login(app, database) {
-  await provisionAdmin(database, 'admin@example.com', 'a-long-test-password')
-  const csrf = await app.inject('/api/auth/csrf')
-  assert.equal(csrf.statusCode, 200)
-  const result = await app.inject({
-    method: 'POST',
-    url: '/api/auth/login',
-    headers: {
-      origin,
-      cookie: cookie(csrf),
-      'x-csrf-token': csrf.json().csrfToken,
-    },
-    payload: { email: 'ADMIN@example.com', password: 'a-long-test-password' },
-  })
-  assert.equal(result.statusCode, 200, result.body)
-  assert.notEqual(result.json().csrfToken, csrf.json().csrfToken)
-  assert.notEqual(
-    cookie(result),
-    cookie(csrf),
-    'login rotates the actual pre-login session'
-  )
-  assert.match(result.headers['set-cookie'].toString(), /HttpOnly/)
-  assert.match(result.headers['set-cookie'].toString(), /SameSite=Strict/i)
-  return {
-    cookie: cookie(result),
-    origin,
-    'x-csrf-token': result.json().csrfToken,
-  }
+  return signInAdmin(app,database)
 }

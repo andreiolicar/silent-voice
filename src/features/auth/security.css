@@ -1,0 +1,94 @@
+.auth-security {
+  display: grid;
+  gap: 24px;
+  width: min(100%, 760px);
+  margin-inline: auto;
+  padding: 24px;
+}
+.auth-security h1 {
+  font-size: 26px;
+  letter-spacing: -0.6px;
+}
+.auth-security h2 {
+  font-size: 18px;
+}
+.auth-security h3 {
+  font-size: 15px;
+}
+.auth-security-card {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+.auth-security form {
+  display: grid;
+  gap: 16px;
+}
+.auth-security p {
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+.auth-qr {
+  width: fit-content;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+}
+.auth-checkbox {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.auth-checkbox input {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.auth-backup-codes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+.auth-sessions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+}
+.auth-sessions li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.auth-sessions li div {
+  min-width: 0;
+}
+.auth-text-button {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  font: inherit;
+  padding: 8px;
+  cursor: pointer;
+}
+.auth-text-button:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .auth-security {
+    padding: 16px;
+  }
+  .auth-security-card {
+    padding: 20px;
+  }
+}

@@ -65,3 +65,17 @@
     padding: 32px 24px;
   }
 }
+
+.auth-text-button {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  font: inherit;
+  padding: 8px;
+  cursor: pointer;
+}
+.auth-text-button:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}

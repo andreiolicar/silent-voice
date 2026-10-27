@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { createPostgresDatabase } from "./sql.ts";
@@ -13,25 +13,20 @@ export async function migratePostgres(url: string): Promise<void> {
         await db.exec(
           "CREATE TABLE IF NOT EXISTS sv_schema_migrations (version INTEGER PRIMARY KEY, checksum TEXT NOT NULL, applied_at TEXT NOT NULL)",
         );
-        const sql = await readFile(
-          new URL("./migrations/001-postgres.sql", import.meta.url),
-          "utf8",
-        );
-        const checksum = createHash("sha256").update(sql).digest("hex");
-        const previous = (await db
-          .prepare(
-            "SELECT checksum FROM sv_schema_migrations WHERE version = ?",
-          )
-          .get(1)) as { checksum: string } | undefined;
-        if (previous) {
-          if (previous.checksum !== checksum)
-            throw new Error("Applied migration checksum mismatch");
-          return;
+        const directory = new URL('./migrations/', import.meta.url)
+        const files = (await readdir(directory)).filter(file => /^\d+-[\w-]+\.sql$/.test(file)).sort()
+        for (const file of files) {
+          const version = Number(file.split('-')[0])
+          const sql = await readFile(new URL(file, directory), 'utf8')
+          const checksum = createHash('sha256').update(sql).digest('hex')
+          const previous = await db.prepare('SELECT checksum FROM sv_schema_migrations WHERE version = ?').get(version) as { checksum: string } | undefined
+          if (previous) {
+            if (previous.checksum !== checksum) throw new Error('Applied migration checksum mismatch')
+            continue
+          }
+          await db.exec(sql)
+          await db.prepare('INSERT INTO sv_schema_migrations VALUES (?, ?, ?)').run(version,checksum,new Date().toISOString())
         }
-        await db.exec(sql);
-        await db
-          .prepare("INSERT INTO sv_schema_migrations VALUES (?, ?, ?)")
-          .run(1, checksum, new Date().toISOString());
       })
       .immediate();
   } finally {

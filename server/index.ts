@@ -1,3 +1,5 @@
+import { Pool } from "pg";
+import { createAuth } from "./auth/better-auth.ts";
 import { readFileSync } from "node:fs";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import { createServer } from "./app.ts";
@@ -7,6 +9,7 @@ import { migratePostgres } from "./db/migrate.ts";
 import { ZaiProvider } from "./chat/zai-provider.ts";
 async function start() {
   let database: ReturnType<typeof createPostgresDatabase> | undefined;
+  let authPool: Pool | undefined;
   let app: Awaited<ReturnType<typeof createServer>> | undefined;
   try {
     const config = loadConfig();
@@ -33,11 +36,17 @@ async function start() {
     });
     if (!config.databaseUrl || !config.directDatabaseUrl)
       throw new Error("Configure DATABASE_URL and DATABASE_URL_UNPOOLED");
+    if (process.env.NODE_ENV === "production" && (!config.authSecret || config.authSecret.length < 32 || !config.resendApiKey)) throw new Error("Configure Better Auth and Resend");
     await migratePostgres(config.directDatabaseUrl);
+    const authUrl = new URL(config.databaseUrl);
+    if (authUrl.searchParams.get("sslmode") === "require") authUrl.searchParams.set("sslmode", "verify-full");
+    authPool = new Pool({connectionString:authUrl.toString(),max:3,connectionTimeoutMillis:15000,idleTimeoutMillis:10000});
+    authPool.on("error",()=>console.error("Authentication database connection interrupted"));
     database = createPostgresDatabase(config.databaseUrl);
     app = await createServer({
       config,
       database,
+      auth: createAuth(config, authPool),
       chatProvider: new ZaiProvider({
         apiKey: config.zaiApiKey,
         model: config.zaiModel,
@@ -57,6 +66,7 @@ async function start() {
             await app?.close();
           } finally {
             await database?.close();
+            await authPool?.end();
           }
         })().then(
           () => process.exit(0),
@@ -67,6 +77,7 @@ async function start() {
   } catch {
     await app?.close().catch(() => {});
     await database?.close().catch(() => {});
+    await authPool?.end().catch(() => {});
     console.error(
       "Não foi possível iniciar a API. Verifique banco, configuração e porta.",
     );

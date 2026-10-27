@@ -17,6 +17,7 @@ import {
   PanelLeftOpen,
   RefreshCw,
   Search,
+  ShieldCheck,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -24,6 +25,7 @@ import type { LucideIcon } from 'lucide-react'
 
 const icons = {
   overview: LayoutDashboard,
+  security: ShieldCheck,
   contacts: UsersRound,
   mail: Mail,
   file: FileText,
@@ -47,7 +49,13 @@ const icons = {
 
 export type AdminIconName = keyof typeof icons
 
-export function AdminIcon({ name, className }: { name: AdminIconName; className?: string }) {
+export function AdminIcon({
+  name,
+  className,
+}: {
+  name: AdminIconName
+  className?: string
+}) {
   const Icon = icons[name]
   return (
     <Icon

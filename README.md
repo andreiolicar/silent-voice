@@ -9,7 +9,7 @@ O escopo atual é desktop, com largura mínima de **1280 px**. A composição mo
 Requer Node.js **24 LTS** e npm.
 
 ```sh
-npm ci
+npm ci --legacy-peer-deps
 npm run dev:api # em um terminal
 npm run dev     # em outro terminal
 ```
@@ -60,7 +60,7 @@ O build publicado reúne o código de `src/`, `index.html` e os arquivos de `pub
 
 As fontes editáveis das mídias, capturas e registros de produção em `docs/reference/`, assim como os planos em `docs/superpowers/`, permanecem preservados na cópia local e ficam fora do Git. Não serão enviados ao GitHub. Reproduzir essas mídias pode exigir Blender, cwebp, FFmpeg e Python com Pillow/NumPy, conforme o processo utilizado. Esses programas e registros não são necessários para instalar, testar ou compilar o site.
 
-`tools/` e `.superpowers/` também são locais e ignorados. Dependências, builds, backups, logs e caches ficam fora do versionamento: instale `node_modules/` com `npm ci` e gere `dist/` com `npm run build`.
+`tools/` e `.superpowers/` também são locais e ignorados. Dependências, builds, backups, logs e caches ficam fora do versionamento: instale `node_modules/` com `npm ci --legacy-peer-deps` e gere `dist/` com `npm run build`.
 
 ## Chatbot e backoffice
 
@@ -69,3 +69,8 @@ Assistente fixo no canto inferior direito, com GLM-4.5-Flash da Z.ai no servidor
 Leia [setup, administração, limites e backup](docs/chatbot-backoffice.md). A chave Z.ai (`ZAI_API_KEY`) é configurada somente no `.env` do servidor; sem ela, contato e administração continuam disponíveis. Não há persistência de transcrição completa.
 
 Código: `src/features/chatbot/`, `src/features/admin/`, `server/` e contratos em `shared/`. A API de desenvolvimento usa porta 3001, com proxy pelo Vite5173. Esta entrega não inclui publicação.
+
+
+## Autenticação unificada
+
+Site e aplicativo compartilham Better Auth no PostgreSQL do Neon. Leia [autenticação, migração e operação](docs/unified-auth.md) para configurar e-mails, administradores, 2FA, sessões e publicação.

@@ -1,69 +1,38 @@
 import { pathToFileURL } from 'node:url'
-import { createPostgresDatabase } from '../db/sql.ts'
-import { provisionAdmin } from '../auth/password.ts'
+import { randomUUID } from 'node:crypto'
+import { Pool } from 'pg'
+import { z } from 'zod'
+import { createAuth } from '../auth/better-auth.ts'
+import { createAuthMailer } from '../auth/email.ts'
+import { loadConfig } from '../config.ts'
 
-/** Read from a private TTY only: never accept credentials as arguments or env. */
-export function promptPassword(label: string): Promise<string> {
-  if (!process.stdin.isTTY || !process.stderr.isTTY)
-    throw new Error('Execute este comando em um terminal privado interativo.')
-  return new Promise((resolve, reject) => {
-    const input = process.stdin
-    const wasRaw = input.isRaw
-    let value = ''
-    process.stderr.write(label)
-    input.setRawMode(true)
-    input.resume()
-    const finish = (error?: Error) => {
-      input.off('data', onData)
-      input.setRawMode(wasRaw)
-      input.pause()
-      process.stderr.write('\n')
-      if (error) reject(error)
-      else resolve(value)
-    }
-    const onData = (chunk: Buffer) => {
-      for (const character of chunk.toString('utf8')) {
-        if (character === '\u0003' || character === '\u0004') {
-          finish(new Error('Operação cancelada.'))
-          return
-        }
-        if (character === '\r' || character === '\n') {
-          finish()
-          return
-        }
-        if (character === '\u007f' || character === '\b')
-          value = Array.from(value).slice(0, -1).join('')
-        else if (character >= ' ' && value.length < 257) value += character
-      }
-    }
-    input.on('data', onData)
-  })
-}
+/** Internal provisioning only. Passwords are set by their owner through Better Auth. */
 export async function main(args = process.argv.slice(2)): Promise<void> {
-  if (args.length !== 2 || args[0] !== '--email' || !args[1])
-    throw new Error(
-      'Uso: npm run admin:create -- --email EMAIL. A senha será solicitada em terminal privado.'
-    )
-  const password = await promptPassword('Senha (12 a 256 caracteres): ')
-  const confirmation = await promptPassword('Confirme a senha: ')
-  if (password !== confirmation) throw new Error('As senhas não coincidem.')
-  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL required')
-  const db = createPostgresDatabase(process.env.DATABASE_URL)
+  if (args.length !== 2 || args[0] !== '--email')
+    throw new Error('Uso: npm run admin:create -- --email EMAIL')
+  const email = z.email().parse(args[1]).toLowerCase()
+  const config = loadConfig()
+  if (!config.databaseUrl || !config.resendApiKey || !config.authSecret)
+    throw new Error('Configure PostgreSQL, Better Auth e Resend antes de provisionar.')
+  const url = new URL(config.databaseUrl)
+  if (url.searchParams.get('sslmode') === 'require') url.searchParams.set('sslmode', 'verify-full')
+  const database = new Pool({ connectionString: url.toString(), max: 1, connectionTimeoutMillis: 15000 })
   try {
-    await provisionAdmin(db, args[1], password)
-    process.stdout.write('Administrador criado.\n')
+    const existing = await database.query('SELECT id, role FROM auth_user WHERE email = $1', [email])
+    if (existing.rows[0] && existing.rows[0].role !== 'admin')
+      throw new Error('A conta existente não é administrativa. Promoção exige uma operação interna específica.')
+    if (!existing.rows[0])
+      await database.query(`INSERT INTO auth_user (id,name,email,"emailVerified","createdAt","updatedAt",role,banned,"twoFactorEnabled") VALUES ($1,$2,$3,FALSE,NOW(),NOW(),'admin',FALSE,FALSE)`, [randomUUID(), 'Administrador', email])
+    const send = createAuthMailer(config.resendApiKey, config.authEmailFrom)
+    const auth = createAuth(config, database, message => send({ ...message, kind: message.kind === 'reset' ? 'invite' : message.kind }))
+    await auth.api.requestPasswordReset({ body: { email, redirectTo: `${config.authUrl || config.origin}/conta/redefinir-senha` } })
+    process.stdout.write('Administrador provisionado. Instruções de definição de senha enviadas por e-mail.\n')
   } finally {
-    await db.close()
+    await database.end()
   }
 }
-if (
-  process.argv[1] &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
   main().catch(() => {
-    process.stderr.write(
-      'Não foi possível criar o administrador. Verifique o e-mail, a senha, o terminal privado e se o usuário já existe.\n'
-    )
+    process.stderr.write('Não foi possível provisionar o administrador. Confira o e-mail, a configuração e o envio no Resend. Nenhuma senha é aceita por este comando.\n')
     process.exitCode = 1
   })
-}

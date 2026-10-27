@@ -5,15 +5,19 @@ import { asSqlDatabase } from './db/sql.ts'
 import type { DatabaseInput } from './db/sql.ts'
 import type { ServerConfig } from './config.ts'
 import type { ChatProvider } from './chat/provider.ts'
+import { registerAuthRoutes } from './auth/routes.ts'
+import type { SilentVoiceAuth } from './auth/better-auth.ts'
 import { registerChatRoute } from './chat/route.ts'
 export async function createServer({
   config,
   chatProvider,
   database,
+  auth,
 }: {
   config: ServerConfig
   chatProvider: ChatProvider
   database?: DatabaseInput
+  auth?: SilentVoiceAuth
 }) {
   const app = Fastify({ logger: false, bodyLimit: 65536, trustProxy: config.trustProxy ? (_address, hop) => hop === 0 : false })
   app.addHook('onRequest', async (request, reply) => {
@@ -52,6 +56,7 @@ export async function createServer({
     if (database) await asSqlDatabase(database).prepare('SELECT 1').get()
     return { status: 'ok' }
   })
+  await registerAuthRoutes(app, auth || null)
   await registerChatRoute(app, config, chatProvider)
   if (database) {
     const { registerDataRoutes } = await import('./leads/routes.ts')
@@ -64,7 +69,7 @@ export async function createServer({
     app.get('/intro-bootstrap.js', (_request, reply) => reply.sendFile('intro-bootstrap.js', config.frontendPath!))
     app.get('/', (_request, reply) => reply.redirect('/admin'))
     app.setNotFoundHandler((request, reply) => {
-      if (['GET', 'HEAD'].includes(request.method) && /^\/admin(?:\/|$)/.test(request.url.split('?')[0]!)) return reply.sendFile('index.html', config.frontendPath!)
+      if (['GET', 'HEAD'].includes(request.method) && /^\/(?:admin|conta)(?:\/|$)/.test(request.url.split('?')[0]!)) return reply.sendFile('index.html', config.frontendPath!)
       return reply.code(404).send({error:'Não encontrado.'})
     })
   }

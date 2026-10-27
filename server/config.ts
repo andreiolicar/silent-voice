@@ -11,6 +11,10 @@ export type ServerConfig = {
   trustProxy?: boolean;
   frontendPath?: string;
   sessionSecret: string;
+  authSecret?: string;
+  authUrl?: string;
+  resendApiKey?: string;
+  authEmailFrom?: string;
   secureCookies: boolean;
   zaiApiKey?: string;
   zaiModel: string;
@@ -75,6 +79,10 @@ export function loadConfig(): ServerConfig {
     host: process.env.HOST || (production ? "0.0.0.0" : "127.0.0.1"),
     trustProxy: production,
     frontendPath: production ? resolve("dist") : undefined,
+    authSecret: process.env.BETTER_AUTH_SECRET,
+    authUrl: process.env.BETTER_AUTH_URL,
+    resendApiKey: process.env.RESEND_API_KEY,
+    authEmailFrom: process.env.AUTH_EMAIL_FROM,
     sessionSecret:
       secret || "local-development-only-change-before-deploy-please",
     secureCookies: production,

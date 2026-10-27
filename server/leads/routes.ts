@@ -11,9 +11,8 @@ import type {
 } from '../../shared/leads.ts'
 import { leadStatuses } from '../../shared/leads.ts'
 import {
-  registerAuthRoutes,
   requireAdmin,
-  requireCsrf,
+  requireJsonMutation,
   requireOrigin,
 } from '../auth/routes.ts'
 
@@ -101,7 +100,6 @@ export async function registerDataRoutes(
   db: SqlDatabase,
   config: ServerConfig
 ): Promise<void> {
-  await registerAuthRoutes(app, db, config)
   const findSubmission = db.prepare(
     'SELECT fingerprint, lead_id, created_at FROM lead_submissions WHERE idempotency_key = ?'
   )
@@ -161,7 +159,7 @@ export async function registerDataRoutes(
 
   const findLead = db.prepare(`${selectLead} WHERE l.id = ?`)
   const notes = db.prepare(
-    'SELECT n.id, n.text, u.email author, n.created_at "createdAt" FROM lead_notes n JOIN admin_users u ON n.author_id = u.id WHERE n.lead_id = ? ORDER BY n.created_at, n.rowid'
+    'SELECT n.id, n.text, u.email author, n.created_at "createdAt" FROM lead_notes n JOIN auth_user u ON n.author_id = u.id WHERE n.lead_id = ? ORDER BY n.created_at, n.rowid'
   )
   const changeStatus = db.prepare(
     'UPDATE leads SET status = ?, version = version + 1, updated_at = ?, status_updated_by = ? WHERE id = ? AND version = ?'
@@ -241,7 +239,7 @@ export async function registerDataRoutes(
     async (request, reply) => {
       if (
         !requireOrigin(request, reply, config) ||
-        !requireCsrf(request, reply)
+        !requireJsonMutation(request, reply)
       )
         return
       const parsed = statusSchema.safeParse(request.body)
@@ -256,7 +254,7 @@ export async function registerDataRoutes(
             !(await changeStatus.run(
               parsed.data.status,
               new Date().toISOString(),
-              request.session.adminId!,
+              request.authSession!.user.id,
               existing.id,
               parsed.data.version
             )).changes
@@ -286,7 +284,7 @@ export async function registerDataRoutes(
     async (request, reply) => {
       if (
         !requireOrigin(request, reply, config) ||
-        !requireCsrf(request, reply)
+        !requireJsonMutation(request, reply)
       )
         return
       const parsed = noteSchema.safeParse(request.body)
@@ -297,14 +295,14 @@ export async function registerDataRoutes(
       const note: LeadNote = {
         id: randomUUID(),
         text: parsed.data.text,
-        author: request.session.adminEmail!,
+        author: request.authSession!.user.email,
         createdAt: new Date().toISOString(),
       }
       await insertNote.run(
         note.id,
         request.params.id,
         note.text,
-        request.session.adminId!,
+        request.authSession!.user.id,
         note.createdAt
       )
       return reply.code(201).send(note)

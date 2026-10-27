@@ -10,8 +10,16 @@ const AdminApp = lazy(() =>
   }))
 )
 
+const AccountPages = lazy(() =>
+  import('./features/auth/AccountPages').then((module) => ({
+    default: module.AccountPages,
+  }))
+)
+
 function Page() {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
+  if (/^\/conta(?:\/|$)/.test(pathname))
+    return <AccountPages key={`${pathname}${search}`} />
   return /^\/admin(?:\/|$)/.test(pathname) ? (
     <LoadBoundary
       fallback={

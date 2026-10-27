@@ -1,23 +1,27 @@
-export type Session = { user: { email: string }; csrfToken: string }
+export type { AuthSession as Session } from '../auth/auth-client'
 export class AdminApiError extends Error {
-  constructor(public status: number) {
+  constructor(
+    public status: number,
+    public code?: string
+  ) {
     super(`Request failed (${status})`)
   }
 }
 export async function adminFetch<T>(
   path: string,
-  options: RequestInit = {},
-  csrfToken?: string
+  options: RequestInit = {}
 ): Promise<T> {
   const headers = new Headers(options.headers)
   if (options.body) headers.set('Content-Type', 'application/json')
-  if (csrfToken) headers.set('X-CSRF-Token', csrfToken)
   const response = await fetch(`/api${path}`, {
     ...options,
     headers,
     credentials: 'same-origin',
   })
-  if (!response.ok) throw new AdminApiError(response.status)
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    throw new AdminApiError(response.status, body?.code ?? body?.error)
+  }
   return response.status === 204
     ? (undefined as T)
     : (response.json() as Promise<T>)

@@ -22,151 +22,6 @@ test('scrypt hashes use random salts and verify passwords without storing plaint
   assert.equal(await verifyPassword('wrong', one), false)
   assert.equal(await verifyPassword('wrong', 'invalid'), false)
 })
-test('requires authenticated sessions and csrf, rotates login sessions, persists and invalidates logout', async (t) => {
-  const { app, database, config, chatProvider } = await fixture(t)
-  for (const url of [
-    '/api/auth/session',
-    '/api/admin/leads',
-    '/api/admin/leads/no-id',
-  ])
-    assert.equal((await app.inject(url)).statusCode, 401)
-  const anonymous = await app.inject('/api/auth/csrf')
-  const headers = await login(app, database)
-  assert.notEqual(cookie(anonymous), headers.cookie)
-  assert.equal(
-    (await app.inject({ url: '/api/auth/session', headers })).json().user.email,
-    'admin@example.com'
-  )
-  const session = database
-    .prepare('SELECT * FROM admin_sessions WHERE data LIKE ?')
-    .get('%admin@example.com%')
-  assert.ok(session)
-  assert.ok(session.expires_at > Date.now())
-  assert.ok(session.expires_at <= Date.now() + 8 * 60 * 60 * 1000)
-  await app.inject({ url: '/api/auth/csrf', headers })
-  await app.inject({ url: '/api/admin/leads', headers })
-  assert.equal(
-    database
-      .prepare('SELECT expires_at FROM admin_sessions WHERE id = ?')
-      .get(session.id).expires_at,
-    session.expires_at,
-    'reads do not extend absolute eight-hour lifetime'
-  )
-  assert.equal(
-    (
-      await app.inject({
-        method: 'POST',
-        url: '/api/auth/logout',
-        headers: { cookie: headers.cookie, origin },
-      })
-    ).statusCode,
-    403
-  )
-  assert.equal(
-    (
-      await app.inject({
-        method: 'POST',
-        url: '/api/auth/logout',
-        headers: { ...headers, origin: 'https://evil.example' },
-      })
-    ).statusCode,
-    403
-  )
-  await app.close()
-  assert.ok(database.open, 'injected database remains open')
-  database.close()
-  const reopenedDatabase = createDatabase(config.databasePath)
-  const restarted = await createServer({
-    config,
-    database: reopenedDatabase,
-    chatProvider,
-  })
-  try {
-    assert.equal(
-      (await restarted.inject({ url: '/api/auth/session', headers }))
-        .statusCode,
-      200
-    )
-    assert.equal(
-      (
-        await restarted.inject({
-          method: 'POST',
-          url: '/api/auth/logout',
-          headers,
-        })
-      ).statusCode,
-      200
-    )
-    assert.equal(
-      (await restarted.inject({ url: '/api/auth/session', headers }))
-        .statusCode,
-      401
-    )
-    assert.equal(
-      reopenedDatabase
-        .prepare('SELECT * FROM admin_sessions WHERE data LIKE ?')
-        .get('%admin@example.com%'),
-      undefined
-    )
-  } finally {
-    await restarted.close()
-    reopenedDatabase.close()
-  }
-})
-test('enforces login origin and csrf, generic credentials errors and attempt limit', async (t) => {
-  const { app } = await fixture(t)
-  const csrf = await app.inject('/api/auth/csrf')
-  const headers = {
-    cookie: cookie(csrf),
-    origin,
-    'x-csrf-token': csrf.json().csrfToken,
-  }
-  const payload = { email: 'absent@example.com', password: 'wrong-password' }
-  assert.equal(
-    (
-      await app.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        headers: { cookie: headers.cookie, origin },
-        payload,
-      })
-    ).statusCode,
-    403
-  )
-  assert.equal(
-    (
-      await app.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        headers: { ...headers, origin: 'https://evil.example' },
-        payload,
-      })
-    ).statusCode,
-    403
-  )
-  for (let i = 0; i < 5; i++) {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/auth/login',
-      headers,
-      payload,
-    })
-    if (response.statusCode === 429) break
-    assert.equal(response.statusCode, 401)
-    assert.ok(!response.body.includes(payload.email))
-  }
-  assert.equal(
-    (
-      await app.inject({
-        method: 'POST',
-        url: '/api/auth/login',
-        headers,
-        payload,
-      })
-    ).statusCode,
-    429
-  )
-})
 test('lists, filters, paginates and computes duplicate emails, notes and optimistic status conflicts', async (t) => {
   const { app, database } = await fixture(t)
   const headers = await login(app, database)
@@ -201,7 +56,7 @@ test('lists, filters, paginates and computes duplicate emails, notes and optimis
       await app.inject({
         method: 'PATCH',
         url: `/api/admin/leads/${id}`,
-        headers: { origin, cookie: headers.cookie },
+        headers: { origin: 'https://evil.example', cookie: headers.cookie },
         payload: { status: 'contacted', version: 1 },
       })
     ).statusCode,
@@ -322,13 +177,13 @@ test('paginates twenty-five per page with stable date filters and rejects expire
   ).json()
   assert.equal(historical.total, 1)
   assert.equal(historical.items[0].id, first.items[0].id)
-  database.prepare('UPDATE admin_sessions SET expires_at = 0').run()
+  database.prepare('UPDATE auth_session SET expiresAt = 0').run()
   assert.equal(
     (await app.inject({ url: '/api/admin/leads', headers })).statusCode,
     401
   )
   assert.equal(
-    database.prepare('SELECT count(*) n FROM admin_sessions').get().n,
+    database.prepare('SELECT count(*) n FROM auth_session').get().n,
     0
   )
 })
