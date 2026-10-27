@@ -56,7 +56,7 @@ export async function createServer({
     if (database) await asSqlDatabase(database).prepare('SELECT 1').get()
     return { status: 'ok' }
   })
-  await registerAuthRoutes(app, auth || null)
+  await registerAuthRoutes(app, auth || null, config)
   await registerChatRoute(app, config, chatProvider)
   if (database) {
     const { registerDataRoutes } = await import('./leads/routes.ts')

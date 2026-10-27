@@ -3,6 +3,7 @@ import { fromNodeHeaders } from 'better-auth/node'
 import type { ServerConfig } from '../config.ts'
 import type { SilentVoiceAuth } from './better-auth.ts'
 import { isAllowedOrigin } from '../origin.ts'
+import { isIP } from 'node:net'
 
 type AuthSession = NonNullable<Awaited<ReturnType<SilentVoiceAuth['api']['getSession']>>>
 declare module 'fastify' {
@@ -46,7 +47,7 @@ export async function requireAdmin(request: FastifyRequest, reply: FastifyReply)
   }
   request.authSession = session
 }
-export async function registerAuthRoutes(app: FastifyInstance, auth: SilentVoiceAuth | null) {
+export async function registerAuthRoutes(app: FastifyInstance, auth: SilentVoiceAuth | null, config: ServerConfig) {
   app.decorate('auth', auth)
   if (!auth) return
   app.route({
@@ -54,10 +55,12 @@ export async function registerAuthRoutes(app: FastifyInstance, auth: SilentVoice
     async handler(request, reply) {
       const url = new URL(request.url, auth.options.baseURL as string)
       const headers = fromNodeHeaders(request.headers)
-      // Fastify already applies the server's bounded trustProxy policy. Give the
-      // SDK that single resolved address, never an untrusted forwarded chain.
-      // Otherwise Better Auth rejects multi-hop headers and shares one bucket.
-      headers.set('x-forwarded-for', request.ip)
+      // On Render, its Cloudflare edge overwrites the configured visitor header.
+      // Elsewhere retain Fastify's bounded proxy policy. Never take the arbitrary
+      // leftmost forwarded token, or pass a multi-hop chain to the SDK limiter.
+      const edgeAddress = config.trustedClientIpHeader ? request.headers[config.trustedClientIpHeader] : undefined
+      const clientAddress = typeof edgeAddress === 'string' && isIP(edgeAddress) ? edgeAddress : request.ip
+      headers.set('x-forwarded-for', clientAddress)
       const response = await auth.handler(new Request(url, {
         method:request.method, headers,
         ...(request.body ? {body:JSON.stringify(request.body)} : {}),

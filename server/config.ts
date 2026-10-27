@@ -9,6 +9,7 @@ export type ServerConfig = {
   directDatabaseUrl?: string;
   host?: string;
   trustProxy?: boolean;
+  trustedClientIpHeader?: 'cf-connecting-ip';
   frontendPath?: string;
   sessionSecret: string;
   authSecret?: string;
@@ -78,6 +79,9 @@ export function loadConfig(): ServerConfig {
     directDatabaseUrl: process.env.DATABASE_URL_UNPOOLED,
     host: process.env.HOST || (production ? "0.0.0.0" : "127.0.0.1"),
     trustProxy: production,
+    // Render's public ingress always passes through its Cloudflare edge, which
+    // overwrites this header. Never trust it on arbitrary/local deployments.
+    trustedClientIpHeader: production && process.env.RENDER === 'true' ? 'cf-connecting-ip' : undefined,
     frontendPath: production ? resolve("dist") : undefined,
     authSecret: process.env.BETTER_AUTH_SECRET,
     authUrl: process.env.BETTER_AUTH_URL,

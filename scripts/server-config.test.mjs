@@ -36,3 +36,24 @@ test('refuses placing private SQLite in the public asset directory', () => {
     else process.env.SQLITE_PATH = previous
   }
 })
+
+test('only production on Render enables the Cloudflare edge address contract', () => {
+  const names = ['NODE_ENV', 'RENDER', 'DATABASE_URL', 'SESSION_SECRET']
+  const previous = Object.fromEntries(names.map(name => [name, process.env[name]]))
+  try {
+    process.env.NODE_ENV = 'production'
+    process.env.DATABASE_URL = 'postgres://fixture:fixture@localhost/fixture'
+    process.env.SESSION_SECRET = 'test-config-secret-longer-than-thirty-two-characters'
+    delete process.env.RENDER
+    assert.equal(loadConfig().trustedClientIpHeader, undefined)
+    process.env.RENDER = 'true'
+    assert.equal(loadConfig().trustedClientIpHeader, 'cf-connecting-ip')
+    process.env.NODE_ENV = 'development'
+    assert.equal(loadConfig().trustedClientIpHeader, undefined)
+  } finally {
+    for (const name of names) {
+      if (previous[name] === undefined) delete process.env[name]
+      else process.env[name] = previous[name]
+    }
+  }
+})

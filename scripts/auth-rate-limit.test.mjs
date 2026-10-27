@@ -6,9 +6,9 @@ import { createAuth } from '../server/auth/better-auth.ts'
 import { createServer } from '../server/app.ts'
 
 const origin = 'http://127.0.0.1:5173'
-async function fixture(t, trustProxy = false) {
+async function fixture(t, trustProxy = false, trustedClientIpHeader) {
   const database = new Database(':memory:')
-  const config = { port: 0, origin, databasePath: ':memory:', sessionSecret: 'test-rate-limit-secret-at-least-32-characters', secureCookies: false, trustProxy, zaiModel: 'unused', chatTimeoutMs: 45000, idleTimeoutMs: 15000 }
+  const config = { port: 0, origin, databasePath: ':memory:', sessionSecret: 'test-rate-limit-secret-at-least-32-characters', secureCookies: false, trustProxy, trustedClientIpHeader, zaiModel: 'unused', chatTimeoutMs: 45000, idleTimeoutMs: 15000 }
   const auth = createAuth(config, database, async () => {})
   await (await getMigrations(auth.options)).runMigrations()
   const app = await createServer({ config, auth, chatProvider: { async *stream() { throw Error('unused') } } })
@@ -42,4 +42,19 @@ test('rate rejection exposes the actual remaining cooldown without extending the
   assert.equal(database.prepare('SELECT lastRequest FROM auth_rate_limit WHERE key LIKE ?').get('%|/sign-in/email').lastRequest, original)
   database.prepare('UPDATE auth_rate_limit SET lastRequest = ? WHERE key LIKE ?').run(Date.now() - 901000, '%|/sign-in/email')
   assert.equal((await attempt('198.51.100.8')).statusCode, 400, 'the same client can try again after the actual window expires')
+})
+
+test('Render edge client addresses remain isolated behind the same internal load balancer', async t => {
+  const { attempt } = await fixture(t, true, 'cf-connecting-ip')
+  const chain = '192.0.2.2, 162.158.1.1, 10.0.0.2'
+  const edge = { 'x-forwarded-for': chain, 'cf-connecting-ip': '203.0.113.8' }
+  for (let n = 0; n < 5; n++) assert.equal((await attempt('10.0.0.3', edge)).statusCode, 400)
+  assert.equal((await attempt('10.0.0.3', { ...edge, 'x-forwarded-for': '192.0.2.99, 162.158.1.1, 10.0.0.2' })).statusCode, 429)
+  assert.equal((await attempt('10.0.0.3', { ...edge, 'cf-connecting-ip': '203.0.113.9' })).statusCode, 400)
+})
+
+test('Cloudflare headers are ignored when the server has not enabled its trusted edge', async t => {
+  const { attempt } = await fixture(t)
+  for (let n = 0; n < 5; n++) await attempt('198.51.100.8')
+  assert.equal((await attempt('198.51.100.8', { 'cf-connecting-ip': '203.0.113.9' })).statusCode, 429)
 })
