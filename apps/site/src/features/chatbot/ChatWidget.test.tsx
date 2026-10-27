@@ -1,0 +1,353 @@
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ChatRequest, ChatStreamEvent } from '../../../shared/chat'
+import type { ChatTransport } from './chat-client'
+import { ChatWidget } from './ChatWidget'
+function controlledTransport() {
+  const calls: {
+    request: ChatRequest
+    signal: AbortSignal
+    emit: (event: ChatStreamEvent) => void
+    resolve: () => void
+    reject: (error: Error) => void
+  }[] = []
+  const transport: ChatTransport = (request, signal, emit) =>
+    new Promise<void>((resolve, reject) => {
+      calls.push({ request, signal, emit, resolve, reject })
+    })
+  return { transport, calls }
+}
+async function open() {
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
+  )
+  return await screen.findByRole(
+    'textbox',
+    { name: 'Sua mensagem' },
+    { timeout: 5000 }
+  )
+}
+afterEach(() => vi.unstubAllGlobals())
+function stubApiFetch(submit: (url: string, init: RequestInit) => Promise<Response>) {
+  vi.stubGlobal('fetch', (url: string, init: RequestInit = {}) =>
+    url === '/api/health'
+      ? Promise.resolve(new Response('{"status":"ok"}', { headers: { 'Content-Type': 'application/json' } }))
+      : submit(url, init))
+}
+
+describe('public chatbot widget', () => {
+  it.each(['O que é o Silent Voice?', 'Como o dispositivo funciona?', 'O que posso ver no aplicativo?'])('sends the suggested question "%s" and renders the streamed answer', async question => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await open()
+    await userEvent.click(screen.getByRole('button', { name: question }))
+    expect(calls).toHaveLength(1)
+    expect(calls[0].request.messages.at(-1)?.content).toBe(question)
+    await act(async () => {
+      calls[0].emit({ type: 'delta', requestId: calls[0].request.requestId, text: 'root = Answer("Informações", [Text("Resposta de teste recebida por streaming.")])' })
+      calls[0].emit({ type: 'done', requestId: calls[0].request.requestId, finishReason: 'stop' })
+      calls[0].resolve()
+    })
+    expect(screen.getByText('Resposta de teste recebida por streaming.')).toBeVisible()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toBeEnabled()
+  })
+  it('can reopen during closing without losing the draft or exposing closed controls', async () => {
+    render(<ChatWidget />)
+    const composer = await open()
+    await userEvent.type(composer, 'Minha dúvida ainda não enviada')
+    await userEvent.click(screen.getByRole('button', { name: 'Minimizar assistente' }))
+    const panel = document.getElementById('silent-voice-chat-panel')!
+    expect(panel).not.toHaveAttribute('hidden')
+    expect(panel).toHaveAttribute('aria-hidden', 'true')
+    expect(panel).toHaveAttribute('inert')
+    expect(screen.queryByRole('dialog')).toBeNull()
+    const reopened = await open()
+    expect(reopened).toHaveValue('Minha dúvida ainda não enviada')
+    expect(reopened).toHaveFocus()
+    expect(panel).toHaveAttribute('aria-hidden', 'false')
+  })
+  it('keeps the welcome screen dismissed when minimizing an existing conversation', async () => {
+    const { transport } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    const composer = await open()
+    const welcome = screen.getByRole('heading', { level: 3 })
+    expect(welcome).toBeVisible()
+    await userEvent.type(composer, 'Como funciona?{Enter}')
+    expect(welcome).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Solicitar demonstração' })).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Minimizar assistente' }))
+    await open()
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
+  })
+
+  it('waits for the intro, opens on demand, focuses composer and restores focus with Escape', async () => {
+    const { rerender } = render(<ChatWidget ready={false} />)
+    expect(screen.queryByRole('button')).toBeNull()
+    rerender(<ChatWidget ready />)
+    expect(screen.queryByRole('dialog')).toBeNull()
+    const composer = await open()
+    expect(
+      screen.getByRole('dialog', { name: 'Assistente Silent Voice' })
+    ).toHaveAttribute('aria-modal', 'false')
+    expect(composer).toHaveFocus()
+    fireEvent.keyDown(composer, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
+    ).toHaveFocus()
+    expect(
+      screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
+    ).toHaveAttribute('aria-expanded', 'false')
+  })
+  it('keeps messages and generation alive while minimized; aborts on unmount and ignores late responses', async () => {
+    const { transport, calls } = controlledTransport()
+    const { unmount } = render(<ChatWidget transport={transport} />)
+    const composer = await open()
+    await userEvent.type(composer, 'Como funciona?{Enter}')
+    expect(await screen.findByText('Como funciona?')).toBeVisible()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Minimizar assistente' })
+    )
+    expect(calls[0].signal.aborted).toBe(false)
+    expect(document.getElementById('silent-voice-chat-panel')).toHaveAttribute(
+      'aria-hidden', 'true'
+    )
+    expect(document.getElementById('silent-voice-chat-panel')).toHaveAttribute(
+      'inert'
+    )
+    await act(async () => {
+      calls[0].emit({
+        type: 'delta',
+        requestId: calls[0].request.requestId,
+        text: 'root = Answer("O dispositivo", [Text("Veja a explicação.")])',
+      })
+      calls[0].emit({
+        type: 'done',
+        requestId: calls[0].request.requestId,
+        finishReason: 'stop',
+      })
+      calls[0].resolve()
+    })
+    await open()
+    expect(screen.getByText('Veja a explicação.')).toBeVisible()
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'Sua mensagem' }),
+      'Outra dúvida{Enter}'
+    )
+    unmount()
+    expect(calls[1].signal.aborted).toBe(true)
+    render(<ChatWidget transport={transport} />)
+    await open()
+    await act(async () => {
+      calls[1].emit({
+        type: 'delta',
+        requestId: calls[1].request.requestId,
+        text: 'root = Answer("Tarde", [Text("Callback obsoleto")])',
+      })
+      calls[1].resolve()
+    })
+    expect(screen.queryByText('Como funciona?')).toBeNull()
+    expect(screen.queryByText('Callback obsoleto')).toBeNull()
+  })
+  it.each(['stop','error','length'] as const)('preserves visible partial blocks after %s and when starting another question',async ending=>{
+    const {transport,calls}=controlledTransport()
+    const {container}=render(<ChatWidget transport={transport}/>)
+    await userEvent.type(await open(),'Como funciona?{Enter}')
+    await act(async()=>calls[0].emit({type:'delta',requestId:calls[0].request.requestId,text:'root = Answer("Como funciona", [Text("O sensor detecta sinais musculares'}))
+    expect(screen.getByText('O sensor detecta sinais musculares')).toBeVisible()
+    if(ending==='stop'){
+      await userEvent.click(screen.getByRole('button',{name:'Parar resposta'}))
+    }else if(ending==='error'){
+      await act(async()=>calls[0].reject(new Error('network loss')))
+    }else{
+      await act(async()=>{calls[0].emit({type:'done',requestId:calls[0].request.requestId,finishReason:'length'});calls[0].resolve()})
+    }
+    expect(screen.getByText('O sensor detecta sinais musculares')).toBeVisible()
+    expect(screen.queryByText(/Não foi possível exibir esta resposta/)).toBeNull()
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull()
+    expect(screen.queryByRole('button',{name:'Parar resposta'})).toBeNull()
+    if(ending==='stop')expect(screen.getByText(/Resposta interrompida. Você pode/)).toBeVisible()
+    else expect(screen.getByRole('alert')).toBeVisible()
+    await userEvent.type(screen.getByRole('textbox',{name:'Sua mensagem'}),'Outra pergunta{Enter}')
+    expect(screen.getByText('O sensor detecta sinais musculares')).toBeVisible()
+  })
+  it('supports Shift+Enter and IME without sending; sends plain Enter and keeps contact reachable on error', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    const composer = await open()
+    await userEvent.type(composer, 'Olá')
+    fireEvent.keyDown(composer, { key: 'Enter', isComposing: true })
+    expect(calls).toHaveLength(0)
+    await userEvent.keyboard('{Shift>}{Enter}{/Shift}')
+    expect(composer).toHaveValue('Olá\n')
+    expect(calls).toHaveLength(0)
+    await userEvent.keyboard('{Enter}')
+    expect(calls).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Parar resposta' })).toBeVisible()
+    await act(async () => calls[0].reject(new Error('unavailable')))
+    expect(await screen.findByRole('alert')).toBeVisible()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Rever pergunta' })
+    )
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveValue(
+      'Olá'
+    )
+    expect(
+      screen.getByRole('link', { name: 'contato@silentvoice.com.br' })
+    ).toBeVisible()
+  })
+  it('only follows streamed output while the visitor is already near the bottom', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await userEvent.type(await open(), 'Como funciona?{Enter}')
+    const viewport = document.querySelector('.sv-chat-scroll') as HTMLDivElement
+    Object.defineProperties(viewport, {
+      scrollHeight: { configurable: true, value: 1000 },
+      clientHeight: { configurable: true, value: 200 },
+    })
+    viewport.scrollTop = 100
+    fireEvent.scroll(viewport)
+    await act(async () =>
+      calls[0].emit({
+        type: 'delta',
+        requestId: calls[0].request.requestId,
+        text: 'root = Answer("Produto", [Text("Primeira parte',
+      })
+    )
+    expect(viewport.scrollTop).toBe(100)
+    viewport.scrollTop = 800
+    fireEvent.scroll(viewport)
+    await act(async () =>
+      calls[0].emit({
+        type: 'delta',
+        requestId: calls[0].request.requestId,
+        text: ' da resposta.")])',
+      })
+    )
+    expect(viewport.scrollTop).toBe(1000)
+  })
+  it('explains an upstream usage limit and keeps the question available without automatic retries', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await userEvent.type(await open(), 'Como funciona?{Enter}')
+    await act(async () => {
+      calls[0].emit({ type: 'error', requestId: calls[0].request.requestId, code: 'provider_rate_limited', retryable: true })
+      calls[0].resolve()
+    })
+    expect(screen.getByRole('alert')).toHaveTextContent('limite de uso do serviço de IA')
+    expect(calls).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Enviar mensagem' })).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Rever pergunta' }))
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveValue('Como funciona?')
+    expect(screen.getByRole('button', { name: 'Enviar mensagem' })).toBeEnabled()
+  })
+  it('opens the contact form from an OpenUI answer without restoring removed toolbar actions', async () => {
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await userEvent.type(await open(), 'Quero uma demonstração{Enter}')
+    await act(async () => {
+      calls[0].emit({ type: 'delta', requestId: calls[0].request.requestId, text: 'root = Answer("Demonstração", [ContactAction()])' })
+      calls[0].emit({ type: 'done', requestId: calls[0].request.requestId, finishReason: 'stop' })
+      calls[0].resolve()
+    })
+    await userEvent.click(await screen.findByRole('button', { name: 'Conversar com a equipe' }))
+    expect(screen.getByLabelText('Nome')).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Voltar à conversa' }))
+    expect(screen.getByRole('textbox', { name: 'Sua mensagem' })).toHaveFocus()
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
+  })
+  it('keeps a pending lead registration alive while minimized without sending its fields to the AI', async () => {
+    let complete!: (response: Response) => void
+    const fetcher = vi.fn(
+      (_url: string, _init: RequestInit) =>
+        new Promise<Response>((resolve) => {
+          complete = resolve
+        })
+    )
+    stubApiFetch(fetcher)
+    const { transport, calls } = controlledTransport()
+    render(<ChatWidget transport={transport} />)
+    await open()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
+    )
+    await userEvent.type(screen.getByLabelText('Nome'), 'Maria Silva')
+    await userEvent.type(screen.getByLabelText('E-mail'), 'maria@example.com')
+    await userEvent.type(
+      screen.getByLabelText('Objetivo do contato'),
+      'Gostaria de conhecer o dispositivo.'
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Registrar interesse' })
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Minimizar assistente' })
+    )
+    expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(false)
+    await act(async () =>
+      complete(
+        new Response(
+          JSON.stringify({
+            id: 'receipt-1',
+            createdAt: '2026-10-15T12:00:00.000Z',
+          }),
+          { status: 201 }
+        )
+      )
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
+    )
+    expect(
+      await screen.findByText('Seu interesse foi registrado.')
+    ).toBeVisible()
+    expect(calls).toHaveLength(0)
+  })
+  it('focuses the confirmed contact receipt after reopening and after returning from chat',async()=>{
+    stubApiFetch(vi.fn().mockResolvedValue(new Response(JSON.stringify({id:'receipt-1',createdAt:'2026-10-15T12:00:00.000Z'}),{status:201})))
+    render(<ChatWidget/>)
+    await open()
+    await userEvent.click(screen.getByRole('button',{name:'Solicitar demonstração'}))
+    await userEvent.type(screen.getByLabelText('Nome'),'Maria Silva')
+    await userEvent.type(screen.getByLabelText('E-mail'),'maria@example.com')
+    await userEvent.type(screen.getByLabelText('Objetivo do contato'),'Quero conhecer o dispositivo.')
+    await userEvent.click(screen.getByRole('button',{name:'Registrar interesse'}))
+    const receipt=await screen.findByRole('heading',{name:'Seu interesse foi registrado.'})
+    await userEvent.click(screen.getByRole('button',{name:'Minimizar assistente'}))
+    await userEvent.click(screen.getByRole('button',{name:'Abrir assistente Silent Voice'}))
+    expect(receipt).toHaveFocus()
+    await userEvent.click(screen.getByRole('button',{name:'Voltar à conversa'}))
+    await userEvent.click(screen.getByRole('button',{name:'Solicitar demonstração'}))
+    expect(receipt).toHaveFocus()
+  })
+  it('preserves the contact form across chat and minimize without reset actions', async () => {
+    render(<ChatWidget />)
+    await open()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
+    )
+    await userEvent.type(screen.getByLabelText('Nome'), 'Maria')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Voltar à conversa' })
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Solicitar demonstração' })
+    )
+    expect(screen.getByLabelText('Nome')).toHaveValue('Maria')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Minimizar assistente' })
+    )
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Abrir assistente Silent Voice' })
+    )
+    await waitFor(() => expect(screen.getByLabelText('Nome')).toBeVisible())
+    expect(screen.getByLabelText('Nome')).toHaveValue('Maria')
+    expect(screen.queryByRole('button', { name: 'Nova conversa' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Falar com a equipe' })).not.toBeInTheDocument()
+  })
+})

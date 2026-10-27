@@ -1,0 +1,43 @@
+.audience-section {
+  padding: 0 0 112px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.audience-section__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--color-illustration-panel);
+  background: var(--color-illustration-panel);
+}
+
+.audience-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  overflow: hidden;
+  padding: 24px 0 40px;
+  background: var(--color-surface);
+}
+
+.audience-card__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding-inline: 24px;
+  text-align: center;
+}
+
+.audience-card p {
+  max-width: 289px;
+  margin: 0;
+  font-size: var(--type-body-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-body-leading);
+  letter-spacing: var(--tracking-normal);
+}
+
+.audience-card p span { color: var(--color-text-muted); }

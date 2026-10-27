@@ -1,0 +1,23 @@
+.card-illustration {
+  width: 100%;
+  max-width: 396px;
+  aspect-ratio: 396 / 235;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+}
+
+.card-illustration > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.card-illustration__metric {
+  fill: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--type-metric-size);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-tight);
+}

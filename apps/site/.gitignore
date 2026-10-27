@@ -1,0 +1,36 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+
+# Local credentials and environment overrides
+.env
+.env.*
+!.env.example
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Offline media production, reference captures and working notes
+/tools/
+/docs/reference/
+/docs/superpowers/
+/.superpowers/
+*.blend1
+
+# Temporary files and caches
+*.log
+__pycache__/
+*.pyc
+.vite/
+coverage/
+
+# Private application data and backups
+/data/
+/backups/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.neon

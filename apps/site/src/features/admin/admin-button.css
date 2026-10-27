@@ -1,0 +1,34 @@
+.sv-button.crm-button {
+  --button-height: 28px;
+  min-height: 28px;
+  gap: 6px;
+  padding-inline: 12px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-leading);
+}
+
+.sv-button.crm-button--primary {
+  border-color: var(--color-secondary);
+  background-color: var(--color-secondary);
+  color: var(--color-text-inverse);
+}
+
+.sv-button.crm-button--primary:hover:not(:disabled),
+.sv-button.crm-button--primary:active:not(:disabled) {
+  border-color: var(--color-secondary);
+}
+
+.crm-button .crm-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.sv-button.crm-button:disabled {
+  opacity: 1;
+  border-color: var(--color-border-subtle);
+  background-color: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  box-shadow: none;
+}

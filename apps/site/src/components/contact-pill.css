@@ -1,0 +1,32 @@
+.contact-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 8px;
+  width: 190px;
+  height: 41px;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-contact);
+  color: var(--color-text-inverse);
+  font-size: var(--type-control-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--type-control-leading);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-contact);
+  transition: box-shadow var(--interaction-duration) var(--interaction-easing);
+}
+
+.contact-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+@media (hover: hover) and (pointer: fine) {
+  .contact-pill:hover { box-shadow: var(--shadow-cta-hover); }
+}
+
+.contact-pill:active { box-shadow: var(--shadow-cta-pressed); }
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-pill { transition: none; }
+}

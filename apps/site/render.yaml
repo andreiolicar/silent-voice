@@ -1,0 +1,60 @@
+# Free Render frontend + Node API. PostgreSQL is managed externally by Neon.
+services:
+  - type: web
+    runtime: static
+    name: silent-voice-site
+    repo: https://github.com/andreiolicar/silent-voice-site
+    branch: deploy/static-frontend
+    autoDeployTrigger: commit
+    buildCommand: npm ci --legacy-peer-deps --include=dev && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://silent-voice-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+  - type: web
+    runtime: node
+    name: silent-voice-api
+    repo: https://github.com/andreiolicar/silent-voice-site
+    branch: deploy/static-frontend
+    region: oregon
+    plan: free
+    autoDeployTrigger: commit
+    buildCommand: npm ci --legacy-peer-deps --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ORIGIN
+        value: https://www.silentvoice.com.br
+      - key: ADDITIONAL_APP_ORIGINS
+        value: https://silentvoice.com.br,https://silent-voice-site.onrender.com,https://silent-voice-api.onrender.com
+      - key: ZAI_MODEL
+        value: glm-4.5-flash
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        value: https://www.silentvoice.com.br
+      - key: AUTH_EMAIL_FROM
+        value: Silent Voice <conta@silentvoice.com.br>
+      - key: RESEND_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: ZAI_API_KEY
+        sync: false

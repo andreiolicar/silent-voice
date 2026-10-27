@@ -1,0 +1,52 @@
+input.sv-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--type-label-size);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--type-label-leading);
+  text-align: left;
+  outline: none;
+  transition: border-color var(--interaction-duration) var(--interaction-easing),
+    box-shadow var(--interaction-duration) var(--interaction-easing);
+}
+input.sv-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+input.sv-input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 12%, transparent);
+}
+input.sv-input:disabled {
+  cursor: default;
+  background: var(--color-surface-subtle);
+}
+@media (hover: hover) and (pointer: fine) {
+  input.sv-input:hover:not(:focus):not(:disabled) {
+    border-color: color-mix(
+      in srgb,
+      var(--color-ink) 34%,
+      var(--color-surface)
+    );
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  input.sv-input {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  input.sv-input:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
