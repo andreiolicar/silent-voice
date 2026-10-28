@@ -10,3 +10,16 @@ checkpoints/
 *.h5
 *.hdf5
 *.gguf
+
+# Private manifests and local operational artifacts must never be committed.
+/docs/cycles/rejection_4_reference_bank_manifest.json
+/docs/cycles/rejection_4_final_freeze.json
+/docs/cycles/global_visual_v2_class_conditional_human_decision_resolution.json
+/data/
+/.venv/
+*.npz
+*.mp4
+*.wav
+*.log
+__pycache__/
+.pytest_cache/
