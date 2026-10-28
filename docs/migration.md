@@ -14,4 +14,4 @@ Em seguida API e admin foram separados e contratos/UI compartilhados extraídos.
 
 Os PDFs antigos foram removidos da árvore atual, mas continuam acessíveis nos commits anteriores. A marca original está em `assets/brand`. Dados privados, backups, fontes pesadas de mídia e segredos não foram importados.
 
-Após a publicação e conferência dos dois serviços, os repositórios de origem serão arquivados reversivelmente. Para contribuir, clone o destino e abra uma branch nova; não continue fazendo pushes nos repositórios antigos. `CODEOWNERS` ajuda a encaminhar revisões, sem impor isolamento de leitura/escrita por pasta.
+Após a publicação e conferência dos dois serviços, `silent-voice-site` e `silent-voice-mobile` foram arquivados reversivelmente, com suas descrições apontando para este monorepo. Não havia PRs ou issues abertos nessas origens. Para contribuir, clone o destino e abra uma branch nova; não continue fazendo pushes nos repositórios antigos. `CODEOWNERS` ajuda a encaminhar revisões, sem impor isolamento de leitura/escrita por pasta.

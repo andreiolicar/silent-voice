@@ -20,3 +20,19 @@ Exportação não comprova execução em aparelho nem protocolo físico. Android
 Não foram consumidas tentativas do login do proprietário para validar o corte. O ensaio de autenticação usa banco e identidade sintéticos; a checagem de produção preserva sessões e configuração existentes.
 
 Revisão independente da migração: nenhum achado crítico, importante ou menor. Históricos, 409 hashes dos snapshots, resolução de runtimes e rotas foram reconferidos. Publicação ainda exige o aceite remoto descrito em `deployment.md`.
+
+## Aceite em produção
+
+Código publicado: `aba3032db0bb55bcd7ee68d837d2099ac544cf1c`.
+
+- Frontend live: `dep-dbgki867bikc73af4mbg`. API live: `dep-dbgki9om7kps739k2hb0`.
+- Os dois serviços apontam para `andreiolicar/silent-voice`, branch `main`, com os planos anteriores preservados.
+- As 12 variáveis anteriores da API foram comparadas sem mudanças; apenas `SKIP_INSTALL_DEPS=true` foi acrescentado aos serviços para controlar a instalação.
+- Seis rewrites conferidos contra `infra/routes.json`. `/`, `/admin/login`, `/admin/cadastros` e `/conta/redefinir-senha` retornam o HTML correto e JS/CSS válidos, sem fallback HTML nos assets.
+- `/api/health`: 200; `/api/auth/get-session` anônimo: 200/null; `/api/admin/leads` anônimo: 401.
+- As duas identidades existentes, o administrador verificado com TOTP, o ID da sessão ativa e o cadastro real permaneceram no banco após os rollouts. Nenhuma tentativa de login do proprietário foi consumida.
+- Login renderizado no domínio real, sem erros de console. Chatbot respondeu com OpenUI completo em produção. Formulário teve recibo confirmado em banco isolado; nenhum contato sintético foi criado em produção.
+- [CI do código publicado](https://github.com/andreiolicar/silent-voice/actions/runs/40612315681): validate, deploy-builds(web) e deploy-builds(api), todos aprovados em Linux.
+- Clones originais reconferidos contra os manifestos iniciais: 237 + 172 arquivos, zero diferenças. Os repositórios de origem foram arquivados reversivelmente depois do aceite.
+
+Este registro posterior altera somente documentação; o SHA acima identifica o código em execução.
