@@ -64,6 +64,7 @@ LIVE_PROVENANCE_NAMES = (
     "edge_centroids",
     "edge_origin_manifest",
 )
+PUBLIC_PROVENANCE_NAMES = ("reference_freeze", "edge_manifest", "edge_freeze")
 
 
 class CaptureCancelled(Exception):
@@ -87,12 +88,16 @@ def _sha256(path: Path) -> str:
 def verify_frozen_sources(
     root: Path,
     *,
+    public_root: Path | None = None,
     freeze_sha256: str = FINAL_FREEZE_SHA256,
     result_sha256: str = FINAL_RESULT_SHA256,
 ) -> dict:
     """Valida R4 fechado e artefatos sem abrir held-out, câmera ou modelos."""
     root = Path(root).resolve()
-    freeze_path = root / FINAL_FREEZE_PATH
+    public_root = Path(
+        public_root if public_root is not None else temporal.ROOT
+    ).resolve()
+    freeze_path = r4._safe_path(root, FINAL_FREEZE_PATH)
     if _sha256(freeze_path) != freeze_sha256:
         raise ValueError("SHA-256 do freeze final R4 divergente.")
     freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
@@ -120,7 +125,14 @@ def verify_frozen_sources(
     if freeze.get("edge_freeze_sha256") != EXPECTED_EDGE_FREEZE_SHA256:
         raise ValueError("SHA-256 do Edge freeze registrado divergiu.")
     records = {name: r4.PROVENANCE[name] for name in LIVE_PROVENANCE_NAMES}
-    provenance = r4.verify_provenance(root, records=records)
+    public_records = {name: records[name] for name in PUBLIC_PROVENANCE_NAMES}
+    private_records = {
+        name: record for name, record in records.items() if name not in public_records
+    }
+    provenance = {
+        **r4.verify_provenance(public_root, records=public_records),
+        **r4.verify_provenance(root, records=private_records),
+    }
     if any(
         freeze.get("provenance_sha256", {}).get(name) != value
         for name, value in provenance.items()
@@ -131,10 +143,14 @@ def verify_frozen_sources(
         recorded[name] != provenance[name] for name in ARTIFACT_PATHS
     ):
         raise ValueError("Inventário/SHA-256 de artefatos Edge R4 divergente.")
-    edge = json.loads((root / records["edge_freeze"][0]).read_bytes())
+    edge = json.loads(
+        r4._safe_path(public_root, records["edge_freeze"][0]).read_bytes()
+    )
     r4.validate_policy(edge)
     implementation = r4._validate_positive_config(
-        root, json.loads((root / records["edge_config"][0]).read_bytes())
+        root,
+        json.loads(r4._safe_path(root, records["edge_config"][0]).read_bytes()),
+        implementation_root=Path(__file__).resolve().parents[1],
     )
     if (
         ort.__version__ != EXPECTED_RUNTIME

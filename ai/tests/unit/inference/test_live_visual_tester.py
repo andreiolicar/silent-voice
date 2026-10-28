@@ -130,7 +130,9 @@ def frozen_fixture(tmp_path, monkeypatch):
         _write_json(tmp_path / relative, edge_manifest),
     )
     monkeypatch.setattr(r4, "PROVENANCE", records)
-    monkeypatch.setattr(r4, "_validate_positive_config", lambda root, config: config)
+    monkeypatch.setattr(
+        r4, "_validate_positive_config", lambda root, config, **kwargs: config
+    )
     monkeypatch.setattr(
         tester,
         "EXPECTED_EDGE_FREEZE_SHA256",
@@ -186,9 +188,42 @@ def frozen_fixture(tmp_path, monkeypatch):
 def _verify(fixture):
     return tester.verify_frozen_sources(
         fixture.root,
+        public_root=fixture.root,
         freeze_sha256=fixture.freeze_sha,
         result_sha256=FINAL_RESULT_SHA,
     )
+
+
+@pytest.mark.parametrize("change", ["missing", "wrong_hash"])
+def test_preflight_separates_public_resources_from_private_artifacts(
+    frozen_fixture, tmp_path, change
+):
+    fixture = frozen_fixture
+    public = tmp_path / "installed_public"
+    for name in tester.PUBLIC_PROVENANCE_NAMES:
+        relative = fixture.records[name][0]
+        destination = public / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        (fixture.root / relative).rename(destination)
+    result = tester.verify_frozen_sources(
+        fixture.root,
+        public_root=public,
+        freeze_sha256=fixture.freeze_sha,
+        result_sha256=FINAL_RESULT_SHA,
+    )
+    assert set(result["provenance_sha256"]) == set(tester.LIVE_PROVENANCE_NAMES)
+    path = public / fixture.records["edge_freeze"][0]
+    if change == "missing":
+        path.unlink()
+    else:
+        path.write_bytes(b"wrong bytes")
+    with pytest.raises(ValueError):
+        tester.verify_frozen_sources(
+            fixture.root,
+            public_root=public,
+            freeze_sha256=fixture.freeze_sha,
+            result_sha256=FINAL_RESULT_SHA,
+        )
 
 
 def test_check_accepts_r4_without_reading_heldout_or_loading_models(
@@ -650,7 +685,7 @@ def test_cli_preflight_validates_r4_without_opening_camera_or_runtime(
     monkeypatch.setattr(
         r4, "_load_runtime", lambda prepared: pytest.fail("Preflight carregou modelos.")
     )
-    cli.main(["--preflight"])
+    cli.main(["--artifact-root", str(tmp_path), "--preflight"])
     output = capsys.readouterr().out
     assert verified_roots == [tmp_path]
     assert "R4" in output or "Rejection 4" in output
@@ -685,7 +720,7 @@ def test_cli_check_keeps_explicit_camera_check_after_provenance(tmp_path, monkey
     monkeypatch.setattr(
         cli, "run_live_session", lambda *args, **kwargs: pytest.fail("Demo iniciada.")
     )
-    cli.main(["--check", "--camera-index", "1"])
+    cli.main(["--artifact-root", str(tmp_path), "--check", "--camera-index", "1"])
     assert events == ["verify", "camera"]
 
 

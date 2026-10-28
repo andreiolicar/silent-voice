@@ -56,6 +56,11 @@ def _profile_id(value: str) -> str:
 def parse_arguments(arguments: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--artifact-root",
+        type=Path,
+        help="Raiz autorizada dos artefatos privados e dados locais.",
+    )
+    parser.add_argument(
         "--camera-index",
         type=_camera_index,
         default=1,
@@ -112,6 +117,13 @@ def parse_arguments(arguments: list[str] | None = None) -> argparse.Namespace:
 
 def main(arguments: list[str] | None = None) -> None:
     args = parse_arguments(arguments)
+    if args.artifact_root is None and not args.visual_preview:
+        raise SystemExit("Informe --artifact-root para uso operacional ou diagnóstico.")
+    private_root = args.artifact_root.resolve() if args.artifact_root else ROOT
+    if args.artifact_root is not None and not private_root.is_dir():
+        raise SystemExit(
+            "A raiz autorizada de artefatos deve ser um diretório existente."
+        )
     if args.fps_auto_diagnostic:
         if (
             args.visual_preview
@@ -130,7 +142,7 @@ def main(arguments: list[str] | None = None) -> None:
         diagnostic_options = {"camera_index": args.camera_index}
         if args.camera_backend is not None:
             diagnostic_options["camera_backend"] = args.camera_backend
-        result = run_auto_fps_diagnostic(ROOT, **diagnostic_options)
+        result = run_auto_fps_diagnostic(private_root, **diagnostic_options)
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
         return
     if args.visual_preview and args.keep_clips:
@@ -154,7 +166,7 @@ def main(arguments: list[str] | None = None) -> None:
         options["audio_sample_rate"] = args.audio_sample_rate
     if args.context_max_age_seconds is not None:
         options["max_context_age_ns"] = args.context_max_age_seconds
-    launch_global_tester(ROOT, **options)
+    launch_global_tester(private_root, **options)
 
 
 if __name__ == "__main__":

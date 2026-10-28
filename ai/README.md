@@ -32,3 +32,15 @@ py -3.12 -m venv .venv
 A prévia é sintética, não testa câmera nem inferência. O runtime exige os artefatos R4 e os manifestos privados originais nos caminhos documentados em `docs/c44_live_tester_reproducibility.md`. Obtenha-os somente de armazenamento autorizado, respeitando licença, consentimento e controle de acesso. Não adicione os arquivos ao Git. A ausência ou divergência bloqueia a verificação operacional; não contorne as verificações. Áudio contextual requer o extra `audio` e checkpoint local autorizado.
 
 O teste público cobre o recorte migrado; não reproduz a regressão histórica completa. A instalação em máquina limpa e a integração com app ou hardware não foram validadas. O manifesto de migração local está em `docs/public_migration_manifest.md`.
+
+## Distribuição Python e CI
+
+O wheel inclui `silent_voice`, os módulos públicos de `scripts` e uma lista explícita de documentos públicos de `docs/cycles`, incluindo a policy temporal v2. Ele não inclui modelos, perfis, gravações nem manifests privados. As dependências devem ser instaladas separadamente usando o lock Windows documentado em `docs/python_reproducibility.md`. A suíte pública também é executada no workflow Python independente em Windows, usando esse lock com verificação de hashes; documentos privados ausentes são informados como SKIP.
+
+O preflight usa os documentos públicos distribuídos junto aos scripts e verifica os oito arquivos de implementação no pacote Python efetivamente instalado, tanto no modo editável quanto no wheel. Os caminhos e hashes registrados nos manifests permanecem inalterados. A raiz dos artefatos privados e dados locais é separada e deve ser informada explicitamente; o programa não procura dados pessoais em outras pastas. Para verificar a proveniência sem abrir câmera ou carregar modelos:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.demo.live_visual_tester --artifact-root $env:SV_R4_ARTIFACT_ROOT --preflight
+```
+
+A variável `SV_R4_ARTIFACT_ROOT` deve apontar para uma raiz privada autorizada, configurada pelo operador antes do comando. A interface GLOBAL operacional também exige `--artifact-root` com essa raiz; a prévia sintética `--visual-preview` continua sem esse requisito. Essa raiz deve conter os manifests privados e demais artefatos R4 autorizados nos caminhos congelados, além dos diretórios locais necessários à operação. O wheel não os fornece. Ausência, caminho não autorizado ou divergência de SHA-256 bloqueiam o preflight. A execução com os artefatos privados após esta alteração ainda precisa de validação autorizada; não copie material privado para o pacote ou para o Git.

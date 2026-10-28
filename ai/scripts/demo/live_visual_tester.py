@@ -24,6 +24,12 @@ def _camera_index(value: str) -> int:
 def parse_arguments(arguments: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--artifact-root",
+        type=Path,
+        required=True,
+        help="Raiz autorizada dos artefatos privados e dados locais.",
+    )
+    parser.add_argument(
         "--camera-index",
         type=_camera_index,
         default=1,
@@ -53,8 +59,13 @@ def parse_arguments(arguments: list[str] | None = None) -> argparse.Namespace:
 
 def main(arguments: list[str] | None = None) -> None:
     args = parse_arguments(arguments)
+    root = args.artifact_root.resolve()
+    if not root.is_dir():
+        raise SystemExit(
+            "A raiz autorizada de artefatos deve ser um diretório existente."
+        )
     if args.preflight or args.check:
-        verified = verify_frozen_sources(ROOT)
+        verified = verify_frozen_sources(root)
         print("Live Visual Tester R4: proveniência PASS; zero gravações e inferências.")
         print(f"Freeze R4 SHA-256: {verified['freeze_sha256']}")
         print(f"Candidato: {verified['candidate_id']}")
@@ -67,7 +78,7 @@ def main(arguments: list[str] | None = None) -> None:
             print("Câmera não aberta; modelos não carregados.")
         return
     run_live_session(
-        ROOT,
+        root,
         camera_index=args.camera_index,
         debug=args.debug,
         keep_clips=args.keep_clips,

@@ -40,8 +40,21 @@ audio = [
     "openai-whisper==20250625",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src", scripts = "scripts", docs = "docs"}
+
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "."]
+include = ["silent_voice*", "scripts*", "docs*"]
+
+[tool.setuptools.package-data]
+"docs.cycles" = [
+    "multispeaker_visual_01_temporal_policy_v2.json",
+    "rejection_4_edge_policy_freeze.json",
+    "rejection_4_edge_policy_manifest.json",
+    "rejection_4_reference_freeze.json",
+    "c4_4_technical_code_freeze.md",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
