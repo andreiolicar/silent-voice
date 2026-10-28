@@ -250,6 +250,7 @@ def perform_capture(
     created = False
     try:
         capture_options = {"show_frame": show_frame, "read_key": read_key}
+        capture_options["cleanup_on_error"] = not keep_clips
         if diagnostic_callback is not None:
             capture_options["diagnostic_callback"] = diagnostic_callback
         timing = backend.record_clip(camera, video, **capture_options)

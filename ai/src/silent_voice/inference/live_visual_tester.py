@@ -6,6 +6,7 @@ import math
 import os
 import re
 import statistics
+import threading
 import time
 import unicodedata
 from collections import Counter
@@ -248,14 +249,29 @@ def clip_path(root: Path, session_id: str, number: int, *, keep: bool) -> Path:
     return ensure_diagnostic_path(root, Path(root) / relative)
 
 
+_temporary_ownership = threading.local()
+
+
+def _owned_clips():
+    if not hasattr(_temporary_ownership, "clips"):
+        _temporary_ownership.clips = {}
+    return _temporary_ownership.clips
+
+
 def cleanup_temporary_clip(root: Path, path: Path) -> None:
     """Remove somente o MP4 temporário e seu timing criado pelo Live Tester."""
     target = ensure_diagnostic_path(root, path)
     temporary = (Path(root).resolve() / DIAGNOSTIC_ROOT / "tmp").resolve()
     if not target.is_relative_to(temporary):
         raise ValueError("Somente clipe temporário pode ser removido.")
-    target.unlink(missing_ok=True)
-    temporal.sidecar_path(target).unlink(missing_ok=True)
+    identities = _owned_clips().pop(target, None)
+    if identities is None:
+        return
+    for candidate, identity in zip((target, temporal.sidecar_path(target)), identities):
+        if not candidate.is_symlink() and candidate.exists():
+            current = candidate.stat()
+            if (current.st_dev, current.st_ino) == (identity.st_dev, identity.st_ino):
+                candidate.unlink()
 
 
 def mark_retained_clip(root: Path, path: Path) -> Path:
@@ -469,9 +485,11 @@ def record_clip(
     show_frame=None,
     read_key=None,
     diagnostic_callback=None,
+    cleanup_on_error=True,
 ) -> dict:
     """Valida aquisição monotônica e grava 121 posições temporais a 30 FPS."""
     path = Path(path)
+    _owned_clips().pop(path.resolve(), None)
     if path.exists() or temporal.sidecar_path(path).exists():
         raise FileExistsError(f"Clipe de demo já existe: {path}")
     policy = temporal.load_policy(version=2)
@@ -573,7 +591,19 @@ def record_clip(
             f"{report['acquisition_duration_seconds']:.3f} s, "
             f"{report['source_fps_effective']:.2f} FPS."
         )
-    return temporal.write_video_with_sidecar(path, frames, timestamps_ns, policy)
+
+    def remember_ownership(video_identity, sidecar_identity):
+        if cleanup_on_error:
+            _owned_clips()[path.resolve()] = (video_identity, sidecar_identity)
+
+    return temporal.write_video_with_sidecar(
+        path,
+        frames,
+        timestamps_ns,
+        policy,
+        cleanup_on_error=cleanup_on_error,
+        ownership_callback=remember_ownership,
+    )
 
 
 def _ascii_for_opencv(value: str) -> str:
@@ -684,6 +714,7 @@ def run_live_session(
                 timing = record_clip(
                     camera,
                     video,
+                    cleanup_on_error=not keep_clips,
                     show_frame=lambda image, remaining: _show_overlay(
                         image, [f"GRAVANDO: {remaining:.1f} s"], compact=True
                     ),

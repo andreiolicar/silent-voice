@@ -172,6 +172,8 @@ def write_video_with_sidecar(
     *,
     read_failures: int = 0,
     interrupted: bool = False,
+    cleanup_on_error: bool = False,
+    ownership_callback=None,
 ) -> dict:
     """Escreve vídeo e sidecar sem sobrescrever um attempt existente."""
     video = Path(video)
@@ -187,29 +189,51 @@ def write_video_with_sidecar(
         timestamps_ns, policy, read_failures=read_failures, interrupted=interrupted
     )
     video.parent.mkdir(parents=True, exist_ok=True)
-    writer = cv2.VideoWriter(
-        str(video),
-        cv2.VideoWriter_fourcc(*policy["requested_fourcc"]),
-        policy["output_fps"],
-        (width, height),
-    )
-    if not writer.isOpened():
-        raise RuntimeError("Falha de codificação MP4 no attempt temporal.")
+    # Reserva exclusiva impede que uma tentativa sobrescreva um arquivo existente.
+    with video.open("xb"):
+        video_identity = Path(video).stat()
+    sidecar_identity = None
     try:
-        for index in report["output_to_source_index"]:
-            writer.write(frames[index])
-    finally:
-        writer.release()
-    report.update(
-        {
-            "format_version": 1,
-            "policy_version": policy["version"],
-            "policy_sha256": policy_fingerprint(policy),
-            "video_sha256": sha256_file(video),
-        }
-    )
-    with sidecar.open("xb") as stream:
-        stream.write(canonical_bytes(report))
+        writer = cv2.VideoWriter(
+            str(video),
+            cv2.VideoWriter_fourcc(*policy["requested_fourcc"]),
+            policy["output_fps"],
+            (width, height),
+        )
+        try:
+            if not writer.isOpened():
+                raise RuntimeError("Falha de codificação MP4 no attempt temporal.")
+            for index in report["output_to_source_index"]:
+                writer.write(frames[index])
+        finally:
+            writer.release()
+        report.update(
+            {
+                "format_version": 1,
+                "policy_version": policy["version"],
+                "policy_sha256": policy_fingerprint(policy),
+                "video_sha256": sha256_file(video),
+            }
+        )
+        with sidecar.open("xb") as stream:
+            sidecar_identity = sidecar.stat()
+            stream.write(canonical_bytes(report))
+        if ownership_callback is not None:
+            ownership_callback(video_identity, sidecar_identity)
+    except BaseException:
+        if cleanup_on_error:
+            for path, identity in (
+                (sidecar, sidecar_identity),
+                (video, video_identity),
+            ):
+                if identity is not None and not path.is_symlink() and path.exists():
+                    current = path.stat()
+                    if (current.st_dev, current.st_ino) == (
+                        identity.st_dev,
+                        identity.st_ino,
+                    ):
+                        path.unlink()
+        raise
     return report
 
 

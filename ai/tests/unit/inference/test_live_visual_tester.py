@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from threading import Thread
 from types import SimpleNamespace
 
 import pytest
@@ -770,8 +771,8 @@ def test_keep_clip_sidecar_marks_demo_and_default_cleanup_is_local(tmp_path):
     timing = Path(str(temporary) + ".timing.json")
     timing.write_bytes(b"synthetic timing")
     tester.cleanup_temporary_clip(tmp_path, temporary)
-    assert not temporary.exists()
-    assert not timing.exists()
+    assert temporary.read_bytes() == b"video"
+    assert timing.read_bytes() == b"synthetic timing"
     retained = tester.clip_path(tmp_path, "session", 1, keep=True)
     retained.parent.mkdir(parents=True)
     retained.write_bytes(b"video")
@@ -837,6 +838,60 @@ def test_recorder_normalizes_valid_capture_and_records_real_timestamps(
     assert observed["fps"] == 30 and observed["size"] == (640, 480)
     assert observed["released"] is True
     assert path.is_file()
+    tester.cleanup_temporary_clip(tmp_path, path)
+    assert not path.exists()
+    assert not tester.temporal.sidecar_path(path).exists()
+
+
+def test_cleanup_preserves_sidecar_replaced_after_capture(tmp_path, monkeypatch):
+    timestamps = [round(index * 1_000_000_000 / 30) for index in range(121)]
+    camera, path, clock, _, _ = _synthetic_temporal_capture(
+        tmp_path, monkeypatch, timestamps
+    )
+    tester.record_clip(camera, path, clock_ns=clock)
+    sidecar = tester.temporal.sidecar_path(path)
+    sidecar.rename(sidecar.with_suffix(".original"))
+    sidecar.write_bytes(b"different attempt")
+    tester.cleanup_temporary_clip(tmp_path, path)
+    assert not path.exists()
+    assert sidecar.read_bytes() == b"different attempt"
+
+
+def test_failed_new_attempt_cannot_cleanup_prior_attempt(tmp_path, monkeypatch):
+    timestamps = [round(index * 1_000_000_000 / 30) for index in range(121)]
+    camera, path, clock, _, _ = _synthetic_temporal_capture(
+        tmp_path, monkeypatch, timestamps
+    )
+    tester.record_clip(camera, path, clock_ns=clock)
+    original_video = path.read_bytes()
+    sidecar = tester.temporal.sidecar_path(path)
+    original_sidecar = sidecar.read_bytes()
+    with pytest.raises(FileExistsError):
+        tester.record_clip(camera, path, clock_ns=clock)
+    tester.cleanup_temporary_clip(tmp_path, path)
+    assert path.read_bytes() == original_video
+    assert sidecar.read_bytes() == original_sidecar
+
+
+def test_colliding_thread_cannot_invalidate_owners_cleanup(tmp_path, monkeypatch):
+    timestamps = [round(index * 1_000_000_000 / 30) for index in range(121)]
+    camera, path, clock, _, _ = _synthetic_temporal_capture(
+        tmp_path, monkeypatch, timestamps
+    )
+    tester.record_clip(camera, path, clock_ns=clock)
+
+    def competing_attempt():
+        try:
+            tester.record_clip(camera, path, clock_ns=clock)
+        except FileExistsError:
+            tester.cleanup_temporary_clip(tmp_path, path)
+
+    thread = Thread(target=competing_attempt)
+    thread.start()
+    thread.join()
+    assert path.exists()
+    tester.cleanup_temporary_clip(tmp_path, path)
+    assert not path.exists()
 
 
 @pytest.mark.parametrize(
