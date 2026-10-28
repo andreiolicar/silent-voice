@@ -9,7 +9,7 @@ Conferência local em 27/10/2026. Referências originais e preservação de hist
 - Instalações limpas selecionadas de frontend e API passaram sem instalar o runtime mobile. Importação real do módulo de autenticação passou na instalação reduzida da API.
 - Mobile: lint, tipos e Prettier aprovados; exportações web, iOS e Android aprovadas. Expo Doctor voltou ao baseline 20/21: seis recomendações de patches já existentes (Expo/constants/font/linking/router/splash). O SDK foi preservado.
 - Os três SQL de migração continuam idênticos ao deploy anterior; o contrato OpenUI gerado também.
-- Chromium/preview integrado: login, rota de redefinição inválida e landing renderizam seus respectivos apps. Inter e ausência de overflow em 1280 px conferidos. As URLs públicas não mudaram.
+- Chromium/preview integrado: login, rota de redefinição inválida e landing renderizam seus respectivos apps. Inter e ausência de overflow em 1280 px conferidos. As URLs públicas não mudaram. Pergunta real ao GLM gerou uma resposta OpenUI completa no preview, sem erros de console.
 
 ## Limitações e avisos
 
@@ -18,3 +18,5 @@ Exportação não comprova execução em aparelho nem protocolo físico. Android
 `npm audit` encontrou 12 avisos na instalação completa (5 baixos, 3 moderados, 4 altos), concentrados na ferramenta Expo/Vite e suas dependências. A instalação reduzida da API reportou zero. Não foi aplicado `audit fix --force` ou downgrade de Expo. A atualização de ferramentas deve ser tratada em ciclo separado, sem confundir esses avisos com falha dos fluxos testados.
 
 Não foram consumidas tentativas do login do proprietário para validar o corte. O ensaio de autenticação usa banco e identidade sintéticos; a checagem de produção preserva sessões e configuração existentes.
+
+Revisão independente da migração: nenhum achado crítico, importante ou menor. Históricos, 409 hashes dos snapshots, resolução de runtimes e rotas foram reconferidos. Publicação ainda exige o aceite remoto descrito em `deployment.md`.
