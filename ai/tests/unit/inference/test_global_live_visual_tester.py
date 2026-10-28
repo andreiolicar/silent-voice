@@ -257,13 +257,24 @@ def test_preview_cli_routes_to_visual_only_mode(monkeypatch):
     ]
 
 
-def test_cli_forwards_explicit_camera_backend_without_changing_default(monkeypatch):
+def test_cli_forwards_explicit_camera_backend_without_changing_default(
+    monkeypatch, tmp_path
+):
     cli = importlib.import_module("scripts.demo.global_live_visual_tester")
     observed = []
     monkeypatch.setattr(
         cli, "launch_global_tester", lambda *a, **kw: observed.append(kw)
     )
-    cli.main(["--camera-index", "1", "--camera-backend", "MSMF"])
+    cli.main(
+        [
+            "--artifact-root",
+            str(tmp_path),
+            "--camera-index",
+            "1",
+            "--camera-backend",
+            "MSMF",
+        ]
+    )
     assert observed == [
         {
             "camera_index": 1,
@@ -788,14 +799,16 @@ def test_fps_diagnostic_mode_skips_redraw_but_drains_capture_events(
     assert app._fps_mode == "NORMAL"
 
 
-def test_fps_diagnostic_cli_option_reaches_window(monkeypatch):
+def test_fps_diagnostic_cli_option_reaches_window(monkeypatch, tmp_path):
     from scripts.demo import global_live_visual_tester as cli
 
     options = []
     monkeypatch.setattr(
         cli, "launch_global_tester", lambda root, **kw: options.append(kw)
     )
-    cli.main(["--camera-index", "1", "--fps-diagnostic"])
+    cli.main(
+        ["--artifact-root", str(tmp_path), "--camera-index", "1", "--fps-diagnostic"]
+    )
     assert options == [
         {
             "camera_index": 1,
@@ -806,7 +819,7 @@ def test_fps_diagnostic_cli_option_reaches_window(monkeypatch):
     ]
 
 
-def test_auto_fps_diagnostic_cli_avoids_live_tester_and_models(monkeypatch):
+def test_auto_fps_diagnostic_cli_avoids_live_tester_and_models(monkeypatch, tmp_path):
     from scripts.demo import global_live_visual_tester as cli
 
     calls = []
@@ -819,11 +832,19 @@ def test_auto_fps_diagnostic_cli_avoids_live_tester_and_models(monkeypatch):
         lambda root, *, camera_index: calls.append((root, camera_index)),
         raising=False,
     )
-    cli.main(["--camera-index", "1", "--fps-auto-diagnostic"])
-    assert calls == [(cli.ROOT, 1)]
+    cli.main(
+        [
+            "--artifact-root",
+            str(tmp_path),
+            "--camera-index",
+            "1",
+            "--fps-auto-diagnostic",
+        ]
+    )
+    assert calls == [(tmp_path.resolve(), 1)]
 
 
-def test_auto_fps_diagnostic_cli_forwards_backend(monkeypatch):
+def test_auto_fps_diagnostic_cli_forwards_backend(monkeypatch, tmp_path):
     from scripts.demo import global_live_visual_tester as cli
 
     calls = []
@@ -835,9 +856,17 @@ def test_auto_fps_diagnostic_cli_forwards_backend(monkeypatch):
         ),
     )
     cli.main(
-        ["--camera-index", "1", "--camera-backend", "MSMF", "--fps-auto-diagnostic"]
+        [
+            "--artifact-root",
+            str(tmp_path),
+            "--camera-index",
+            "1",
+            "--camera-backend",
+            "MSMF",
+            "--fps-auto-diagnostic",
+        ]
     )
-    assert calls == [(cli.ROOT, 1, "MSMF")]
+    assert calls == [(tmp_path.resolve(), 1, "MSMF")]
 
 
 def test_auto_fps_diagnostic_collects_abab_without_media(tmp_path, monkeypatch):

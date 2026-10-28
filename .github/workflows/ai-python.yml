@@ -1,0 +1,31 @@
+name: Validate AI Python
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ai
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12.10'
+          cache: pip
+          cache-dependency-path: ai/requirements-live-tester-win-cp312.lock
+      - name: Create isolated virtualenv
+        run: python -m venv .venv
+      - name: Install locked dependencies
+        run: .\.venv\Scripts\python.exe -m pip install --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-live-tester-win-cp312.lock
+      - name: Install project
+        run: .\.venv\Scripts\python.exe -m pip install --no-build-isolation --no-deps -e .
+      - run: .\.venv\Scripts\python.exe -m pip check
+      - run: .\.venv\Scripts\python.exe -m black --check .
+      - run: .\.venv\Scripts\python.exe -m flake8 src tests scripts
+      - run: .\.venv\Scripts\python.exe -m pytest tests -q -ra -p no:cacheprovider

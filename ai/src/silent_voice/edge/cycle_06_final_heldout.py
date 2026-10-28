@@ -424,7 +424,9 @@ def _canonical_plan_sha256(path: Path) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def _frozen_implementation_hashes(root: Path, config: dict) -> dict[str, str]:
+def _frozen_implementation_hashes(
+    root: Path, config: dict, *, implementation_root: Path | None = None
+) -> dict[str, str]:
     recorded = {
         "runtime_implementation_sha256": config["runtime_implementation_sha256"],
         "roi_implementation_sha256": config["preprocessing"]["roi_definition"][
@@ -449,11 +451,23 @@ def _frozen_implementation_hashes(root: Path, config: dict) -> dict[str, str]:
             "threshold_selection_implementation_sha256"
         ],
     }
+    if implementation_root is None:
+        paths = {name: Path(root) / IMPLEMENTATION_FILES[name] for name in recorded}
+    else:
+        from scripts.evaluation.qc_rejection_4_heldout import _safe_path
+
+        paths = {}
+        for name in recorded:
+            relative = Path(IMPLEMENTATION_FILES[name])
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ValueError("Path de implementação não autorizado.")
+            try:
+                relative = relative.relative_to("src/silent_voice")
+            except ValueError as error:
+                raise ValueError("Path de implementação não autorizado.") from error
+            paths[name] = _safe_path(implementation_root, relative)
     return check_hashes(
-        {
-            name: (root / IMPLEMENTATION_FILES[name], expected)
-            for name, expected in recorded.items()
-        }
+        {name: (paths[name], expected) for name, expected in recorded.items()}
     )
 
 

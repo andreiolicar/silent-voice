@@ -288,7 +288,9 @@ def _ensure_unconsumed(root: Path) -> None:
             )
 
 
-def _validate_positive_config(root: Path, config: dict) -> dict:
+def _validate_positive_config(
+    root: Path, config: dict, *, implementation_root: Path | None = None
+) -> dict:
     # Estes helpers validam bytes/metadados; não carregam pesos ou sessões ONNX.
     from silent_voice.edge.cycle_06_final_heldout import _frozen_implementation_hashes
     from silent_voice.edge.preheldout_freeze import (
@@ -308,7 +310,11 @@ def _validate_positive_config(root: Path, config: dict) -> dict:
             or config[section]["sha256"] != PROVENANCE[name][1]
         ):
             raise ValueError("Artefato positivo substituído.")
-    return _frozen_implementation_hashes(root, config)
+    if implementation_root is None:
+        return _frozen_implementation_hashes(root, config)
+    return _frozen_implementation_hashes(
+        root, config, implementation_root=implementation_root
+    )
 
 
 def _validate_state_document(root: Path, execution: bool = False) -> None:

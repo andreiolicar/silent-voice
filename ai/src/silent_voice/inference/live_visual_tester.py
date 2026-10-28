@@ -6,6 +6,7 @@ import math
 import os
 import re
 import statistics
+import threading
 import time
 import unicodedata
 from collections import Counter
@@ -63,6 +64,7 @@ LIVE_PROVENANCE_NAMES = (
     "edge_centroids",
     "edge_origin_manifest",
 )
+PUBLIC_PROVENANCE_NAMES = ("reference_freeze", "edge_manifest", "edge_freeze")
 
 
 class CaptureCancelled(Exception):
@@ -86,12 +88,16 @@ def _sha256(path: Path) -> str:
 def verify_frozen_sources(
     root: Path,
     *,
+    public_root: Path | None = None,
     freeze_sha256: str = FINAL_FREEZE_SHA256,
     result_sha256: str = FINAL_RESULT_SHA256,
 ) -> dict:
     """Valida R4 fechado e artefatos sem abrir held-out, câmera ou modelos."""
     root = Path(root).resolve()
-    freeze_path = root / FINAL_FREEZE_PATH
+    public_root = Path(
+        public_root if public_root is not None else temporal.ROOT
+    ).resolve()
+    freeze_path = r4._safe_path(root, FINAL_FREEZE_PATH)
     if _sha256(freeze_path) != freeze_sha256:
         raise ValueError("SHA-256 do freeze final R4 divergente.")
     freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
@@ -119,7 +125,14 @@ def verify_frozen_sources(
     if freeze.get("edge_freeze_sha256") != EXPECTED_EDGE_FREEZE_SHA256:
         raise ValueError("SHA-256 do Edge freeze registrado divergiu.")
     records = {name: r4.PROVENANCE[name] for name in LIVE_PROVENANCE_NAMES}
-    provenance = r4.verify_provenance(root, records=records)
+    public_records = {name: records[name] for name in PUBLIC_PROVENANCE_NAMES}
+    private_records = {
+        name: record for name, record in records.items() if name not in public_records
+    }
+    provenance = {
+        **r4.verify_provenance(public_root, records=public_records),
+        **r4.verify_provenance(root, records=private_records),
+    }
     if any(
         freeze.get("provenance_sha256", {}).get(name) != value
         for name, value in provenance.items()
@@ -130,10 +143,14 @@ def verify_frozen_sources(
         recorded[name] != provenance[name] for name in ARTIFACT_PATHS
     ):
         raise ValueError("Inventário/SHA-256 de artefatos Edge R4 divergente.")
-    edge = json.loads((root / records["edge_freeze"][0]).read_bytes())
+    edge = json.loads(
+        r4._safe_path(public_root, records["edge_freeze"][0]).read_bytes()
+    )
     r4.validate_policy(edge)
     implementation = r4._validate_positive_config(
-        root, json.loads((root / records["edge_config"][0]).read_bytes())
+        root,
+        json.loads(r4._safe_path(root, records["edge_config"][0]).read_bytes()),
+        implementation_root=Path(__file__).resolve().parents[1],
     )
     if (
         ort.__version__ != EXPECTED_RUNTIME
@@ -248,14 +265,29 @@ def clip_path(root: Path, session_id: str, number: int, *, keep: bool) -> Path:
     return ensure_diagnostic_path(root, Path(root) / relative)
 
 
+_temporary_ownership = threading.local()
+
+
+def _owned_clips():
+    if not hasattr(_temporary_ownership, "clips"):
+        _temporary_ownership.clips = {}
+    return _temporary_ownership.clips
+
+
 def cleanup_temporary_clip(root: Path, path: Path) -> None:
     """Remove somente o MP4 temporário e seu timing criado pelo Live Tester."""
     target = ensure_diagnostic_path(root, path)
     temporary = (Path(root).resolve() / DIAGNOSTIC_ROOT / "tmp").resolve()
     if not target.is_relative_to(temporary):
         raise ValueError("Somente clipe temporário pode ser removido.")
-    target.unlink(missing_ok=True)
-    temporal.sidecar_path(target).unlink(missing_ok=True)
+    identities = _owned_clips().pop(target, None)
+    if identities is None:
+        return
+    for candidate, identity in zip((target, temporal.sidecar_path(target)), identities):
+        if not candidate.is_symlink() and candidate.exists():
+            current = candidate.stat()
+            if (current.st_dev, current.st_ino) == (identity.st_dev, identity.st_ino):
+                candidate.unlink()
 
 
 def mark_retained_clip(root: Path, path: Path) -> Path:
@@ -469,9 +501,11 @@ def record_clip(
     show_frame=None,
     read_key=None,
     diagnostic_callback=None,
+    cleanup_on_error=True,
 ) -> dict:
     """Valida aquisição monotônica e grava 121 posições temporais a 30 FPS."""
     path = Path(path)
+    _owned_clips().pop(path.resolve(), None)
     if path.exists() or temporal.sidecar_path(path).exists():
         raise FileExistsError(f"Clipe de demo já existe: {path}")
     policy = temporal.load_policy(version=2)
@@ -573,7 +607,19 @@ def record_clip(
             f"{report['acquisition_duration_seconds']:.3f} s, "
             f"{report['source_fps_effective']:.2f} FPS."
         )
-    return temporal.write_video_with_sidecar(path, frames, timestamps_ns, policy)
+
+    def remember_ownership(video_identity, sidecar_identity):
+        if cleanup_on_error:
+            _owned_clips()[path.resolve()] = (video_identity, sidecar_identity)
+
+    return temporal.write_video_with_sidecar(
+        path,
+        frames,
+        timestamps_ns,
+        policy,
+        cleanup_on_error=cleanup_on_error,
+        ownership_callback=remember_ownership,
+    )
 
 
 def _ascii_for_opencv(value: str) -> str:
@@ -684,6 +730,7 @@ def run_live_session(
                 timing = record_clip(
                     camera,
                     video,
+                    cleanup_on_error=not keep_clips,
                     show_frame=lambda image, remaining: _show_overlay(
                         image, [f"GRAVANDO: {remaining:.1f} s"], compact=True
                     ),
