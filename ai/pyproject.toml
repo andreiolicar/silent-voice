@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "silent-voice-ai"
+version = "0.1.0"
+description = "AI Engine multimodal do projeto Silent Voice."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy==1.26.4",
+    "mediapipe==0.10.21",
+    "opencv-contrib-python==4.10.0.84",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.2",
+    "black==25.1.0",
+    "flake8==7.3.0",
+]
+training = [
+    "torch==2.14.0",
+    "scikit-learn==1.6.1",
+]
+pretrained = [
+    "torch==2.14.0",
+    "torchvision==0.29.0",
+    "timm==0.9.16",
+]
+live-tester = [
+    "Pillow==12.3.0",
+    "onnxruntime==1.30.0",
+    "torch==2.14.0",
+    "scipy==1.17.1",
+]
+audio = [
+    "sounddevice==0.5.6",
+    "scipy==1.17.1",
+    "openai-whisper==20250625",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
