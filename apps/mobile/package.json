@@ -43,7 +43,8 @@
     "eslint-config-expo": "57.0.2",
     "prettier": "3.9.6",
     "react-test-renderer": "19.2.3",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "@babel/core": "7.29.7"
   },
   "scripts": {
     "start": "expo start",

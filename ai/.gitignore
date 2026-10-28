@@ -1,0 +1,12 @@
+datasets/
+artifacts/
+runs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.h5
+*.hdf5
+*.gguf

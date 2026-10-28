@@ -45,3 +45,14 @@ test('an incomplete build never removes the previous published output or source 
   await assert.rejects(assembleWeb({ siteDir: outDir, adminDir: outDir, outDir: root }), /overlap|source|unsafe/i)
   assert.equal(await readFile(join(outDir, 'index.html'), 'utf8'), 'previous')
 })
+
+test('Expo transforms can load Babel and native modules share the application dependencies', () => {
+  const mobile = createRequire(new URL('../apps/mobile/package.json', import.meta.url))
+  const expo = createRequire(mobile.resolve('expo/package.json'))
+  const preset = createRequire(expo.resolve('babel-preset-expo'))
+  assert.equal(preset('@babel/core/package.json').version, '7.29.7')
+  const asset = createRequire(expo.resolve('expo-asset/package.json'))
+  assert.equal(asset.resolve('expo-constants'), mobile.resolve('expo-constants'))
+  const router = createRequire(mobile.resolve('expo-router/package.json'))
+  assert.equal(expo.resolve('@expo/log-box/package.json'), router.resolve('@expo/log-box/package.json'))
+})

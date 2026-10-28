@@ -1,17 +1,33 @@
+# Configuration reference for the TWO EXISTING services; do not create duplicates.
 # Free Render frontend + Node API. PostgreSQL is managed externally by Neon.
 services:
   - type: web
     runtime: static
     name: silent-voice-site
-    repo: https://github.com/andreiolicar/silent-voice-site
-    branch: deploy/static-frontend
+    repo: https://github.com/andreiolicar/silent-voice
+    branch: main
     autoDeployTrigger: commit
-    buildCommand: npm ci --legacy-peer-deps --include=dev && npm run build
+    buildCommand: npm ci --workspace @silent-voice/site --workspace @silent-voice/admin --workspace @silent-voice/web-ui --workspace @silent-voice/contracts --workspace @silent-voice/http-client --include=dev && npm run build:web
     staticPublishPath: dist
+    envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
     routes:
       - type: rewrite
         source: /api/*
         destination: https://silent-voice-api.onrender.com/api/*
+      - type: rewrite
+        source: /admin
+        destination: /admin/index.html
+      - type: rewrite
+        source: /admin/*
+        destination: /admin/index.html
+      - type: rewrite
+        source: /conta
+        destination: /admin/index.html
+      - type: rewrite
+        source: /conta/*
+        destination: /admin/index.html
       - type: rewrite
         source: /*
         destination: /index.html
@@ -25,15 +41,17 @@ services:
   - type: web
     runtime: node
     name: silent-voice-api
-    repo: https://github.com/andreiolicar/silent-voice-site
-    branch: deploy/static-frontend
+    repo: https://github.com/andreiolicar/silent-voice
+    branch: main
     region: oregon
     plan: free
     autoDeployTrigger: commit
-    buildCommand: npm ci --legacy-peer-deps --include=dev && npm run build
-    startCommand: npm start
+    buildCommand: npm ci --workspace @silent-voice/api --workspace @silent-voice/contracts --include=dev && npm run build:api
+    startCommand: npm run start --workspace @silent-voice/api
     healthCheckPath: /api/health
     envVars:
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
       - key: NODE_ENV
         value: production
       - key: APP_ORIGIN
@@ -43,9 +61,9 @@ services:
       - key: ZAI_MODEL
         value: glm-4.5-flash
       - key: SESSION_SECRET
-        generateValue: true
+        sync: false
       - key: BETTER_AUTH_SECRET
-        generateValue: true
+        sync: false
       - key: BETTER_AUTH_URL
         value: https://www.silentvoice.com.br
       - key: AUTH_EMAIL_FROM

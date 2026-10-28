@@ -1,0 +1,32 @@
+[
+  {
+    "type": "rewrite",
+    "source": "/api/*",
+    "destination": "https://silent-voice-api.onrender.com/api/*"
+  },
+  {
+    "type": "rewrite",
+    "source": "/admin",
+    "destination": "/admin/index.html"
+  },
+  {
+    "type": "rewrite",
+    "source": "/admin/*",
+    "destination": "/admin/index.html"
+  },
+  {
+    "type": "rewrite",
+    "source": "/conta",
+    "destination": "/admin/index.html"
+  },
+  {
+    "type": "rewrite",
+    "source": "/conta/*",
+    "destination": "/admin/index.html"
+  },
+  {
+    "type": "rewrite",
+    "source": "/*",
+    "destination": "/index.html"
+  }
+]

@@ -5,7 +5,7 @@
 Silent Voice Mobile is the React Native application for the Silent Voice assistive communication system.
 
 Root:
-`C:\Users\USER\Desktop\silent-voice-mobile`
+`apps/mobile/` neste monorepo. Instale dependências na raiz com `npm ci`; use os scripts de workspace.
 
 ## Stack
 

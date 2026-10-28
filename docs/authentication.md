@@ -4,7 +4,7 @@ Site e aplicativo usam Better Auth 1.7.14, com `@better-auth/expo` na mesma vers
 
 ## Configuração
 
-Instale com Node 24 e `npm ci --legacy-peer-deps`. O flag mantém a instalação reproduzível sem adaptadores/frameworks opcionais do Better Auth. Em produção:
+Instale com Node 24 e `npm ci`. O flag mantém a instalação reproduzível sem adaptadores/frameworks opcionais do Better Auth. Em produção:
 
 - `DATABASE_URL`: conexão PostgreSQL com pool.
 - `DATABASE_URL_UNPOOLED`: conexão direta para migrações e backup.
@@ -56,8 +56,8 @@ Em incidente, interromper novas alterações administrativas e voltar frontend/A
 npm test
 npm run typecheck
 npm run build
-TEST_DATABASE_URL_FILE=/caminho/privado/url-isolada node --experimental-strip-types --test scripts/postgres.integration.test.mjs
-AUTH_TEST_DATABASE_URL_FILE=/caminho/privado/url-isolada node --experimental-strip-types --test scripts/unified-auth-migration.test.mjs
+TEST_DATABASE_URL_FILE=/caminho/privado/url-isolada node --experimental-strip-types --test apps/api/tests/postgres.integration.test.mjs
+AUTH_TEST_DATABASE_URL_FILE=/caminho/privado/url-isolada node --experimental-strip-types --test apps/api/tests/unified-auth-migration.test.mjs
 ```
 
 No mobile: testes, lint, typecheck, formatação, verificação de dependências/Expo Doctor e exportações web/iOS/Android. Exportação não substitui teste nativo. Registre separadamente qualquer falha de simulador, deep link ou dispositivo físico. Nenhuma integração USB nova é introduzida por esta autenticação.
