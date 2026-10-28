@@ -1,0 +1,59 @@
+{
+  "candidate_id": "R4_REFERENCE_BANK_TOP3_GLOBAL",
+  "decision_parity": "144/144",
+  "embedding_dimension": 1664,
+  "emitted_result_parity": "144/144",
+  "format_version": 1,
+  "heldouts_opened": false,
+  "host_comparison": "Python float(score) >= exact float threshold",
+  "k": 3,
+  "labels": [
+    "SIM",
+    "NÃO",
+    "AJUDA",
+    "ÁGUA",
+    "BANHEIRO",
+    "PARAR"
+  ],
+  "live_tester_updated_to_r4": false,
+  "max_abs_score_error_tolerance": 1e-05,
+  "max_absolute_score_error": 9.80548276352522e-07,
+  "normalization": "reference float64 L2 norm > 1e-12; scorer FP32 L2 query",
+  "operator": ">=",
+  "opset": 17,
+  "parity_corpus": "rejection_4_diagnostic",
+  "parity_record_count": 144,
+  "parity_result_sha256": "a43dfec8a36e6a17f9a78737a269d2b55668449feaf87f3a8ec6b4453aba90b9",
+  "pipeline_fingerprint_sha256": "e8394f470520f61d096bc0f1a4f5997f5ae5692af412707c4905519ae602c48b",
+  "positive_artifact_sha256": {
+    "classifier": "eb299d65e4f2b9a15108f79b8044355068911d2180161d46806a9c0269fa9261",
+    "edge_centroids": "d7cece625425d09cb313830e0491121b42d116f409bd400bf9c18f7ea53e0a61",
+    "encoder": "ff81172639263a6a74975e7147d63e62af944b947e48f53fba6980af732c91a7",
+    "positive_checkpoint": "33a0d1f1f564dc75f83ebc08fc2dca255840da60ca40a9c41fdd36d4ad0cc6a2",
+    "positive_config": "29b7df189ac8f3b5b01ce2b5b5b03870dd37b678ccb6f6f536e8ac9debaa7a1e"
+  },
+  "positive_label_parity": "144/144",
+  "preprocessing_config_fingerprints": {
+    "edge_config_sha256": "a761de851e7dc22ed8974dbd3dc98e23963d384057488bdfe9aae0ef406eb4d4",
+    "historical_roi_manifest_sha256": "e6f8b2952f40ccfa8c2988d0909c35a14dd6ae42821e9fc55cb7f5abe3995ee2",
+    "historical_sampling_manifest_sha256": "13a45412538e9a67756884dbafcdb3d22bbfd0126892dcf2e0f4e8f52db49b17",
+    "positive_config_sha256": "29b7df189ac8f3b5b01ce2b5b5b03870dd37b678ccb6f6f536e8ac9debaa7a1e"
+  },
+  "provider": "CPUExecutionProvider",
+  "reference_bank_manifest_sha256": "9d1ea4aa1ad869a6dc9076ecbbd9f81510b262c5c293600d54a84908a47456b5",
+  "reference_bank_path": "data/processed/models/rejection_4/rejection_4_top3_reference_bank.npz",
+  "reference_bank_sha256": "e0fefb568ee3f689c75354cd1c75696d7cef91e215bd7cb3a99039ecf092a34c",
+  "reference_policy_freeze_sha256": "79015c1b7f39ae64027a1a69253ba0411cdb8351a339d0a687d0ec4e75714a3c",
+  "runtime": "1.30.0",
+  "scorer_inputs": {
+    "clip_embedding": "float32[1,1664]",
+    "predicted_label_index": "int64[1]"
+  },
+  "scorer_output": {
+    "top3_pred_score": "float32[1]"
+  },
+  "scorer_path": "data/processed/models/rejection_4/rejection_4_top3_policy.onnx",
+  "scorer_sha256": "28b214850ce53fdcb7170c0fab52620cf8a6c97c2be712092686658b81d5169f",
+  "state": "REJECTION_4_EDGE_POLICY_FROZEN",
+  "threshold": 0.5666271450980487
+}
