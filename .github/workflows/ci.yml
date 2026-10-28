@@ -25,3 +25,21 @@ jobs:
       - run: npm run check:mobile
       - name: Export Expo web, iOS and Android bundles
         run: npm exec --workspace @silent-voice/mobile -- expo export --platform all
+
+  deploy-builds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        target: [web, api]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm run ci:${{ matrix.target }}
+      - run: npm run build:${{ matrix.target }}
+      - name: Import API authentication runtime
+        if: matrix.target == 'api'
+        run: node --experimental-strip-types --input-type=module -e 'await import("./apps/api/src/auth/better-auth.ts")'

@@ -20,13 +20,15 @@
     "test": "node --test scripts/*.test.mjs && npm test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build:web && npm run build:api",
-    "build:web": "npm run build --workspace @silent-voice/site && npm run build --workspace @silent-voice/admin && node infra/build-web.mjs",
+    "build:web": "node scripts/check-web-install.mjs && npm run build --workspace @silent-voice/site && npm run build --workspace @silent-voice/admin && node infra/build-web.mjs",
     "build:api": "npm run build --workspace @silent-voice/api",
     "check:mobile": "npm run lint --workspace @silent-voice/mobile && npm run typecheck --workspace @silent-voice/mobile && npm run format:check --workspace @silent-voice/mobile",
     "admin:create": "npm run admin:create --workspace @silent-voice/api --",
     "db:migrate": "npm run db:migrate --workspace @silent-voice/api",
     "preview": "node scripts/preview.mjs",
-    "start": "npm run start --workspace @silent-voice/api"
+    "start": "npm run start --workspace @silent-voice/api",
+    "ci:web": "npm ci --include-workspace-root --workspace @silent-voice/site --workspace @silent-voice/admin --workspace @silent-voice/web-ui --workspace @silent-voice/contracts --workspace @silent-voice/http-client --include=dev",
+    "ci:api": "npm ci --workspace @silent-voice/api --workspace @silent-voice/contracts --include=dev"
   },
   "devDependencies": {
     "@neon/config": "1.9.2",

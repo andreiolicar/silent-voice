@@ -7,7 +7,7 @@ services:
     repo: https://github.com/andreiolicar/silent-voice
     branch: main
     autoDeployTrigger: commit
-    buildCommand: npm ci --workspace @silent-voice/site --workspace @silent-voice/admin --workspace @silent-voice/web-ui --workspace @silent-voice/contracts --workspace @silent-voice/http-client --include=dev && npm run build:web
+    buildCommand: npm run ci:web && npm run build:web
     staticPublishPath: dist
     envVars:
       - key: SKIP_INSTALL_DEPS
@@ -46,7 +46,7 @@ services:
     region: oregon
     plan: free
     autoDeployTrigger: commit
-    buildCommand: npm ci --workspace @silent-voice/api --workspace @silent-voice/contracts --include=dev && npm run build:api
+    buildCommand: npm run ci:api && npm run build:api
     startCommand: npm run start --workspace @silent-voice/api
     healthCheckPath: /api/health
     envVars:

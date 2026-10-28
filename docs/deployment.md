@@ -14,19 +14,19 @@ Banco PostgreSQL externo no Neon. Nenhum serviço adicional ou upgrade de plano 
 Frontend:
 
 ```sh
-npm ci --workspace @silent-voice/site --workspace @silent-voice/admin --workspace @silent-voice/web-ui --workspace @silent-voice/contracts --workspace @silent-voice/http-client --include=dev
+npm run ci:web
 npm run build:web
 ```
 
 API:
 
 ```sh
-npm ci --workspace @silent-voice/api --workspace @silent-voice/contracts --include=dev
+npm run ci:api
 npm run build:api
 npm run start --workspace @silent-voice/api
 ```
 
-Raiz do serviço vazia (raiz do repositório), Node 24, `SKIP_INSTALL_DEPS=true` para não executar uma instalação automática completa antes da selecionada. `.npmrc` e lockfile são compartilhados. O comando build da API valida os tipos; Node 24 executa o TypeScript suportado por strip-types.
+Raiz do serviço vazia (raiz do repositório), Node 24, `SKIP_INSTALL_DEPS=true` para não executar uma instalação automática completa antes da selecionada. `.npmrc` e lockfile são compartilhados. `ci:web` inclui as ferramentas da raiz porque o gerador OpenUI executa CJS antes do Vite e precisa do peer React. Isso não instala Expo/React Native. A CI também exercita instalações reduzidas em runners independentes, sem poder resolver dependências de um checkout pai. O comando build da API valida os tipos; Node 24 executa o TypeScript suportado por strip-types.
 
 ## Rotas e domínios
 
