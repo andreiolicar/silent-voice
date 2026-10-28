@@ -7,6 +7,6 @@ const require = createRequire(import.meta.url)
 const { silentVoiceLibrary } =
   require('../src/features/chatbot/response-library.tsx') as typeof import('../src/features/chatbot/response-library')
 await writeFile(
-  new URL('../shared/openui-spec.json', import.meta.url),
+  new URL(import.meta.resolve('@silent-voice/contracts/openui-spec.json')),
   `${JSON.stringify(silentVoiceLibrary.toSpec(), null, 2)}\n`
 )

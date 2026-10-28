@@ -1,0 +1,37 @@
+{
+  "name": "silent-voice",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:site": "npm run dev --workspace @silent-voice/site",
+    "dev:admin": "npm run dev --workspace @silent-voice/admin",
+    "dev:api": "npm run dev --workspace @silent-voice/api",
+    "dev:mobile": "npm start --workspace @silent-voice/mobile",
+    "test": "node --test scripts/*.test.mjs && npm test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm run build --workspace @silent-voice/site && npm run build --workspace @silent-voice/admin && node infra/build-web.mjs",
+    "build:api": "npm run build --workspace @silent-voice/api",
+    "check:mobile": "npm run lint --workspace @silent-voice/mobile && npm run typecheck --workspace @silent-voice/mobile && npm run format:check --workspace @silent-voice/mobile",
+    "admin:create": "npm run admin:create --workspace @silent-voice/api --",
+    "db:migrate": "npm run db:migrate --workspace @silent-voice/api",
+    "preview": "node scripts/preview.mjs"
+  },
+  "devDependencies": {
+    "@neon/config": "1.9.2"
+  },
+  "overrides": {
+    "katex": "^0.19.0",
+    "@openuidev/lang-core": "1.0.1"
+  }
+}

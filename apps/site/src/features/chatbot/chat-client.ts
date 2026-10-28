@@ -1,6 +1,6 @@
-import type { ChatRequest, ChatStreamEvent } from '../../../shared/chat'
+import type { ChatRequest, ChatStreamEvent } from '@silent-voice/contracts/chat'
 import { consumeChatStream } from './sse-parser'
-import { waitForApi } from './api-readiness'
+import { waitForApi } from '@silent-voice/http-client/readiness'
 export type ChatTransport = (
   request: ChatRequest,
   signal: AbortSignal,

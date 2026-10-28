@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ChatMessage } from '../../../shared/chat'
+import type { ChatMessage } from '@silent-voice/contracts/chat'
 import { streamChat } from './chat-client'
 import type { ChatTransport } from './chat-client'
 export type ChatPhase =

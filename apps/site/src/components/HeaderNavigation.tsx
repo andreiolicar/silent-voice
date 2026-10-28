@@ -1,5 +1,5 @@
 import { siteLinks } from '../site-links'
-import { ActionControl } from './ui/ActionControl'
+import { ActionControl } from '@silent-voice/web-ui/ActionControl'
 
 const navigation = [
   { key: 'inicio', label: 'Início', width: 52 },

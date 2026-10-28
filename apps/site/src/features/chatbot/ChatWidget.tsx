@@ -1,7 +1,7 @@
 import './openui-bootstrap'
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import type { ChatTransport } from './chat-client'
-import { LoadBoundary } from '../../components/LoadBoundary'
+import { LoadBoundary } from '@silent-voice/web-ui/LoadBoundary'
 import './chat-widget.css'
 const ChatPanel = lazy(() => import('./ChatPanel'))
 export function ChatWidget({

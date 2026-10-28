@@ -1,5 +1,5 @@
 import * as m from 'motion/react-m'
-import { GreenButton, WhiteButton } from './ui/Button'
+import { GreenButton, WhiteButton } from '@silent-voice/web-ui/Button'
 import { HeroArtwork } from './HeroArtwork'
 import { ImpactBand } from './ImpactBand'
 import { siteLinks } from '../site-links'

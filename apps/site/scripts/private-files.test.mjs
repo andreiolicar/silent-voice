@@ -15,11 +15,16 @@ test('development server never serves private database or backup files, includin
     `backups/${marker}.sqlite`,
     `backups/${marker}.dump`,
     `server/${marker}.txt`,
+    `../api/${marker}.txt`,
+    `../../.env.${marker}`,
+    `../../.superpowers/${marker}.txt`,
     `${marker}-configured`,
     `${marker}-configured-wal`,
     `.env.${marker}`,
     `${marker}.pem`,
   ]
+  await mkdir('../../.superpowers', { recursive: true })
+  await mkdir('server', { recursive: true })
   await mkdir('data', { recursive: true })
   await mkdir('backups', { recursive: true })
   for (const path of files)
@@ -38,7 +43,7 @@ test('development server never serves private database or backup files, includin
     await server.listen()
     const port = server.httpServer.address().port
     for (const path of files) {
-      for (const urlPath of [`/${path}`, `/@fs${resolve(path)}`]) {
+      for (const urlPath of [...(path.startsWith('../') ? [] : [`/${path}`]), `/@fs${resolve(path)}`]) {
         const response = await fetch(`http://127.0.0.1:${port}${urlPath}`)
         assert.ok(
           response.status === 403 || response.status === 404,

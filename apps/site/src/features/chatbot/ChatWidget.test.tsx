@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ChatRequest, ChatStreamEvent } from '../../../shared/chat'
+import type { ChatRequest, ChatStreamEvent } from '@silent-voice/contracts/chat'
 import type { ChatTransport } from './chat-client'
 import { ChatWidget } from './ChatWidget'
 function controlledTransport() {

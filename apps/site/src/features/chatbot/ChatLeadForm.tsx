@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
-import type { LeadInput, LeadProfile, LeadReceipt } from '../../../shared/leads'
-import { Input } from '../../components/ui/Input'
+import type { LeadInput, LeadProfile, LeadReceipt } from '@silent-voice/contracts/leads'
+import { Input } from '@silent-voice/web-ui/Input'
 import { ChatButton } from './ChatButton'
-import { waitForApi } from './api-readiness'
+import { waitForApi } from '@silent-voice/http-client/readiness'
 import './chat-lead-form.css'
 
 type Fields = {

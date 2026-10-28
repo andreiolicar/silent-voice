@@ -6,7 +6,7 @@ import { AppSection } from './components/AppSection'
 import { AudienceSection } from './components/AudienceSection'
 import { FaqSection } from './components/FaqSection'
 import { Footer } from './components/Footer'
-import { LoadBoundary } from './components/LoadBoundary'
+import { LoadBoundary } from '@silent-voice/web-ui/LoadBoundary'
 import { IntroProvider, useIntroState } from './intro/IntroProvider'
 import './styles/responsive.css'
 

@@ -1,6 +1,6 @@
 import { siteLinks } from '../site-links'
 import { SectionStar } from './SectionStar'
-import { ActionControl } from './ui/ActionControl'
+import { ActionControl } from '@silent-voice/web-ui/ActionControl'
 import './contact-pill.css'
 
 export function ContactPill({ className = '' }: { className?: string }) {

@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { useChatConversation } from '../useChatConversation'
 import type { ChatTransport } from '../chat-client'
-import type { ChatRequest, ChatStreamEvent } from '../../../../shared/chat'
+import type { ChatRequest, ChatStreamEvent } from '@silent-voice/contracts/chat'
 function controlled() {
   const pending: Array<{
     request: ChatRequest

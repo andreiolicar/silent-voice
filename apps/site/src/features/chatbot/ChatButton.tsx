@@ -1,5 +1,5 @@
 import type { ComponentPropsWithRef } from 'react'
-import '../../components/ui/button.css'
+import '@silent-voice/web-ui/button.css'
 import './chat-controls.css'
 
 type ChatButtonProps = ComponentPropsWithRef<'button'> & {

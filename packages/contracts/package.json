@@ -1,0 +1,12 @@
+{
+  "name": "@silent-voice/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./web": "./src/web.ts",
+    "./chat": "./src/chat.ts",
+    "./leads": "./src/leads.ts",
+    "./openui-spec.json": "./src/openui-spec.json"
+  }
+}

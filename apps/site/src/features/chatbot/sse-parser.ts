@@ -1,4 +1,4 @@
-import type { ChatStreamEvent } from '../../../shared/chat'
+import type { ChatStreamEvent } from '@silent-voice/contracts/chat'
 function parseEvent(data: string): ChatStreamEvent {
   const value: unknown = JSON.parse(data)
   if (!value || typeof value !== 'object') throw new Error('invalid_event')
