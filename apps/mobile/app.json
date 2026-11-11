@@ -8,6 +8,10 @@
     "scheme": "silentvoicemobile",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "br.com.silentvoice.mobile.dev",
+      "infoPlist": {
+        "NSCameraUsageDescription": "O Silent Voice usa a câmera frontal para um ensaio local de aquisição. Nenhuma imagem é salva ou enviada."
+      },
       "icon": "./assets/expo.icon"
     },
     "android": {

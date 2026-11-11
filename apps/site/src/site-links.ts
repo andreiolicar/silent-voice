@@ -3,9 +3,12 @@
 // feedback only. They have no click action or fake navigation.
 export const siteLinks: Record<string, string | undefined> = {
   inicio: '#inicio',
+  atuacao: '#atuacao',
+  solucao: '#capacidades',
+  assistentes: '#equipe',
   comunicacao: '#comunicacao',
   aplicativo: '#aplicativo',
-  paraQuem: '#para-quem',
+  paraQuem: '#atuacao',
   faq: '#faq',
   institucional: undefined,
   servicos: undefined,

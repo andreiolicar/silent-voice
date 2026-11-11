@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { expect, it, vi } from 'vitest'
 import { LazyMotion, domAnimation } from 'motion/react'
 import { Header } from './Header'
@@ -7,10 +7,75 @@ it('opens mobile navigation with every existing item and closes with Escape', ()
   render(<LazyMotion features={domAnimation} strict><Header /></LazyMotion>)
   const toggle = screen.getByRole('button', { name: 'Abrir menu' })
   expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  expect(document.getElementById('mobile-navigation')).toHaveAttribute('inert')
   fireEvent.click(toggle)
   expect(screen.getByRole('button', { name: 'Fechar menu' })).toHaveAttribute('aria-expanded', 'true')
   const panel = document.getElementById('mobile-navigation')!
-  for (const label of ['Início','Institucional','Serviços','Investimento','Contato','Participe']) expect(panel.textContent).toContain(label)
+  expect(panel).not.toHaveAttribute('inert')
+  for (const label of ['Início','Atuação','Solução','Assistentes IA','FAQ','Participe']) expect(panel.textContent).toContain(label)
   fireEvent.keyDown(panel, { key:'Escape' })
   expect(screen.getByRole('button', { name:'Abrir menu' })).toHaveAttribute('aria-expanded','false')
+  expect(toggle).toHaveFocus()
+  expect(panel).toHaveAttribute('aria-hidden', 'true')
+  expect(panel).toHaveAttribute('inert')
+})
+
+it('links each section and closes the mobile menu when a destination is selected', () => {
+  render(<LazyMotion features={domAnimation} strict><Header participateHref="#lista" /></LazyMotion>)
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }))
+  const panel = within(document.getElementById('mobile-navigation')!)
+  expect(panel.getByRole('link', { name: 'Início' })).toHaveAttribute('href', '#inicio')
+  expect(panel.getByRole('link', { name: 'Solução' })).toHaveAttribute('href', '#capacidades')
+  expect(panel.getByRole('link', { name: 'Assistentes IA' })).toHaveAttribute('href', '#equipe')
+  expect(panel.getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '#faq')
+  expect(panel.getByRole('link', { name: 'Atuação' })).toHaveAttribute('href', '#atuacao')
+  fireEvent.click(panel.getByRole('link', { name: 'Atuação' }))
+  expect(screen.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false')
+  fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }))
+  fireEvent.click(panel.getByRole('link', { name: 'FAQ' }))
+  expect(screen.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false')
+})
+
+it('dismisses on an outside pointer or when focus leaves the menu', () => {
+  render(<LazyMotion features={domAnimation} strict><Header /><button>Fora do menu</button></LazyMotion>)
+  const toggle = screen.getByRole('button', { name: 'Abrir menu' })
+  const outside = screen.getByRole('button', { name: 'Fora do menu' })
+  fireEvent.click(toggle)
+  fireEvent.pointerDown(document.getElementById('mobile-navigation')!)
+  expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  fireEvent.pointerDown(outside)
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  fireEvent.click(toggle)
+  fireEvent.blur(toggle, { relatedTarget: outside })
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+})
+
+it('closes after scrolling more than eight pixels from the opening position', () => {
+  const scrollY = vi.spyOn(window, 'scrollY', 'get').mockReturnValue(120)
+  render(<LazyMotion features={domAnimation} strict><Header /></LazyMotion>)
+  const toggle = screen.getByRole('button', { name: 'Abrir menu' })
+  fireEvent.click(toggle)
+  scrollY.mockReturnValue(128)
+  fireEvent.scroll(window)
+  expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  scrollY.mockReturnValue(129)
+  fireEvent.scroll(window)
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  scrollY.mockRestore()
+})
+
+it('closes when returning to desktop and does not reopen on returning to mobile', () => {
+  const media = new EventTarget() as MediaQueryList
+  Object.defineProperty(media, 'matches', { value: false, configurable: true })
+  const matchMedia = vi.spyOn(window, 'matchMedia').mockReturnValue(media)
+  render(<LazyMotion features={domAnimation} strict><Header /></LazyMotion>)
+  const toggle = screen.getByRole('button', { name: 'Abrir menu' })
+  fireEvent.click(toggle)
+  Object.defineProperty(media, 'matches', { value: true, configurable: true })
+  act(() => { media.dispatchEvent(new Event('change')) })
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  Object.defineProperty(media, 'matches', { value: false })
+  act(() => { media.dispatchEvent(new Event('change')) })
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  matchMedia.mockRestore()
 })

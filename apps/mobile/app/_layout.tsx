@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { IdentityBoundary } from '@/features/auth/IdentityBoundary';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
+import { iosLabEnabled } from '@/features/visual-recognition/lab-config';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +47,9 @@ function AuthenticatedStack() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="auth" />
+        <Stack.Protected guard={iosLabEnabled}>
+          <Stack.Screen name="ios-lab" />
+        </Stack.Protected>
         <Stack.Protected guard={!onboarding}>
           <Stack.Screen name="onboarding" />
         </Stack.Protected>

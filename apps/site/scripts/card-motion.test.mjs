@@ -1,6 +1,31 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { CONVERSATION_DURATION, sampleConversation, samplePhoneRing } from '../src/components/cards/conversation.ts'
+import { EXPRESSION_CYCLE_DURATION, sampleExpressionWiggle } from '../src/components/cards/expression-motion.ts'
+
+test('expressions wait for their entrance and ring left to right before the slide advances', () => {
+  const frame = time => [0, 1, 2].map(index => sampleExpressionWiggle(time, index))
+  for (const time of [0, .55, .99, 1.61, 1.8]) assert.deepEqual(frame(time), [0, 0, 0])
+  for (const [index, time] of [2.02, 2.74, 3.46].entries()) {
+    const angles = frame(time)
+    assert.ok(Math.abs(angles[index]) > 7.9)
+    assert.ok(angles.every((angle, other) => index === other || angle === 0))
+    assert.ok(Math.abs(angles[index] - samplePhoneRing(1.12)) < 1e-9)
+  }
+  for (const time of [2.56, 3.28, 4, 4.99, 7.99]) assert.deepEqual(frame(time), [0, 0, 0])
+})
+
+test('expression motion never overlaps or drifts across repeated cycles', () => {
+  for (let tick = 0; tick < 2400; tick++) {
+    const time = tick / 100
+    const angles = [0, 1, 2].map(index => sampleExpressionWiggle(time, index))
+    assert.ok(angles.filter(angle => Math.abs(angle) > 1e-9).length <= 1)
+    for (const [index, angle] of angles.entries()) {
+      assert.ok(Math.abs(angle) <= 8)
+      assert.ok(Math.abs(angle - sampleExpressionWiggle(time + EXPRESSION_CYCLE_DURATION, index)) < 1e-9)
+    }
+  }
+})
 
 test('telephone rings only before the first message and settles without drift', () => {
   assert.equal(samplePhoneRing(.9), 0)

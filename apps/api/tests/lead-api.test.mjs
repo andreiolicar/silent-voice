@@ -175,9 +175,11 @@ test('database opens with application and authentication tables and enforced con
       'lead_submissions',
       'leads',
       'schema_migrations',
+      'waitlist_entries',
     ]
   )
   assert.equal((await submit(app)).statusCode, 201)
+  assert.equal((await app.inject({method: 'POST', url: '/api/waitlist', headers: {origin}, payload: {email: 'backup@example.com'}})).statusCode, 200)
   const destination = path.join(directory, 'cli-backup.sqlite')
   const backup = spawnSync(
     process.execPath,
@@ -192,6 +194,7 @@ test('database opens with application and authentication tables and enforced con
   const restored = createDatabase(destination)
   try {
     assert.equal(restored.prepare('SELECT count(*) n FROM leads').get().n, 1)
+    assert.equal(restored.prepare('SELECT email FROM waitlist_entries').get().email, 'backup@example.com')
     assert.equal(restored.pragma('integrity_check', { simple: true }), 'ok')
     assert.deepEqual(restored.pragma('foreign_key_check'), [])
   } finally {

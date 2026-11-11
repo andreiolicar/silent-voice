@@ -1,0 +1,50 @@
+/* Preserve the original artwork's softness using each assistant's own hue. */
+.v2-agent-demo {
+  --illustration-brand: var(--agent-color);
+  --color-illustration-tint: color-mix(
+    in srgb,
+    var(--illustration-brand) 12%,
+    var(--color-surface)
+  );
+  --color-illustration-accent: color-mix(
+    in srgb,
+    var(--illustration-brand) 62%,
+    var(--color-surface)
+  );
+  --color-illustration-icon-bg: color-mix(
+    in srgb,
+    var(--illustration-brand) 5%,
+    var(--color-surface)
+  );
+  position: absolute;
+  left: 350px;
+  top: 48px;
+  width: 490px;
+  aspect-ratio: 396 / 235;
+  pointer-events: none;
+}
+.v2-agent-demo .card-illustration {
+  max-width: none;
+}
+@media (min-width: 768px) and (max-width: 1100px) {
+  .v2-agent-demo {
+    left: 43%;
+    width: 57%;
+    top: 60px;
+  }
+}
+@media (min-width: 768px) and (max-width: 950px) {
+  .v2-team .v2-agent-copy {
+    width: 36%;
+  }
+}
+@media (max-width: 767px) {
+  .v2-agent-demo {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: calc(100% + 40px);
+    margin-inline: -20px;
+    flex-shrink: 0;
+  }
+}
