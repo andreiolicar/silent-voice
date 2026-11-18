@@ -2,7 +2,10 @@
   --audience-tint: color-mix(in srgb, var(--color-brand) 12%, white);
   --audience-edge: color-mix(in srgb, var(--color-brand) 19%, white);
   --audience-accent: color-mix(in srgb, var(--color-brand) 62%, white);
-  padding: 48px 24px 32px;
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: var(--page-max-width);
+  margin-inline: auto;
+  padding: var(--v2-section-gap) 0 0;
 }
 .v2-audience-intro {
   display: flex;
@@ -32,7 +35,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  max-width: 1280px;
   margin: 64px auto 0;
 }
 .v2-audience-card {
@@ -58,18 +60,15 @@
 .v2-audience-copy p { color: var(--v2-muted); }
 
 @media (max-width: 1023.98px) {
-  .v2-audience { padding-top: 32px; padding-bottom: 0; }
   .v2-audience-grid { margin-top: 48px; }
   .v2-audience-card { padding: 28px 18px 36px; gap: 24px; }
 }
 @media (max-width: 959px) {
-  .v2-audience { padding-inline: 20px; }
-  .v2-audience-grid { max-width: 480px; grid-template-columns: 1fr; gap: 16px; }
+  .v2-audience-grid { grid-template-columns: 1fr; gap: 16px; }
   .v2-audience-card { padding: 28px 28px 36px; }
   .v2-audience-art { max-width: 300px; }
 }
 @media (max-width: 540px) {
-  .v2-audience { padding: 24px 16px 0; }
   .v2-audience-intro { gap: 20px; }
   .v2-audience-grid { margin-top: 36px; }
   .v2-audience-card { padding: 24px 20px 32px; gap: 24px; }

@@ -1,0 +1,85 @@
+{
+  "scope": "SYNTHETIC_ONLY_NO_MODEL_NO_PERSON",
+  "width": 640,
+  "height": 480,
+  "pixelFormat": "BGR8",
+  "sourceBytesPerRow": 2576,
+  "sourceByteCount": 1236480,
+  "byteCount": 921600,
+  "sha256": "94886147b68e9d9c9358ad52b2a3f8ccc99da1a5c01881e0466c6fceb217f00a",
+  "pattern": "B=(x+3*y)%256; G=(5*x+y)%256; R=(7*x+11*y)%256; A=(x^y)%256; padding=231",
+  "samples": [
+    {
+      "offset": 0,
+      "value": 0
+    },
+    {
+      "offset": 1,
+      "value": 0
+    },
+    {
+      "offset": 2,
+      "value": 0
+    },
+    {
+      "offset": 3,
+      "value": 1
+    },
+    {
+      "offset": 4,
+      "value": 5
+    },
+    {
+      "offset": 5,
+      "value": 7
+    },
+    {
+      "offset": 1917,
+      "value": 127
+    },
+    {
+      "offset": 1918,
+      "value": 123
+    },
+    {
+      "offset": 1919,
+      "value": 121
+    },
+    {
+      "offset": 1920,
+      "value": 3
+    },
+    {
+      "offset": 1921,
+      "value": 1
+    },
+    {
+      "offset": 1922,
+      "value": 11
+    },
+    {
+      "offset": 461760,
+      "value": 16
+    },
+    {
+      "offset": 461761,
+      "value": 48
+    },
+    {
+      "offset": 461762,
+      "value": 16
+    },
+    {
+      "offset": 921597,
+      "value": 28
+    },
+    {
+      "offset": 921598,
+      "value": 90
+    },
+    {
+      "offset": 921599,
+      "value": 14
+    }
+  ]
+}

@@ -1,12 +1,15 @@
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { Typography } from "@silent-voice/web-ui/Typography";
 import { AgentTabs, agentIcons } from "./AgentTabs";
-import { agents, agentFor } from "./agents";
+import { agents, agentFor, type AgentId } from "./agents";
 import { AgentDemo } from "./AgentDemo";
 import { useAgentCarousel } from "./useAgentCarousel";
-export function AgentTeam() {
+export function AgentTeam({ requestedAgent }: { requestedAgent?: { id: AgentId } }) {
   const { ref, selected, cycle, select, running, reducedMotion } =
     useAgentCarousel();
+  useEffect(() => {
+    if (requestedAgent) select(requestedAgent.id);
+  }, [requestedAgent, select]);
   const agent = agentFor(selected);
   const Icon = agentIcons[selected];
   return (
@@ -14,6 +17,7 @@ export function AgentTeam() {
       ref={ref}
       className="v2-team v2-section"
       id="equipe"
+      tabIndex={-1}
       aria-labelledby="team-title"
       style={
         {

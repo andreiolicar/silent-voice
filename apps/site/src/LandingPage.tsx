@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
+import type { AgentId } from './v2/agents'
 import { LoadBoundary } from '@silent-voice/web-ui/LoadBoundary'
 import { IntroProvider, useIntroState } from './intro/IntroProvider'
 import { Header } from './components/Header'
@@ -53,13 +54,14 @@ function ChatEntry() {
 
 function LandingContent() {
   const entranceRef = usePageEntrance()
+  const [agentRequest, setAgentRequest] = useState<{ id: AgentId }>()
   return (
       <div className="sv-v2" ref={entranceRef}>
         <main id="conteudo" tabIndex={-1}>
-          <ProductHero />
+          <ProductHero onSelectAgent={(id) => setAgentRequest({ id })} />
           <Audience />
           <Hero />
-          <AgentTeam />
+          <AgentTeam requestedAgent={agentRequest} />
           <Capabilities />
           <Faq />
           <Waitlist />

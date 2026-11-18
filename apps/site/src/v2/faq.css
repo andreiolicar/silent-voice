@@ -2,18 +2,19 @@
   --faq-ease: cubic-bezier(.22, 1, .36, 1);
   position: relative;
   /* Each section owns its leading gap, so adjacent padding never adds up. */
-  padding: var(--v2-faq-gap) 1.5em 0;
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: var(--page-max-width);
+  margin-inline: auto;
+  padding: var(--v2-section-gap) 0 0;
   background: #fff;
   color: #4d4d4d;
 }
-.sv-v2 .v2-faq + .v2-waitlist { padding-top: var(--v2-faq-gap); }
 .sv-v2 #faq { scroll-margin-top: 0; }
 .v2-faq-layout {
   display: grid;
   grid-template-columns: 22em minmax(0, 1fr);
   align-items: start;
   column-gap: 5em;
-  max-width: 67em;
   margin-inline: auto;
 }
 .v2-faq-head { position: sticky; top: 7.5em; }
@@ -88,9 +89,8 @@
   .v2-faq-item, .v2-faq-sign { transition: none; }
 }
 @media (max-width: 1023.98px) {
-  .sv-v2 .v2-faq { padding-inline: .75em; }
-  .v2-faq-layout { grid-template-columns: minmax(0, 1fr); max-width: 35em; }
-  .v2-faq-head { position: static; padding-inline: .75em; }
+  .v2-faq-layout { grid-template-columns: minmax(0, 1fr); }
+  .v2-faq-head { position: static; }
   .v2-faq-list { margin-top: 1.75em; }
   .v2-faq-trigger { gap: 1em; padding: 1.125em 1.25em; }
   .v2-faq-answer { padding: 0 calc(20 / 15 * 1em) calc(18 / 15 * 1em); }

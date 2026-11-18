@@ -1,4 +1,9 @@
 export type AgentId = "emg" | "vision" | "audio";
+export const agentSignalLabels: Record<AgentId, string> = {
+  vision: "Movimentos dos lábios",
+  emg: "Sinais musculares",
+  audio: "Contexto da conversa",
+};
 export const agents = [
   {
     id: "vision",

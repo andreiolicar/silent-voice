@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
 import { Typography } from '@silent-voice/web-ui/Typography'
-import { agents, agentFor } from './agents'
+import { agents, agentFor, agentSignalLabels } from './agents'
 import { useHeroCarousel } from './useHeroCarousel'
 import { StopwatchSymbol } from './StopwatchSymbol'
+import { AgentPill } from './AgentPill'
 export function Hero() {
   const {
     ref,
@@ -105,39 +106,12 @@ export function Hero() {
           data-leaving={leaving}
           style={{ '--agent-color': badgeAgent.color } as CSSProperties}
         >
-          <button
-            type="button"
-            className="v2-hero-badge"
+          <AgentPill
+            agentId={identity}
+            crossfadeAvatar
             onClick={next}
-            aria-label={`Próximo agente. ${badgeAgent.name}, ${badgeAgent.short}`}
-          >
-            <span className="v2-badge-avatar" aria-hidden="true">
-              {agents.map((person) => (
-                <span
-                  key={person.id}
-                  className="v2-badge-face"
-                  data-active={person.id === identity}
-                >
-                  <img
-                    className="v2-badge-portrait"
-                    src={person.portrait}
-                    alt=""
-                  />
-                  <img
-                    className="v2-badge-ia"
-                    src={`/assets/v2/ia-badge-${person.id === 'emg' ? 'green' : person.id === 'audio' ? 'pink' : 'blue'}.svg`}
-                    alt=""
-                    width="22"
-                    height="14"
-                  />
-                </span>
-              ))}
-            </span>
-            <span className="v2-badge-name">
-              <strong>{badgeAgent.name}</strong>
-              <span>{badgeAgent.short}</span>
-            </span>
-          </button>
+            ariaLabel={`Próximo agente. ${badgeAgent.name}, ${agentSignalLabels[badgeAgent.id]}`}
+          />
           <span className="v2-hero-active-mark" aria-hidden="true">
             <span className="v2-hero-progress-track">
               <span

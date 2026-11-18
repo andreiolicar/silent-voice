@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import * as m from 'motion/react-m'
-import { SmallWhiteButton } from '@silent-voice/web-ui/Button'
+import { SmallGreenButton } from '@silent-voice/web-ui/Button'
 import { HeaderNavigation } from './HeaderNavigation'
 import { Brand } from '@silent-voice/web-ui/Brand'
 import { siteLinks } from '../site-links'
@@ -62,7 +62,7 @@ export function Header({
           <HeaderNavigation />
         </div>
         <div className="header-desktop-action">
-          <SmallWhiteButton href={participateHref}>Participe</SmallWhiteButton>
+          <SmallGreenButton href={participateHref}>Participe</SmallGreenButton>
         </div>
         <div
           ref={mobileMenu}
@@ -99,7 +99,7 @@ export function Header({
           >
             <HeaderNavigation />
             <div className="header-mobile-action">
-              <SmallWhiteButton href={participateHref}>Participe</SmallWhiteButton>
+              <SmallGreenButton href={participateHref}>Participe</SmallGreenButton>
             </div>
           </div>
         </div>

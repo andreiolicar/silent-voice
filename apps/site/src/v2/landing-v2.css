@@ -4,14 +4,14 @@
   --v2-muted: #767676;
   --v2-accent: var(--color-brand);
   --v2-section-gap: 96px;
-  --v2-faq-gap: calc(var(--v2-section-gap) * 1.44);
+  --v2-section-inset: 64px;
   color: var(--v2-ink);
   background: #fff;
   font-family: var(--font-sans);
   overflow: clip;
 }
 @media (max-width: 1023.98px) {
-  .sv-v2 { --v2-section-gap: 64px; }
+  .sv-v2 { --v2-section-gap: 64px; --v2-section-inset: 48px; }
 }
 .sv-v2 * {
   box-sizing: border-box;
@@ -216,7 +216,7 @@
 .v2-hero {
   text-align: center;
   position: relative;
-  padding: 64px 0 80px;
+  padding: var(--v2-section-gap) 0 0;
 }
 .v2-hero-copy {
   position: relative;
@@ -426,73 +426,6 @@
   bottom: -40px;
   opacity: 0;
 }
-.v2-hero-badge {
-  border: 0;
-  color: inherit;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 12px 6px 6px;
-  border-radius: 80px;
-  background: #fff;
-  box-shadow: 0 4px 20px -8px #585c5f29;
-}
-.v2-badge-avatar {
-  position: relative;
-  width: 66px;
-  height: 66px;
-  border: 1px solid #f2f2f2;
-  border-radius: 50%;
-  background: #fff;
-}
-.v2-badge-face {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.v2-badge-face[data-active='true'] {
-  opacity: 1;
-}
-.v2-badge-portrait {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  border-radius: 50%;
-  transform: scale(1.03);
-}
-.v2-badge-ia {
-  position: absolute;
-  width: 22px;
-  height: 14px;
-  bottom: 4px;
-  right: -2px;
-  z-index: 2;
-}
-.v2-badge-name {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  height: 56px;
-  border: 1px solid #f2f2f2;
-  padding: 0 16px;
-  border-radius: 74px;
-  box-shadow: 0 2px 4px #00000005;
-  white-space: nowrap;
-}
-.v2-badge-name strong {
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 600;
-}
-.v2-badge-name > span {
-  font-size: 12px;
-  line-height: 16px;
-  color: #808080;
-}
 .v2-hero-active-mark {
   width: 43px;
   height: 19px;
@@ -521,7 +454,7 @@
   animation: v2-agent-progress 5s linear both;
 }
 .v2-section {
-  padding: 0 80px 100px;
+  padding: var(--v2-section-gap) 80px;
 }
 .v2-section-intro {
   display: flex;
@@ -602,6 +535,11 @@
   max-width: none;
   left: calc(50% - 52px);
   top: 0;
+}
+/* Lia's wider hair needs more room to reveal the same colored frame. */
+.v2-avatar--emg img {
+  transform: scale(0.9);
+  transform-origin: top center;
 }
 .v2-agent-tabs [aria-selected='true'] .v2-avatar {
   isolation: isolate;
@@ -840,9 +778,12 @@
   display: none;
 }
 .v2-capabilities {
-  margin: 0 20px;
+  --capabilities-inset: 20px;
+  margin: 0 var(--capabilities-inset);
   border-radius: 20px;
-  padding: 100px 60px 60px;
+  padding-block: var(--v2-section-inset);
+  /* Keep the inset background while sharing the header's content edges. */
+  padding-inline: max(0px, calc(var(--page-gutter) - var(--capabilities-inset)));
   color: #fff;
   background: #000;
   overflow: clip;
@@ -871,7 +812,7 @@
   max-width: 558px;
 }
 .v2-bento {
-  max-width: 1310px;
+  max-width: var(--page-max-width);
   margin: auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1305,9 +1246,6 @@
     padding-left: 40px;
     padding-right: 40px;
   }
-  .v2-capabilities {
-    padding: 80px 32px 48px;
-  }
   .v2-cap-selector {
     padding: 24px;
   }
@@ -1346,10 +1284,6 @@
   .v2-menu-toggle {
     display: block;
   }
-  .v2-hero {
-    padding-top: 40px;
-    padding-bottom: 60px;
-  }
   .v2-hero-copy > p {
     max-width: 410px;
   }
@@ -1386,24 +1320,8 @@
   .v2-hero-identity {
     bottom: 24px;
   }
-  .v2-badge-avatar {
-    width: 50px;
-    height: 50px;
-  }
-  .v2-badge-name {
-    height: 44px;
-    padding: 0 12px;
-  }
-  .v2-badge-name strong {
-    font-size: 14px;
-    line-height: 20px;
-  }
-  .v2-badge-name > span {
-    font-size: 11px;
-    line-height: 14px;
-  }
   .v2-section {
-    padding: 0 24px 64px;
+    padding-inline: 24px;
   }
   .v2-agent-tabs--portraits {
     margin: 40px auto 32px;
@@ -1440,8 +1358,7 @@
     font-size: 12px;
   }
   .v2-capabilities {
-    padding: 64px 24px 40px;
-    margin: 0 16px;
+    --capabilities-inset: 16px;
   }
   .v2-capabilities .v2-section-intro {
     margin-bottom: 40px;
@@ -1506,7 +1423,7 @@
   .v2-email-row input { font-size: 14px; line-height: 20px; }
 }
 @media (max-width: 540px) {
-  .sv-v2 { --v2-section-gap: 48px; }
+  .sv-v2 { --v2-section-gap: 48px; --v2-section-inset: 32px; }
   .v2-header {
     padding: 0 16px;
     gap: 8px;
@@ -1562,25 +1479,8 @@
   .v2-hero-identity {
     bottom: 22px;
   }
-  .v2-badge-avatar {
-    width: 46px;
-    height: 46px;
-  }
-  .v2-badge-name {
-    height: 42px;
-  }
-  .v2-hero-badge {
-    gap: 8px;
-    padding: 5px 10px 5px 5px;
-  }
-  .v2-badge-name strong {
-    font-size: 14px;
-  }
-  .v2-badge-name > span {
-    font-size: 10px;
-  }
   .v2-section {
-    padding: 0 16px 64px;
+    padding-inline: 16px;
   }
   .v2-section-intro {
     gap: 24px;
@@ -1596,9 +1496,8 @@
     gap: 7px;
   }
   .v2-capabilities {
-    margin: 0;
+    --capabilities-inset: 0px;
     border-radius: 0;
-    padding: 48px 16px;
   }
   .v2-cap-selector {
     padding: 24px 20px;

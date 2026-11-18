@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useReducedMotionPreference } from '../entrance'
 import { agents, type AgentId } from './agents'
 
@@ -53,9 +53,9 @@ export function useAgentCarousel({
     return () => window.clearTimeout(timer)
   }, [running, state.cycle])
 
-  function select(selected: AgentId) {
+  const select = useCallback((selected: AgentId) => {
     setState((previous) => ({ selected, cycle: previous.cycle + 1 }))
-  }
+  }, [])
 
   return { ref, ...state, select, running, reducedMotion }
 }
