@@ -1,0 +1,43 @@
+.v2-agent-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  padding: 4px 24px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #ffffffed;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 30px #213e3310;
+  backdrop-filter: blur(12px);
+}
+.sv-v2 .v2-agent-pill:focus-visible { outline: 2px solid var(--agent-pill-color); outline-offset: 3px; }
+.v2-agent-pill-avatar {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border: 1px solid #f2f2f2;
+  border-radius: 50%;
+  background: #fff;
+}
+.v2-agent-pill-face { position: absolute; inset: 0; opacity: 0; }
+.v2-agent-pill-face[data-active='true'] { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .v2-agent-pill-avatar[data-crossfade='true'] .v2-agent-pill-face { transition: opacity .5s cubic-bezier(.4, 0, .2, 1); }
+}
+.v2-agent-pill-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 50%;
+  transform: scale(1.03);
+}
+.v2-agent-pill-ia { position: absolute; width: 22px; height: 14px; bottom: 4px; right: -2px; z-index: 2; }
+.v2-agent-pill-copy { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; min-width: 0; white-space: nowrap; }
+.v2-agent-pill-copy strong { font-size: 16px; line-height: 20px; font-weight: 600; color: var(--agent-pill-color); }
+.v2-agent-pill-copy > span { font-size: 12px; line-height: 1.4; font-weight: 600; color: #283a34; }

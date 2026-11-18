@@ -14,6 +14,7 @@ import {
 } from '@/features/initial-flow/components';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { motion } from '@/theme';
+import { iosLabEnabled } from '@/features/visual-recognition/lab-config';
 
 const splashBackground = require('@/assets/images/initial-flow/splash-background.png');
 
@@ -35,11 +36,13 @@ export default function Splash() {
         navigationTimer = setTimeout(
           () =>
             router.replace(
-              session
-                ? '/(main)/home'
-                : onboarding
-                  ? '/auth/login'
-                  : '/onboarding',
+              iosLabEnabled
+                ? '/ios-lab'
+                : session
+                  ? '/(main)/home'
+                  : onboarding
+                    ? '/auth/login'
+                    : '/onboarding',
             ),
           reduceMotion ? 0 : motion.normal,
         );

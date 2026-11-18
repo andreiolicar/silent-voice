@@ -1,0 +1,18 @@
+/* Salte's text entrance: 450ms, 6px rise, cubic-bezier(.22, 1, .36, 1).
+   A short stagger carries the same motion through static section content. */
+.sv-v2 [data-reveal] { --reveal-delay: 0s; }
+.sv-v2 [data-reveal='1'] { --reveal-delay: .1s; }
+.sv-v2 [data-reveal='2'] { --reveal-delay: .2s; }
+.sv-v2 [data-reveal='3'] { --reveal-delay: .3s; }
+.sv-v2 [data-reveal-pending] { opacity: 0; }
+.sv-v2 [data-revealed='animated'] {
+  animation: v2-content-enter .45s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay) backwards;
+}
+@keyframes v2-content-enter {
+  from { opacity: 0; translate: 0 6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-v2 [data-reveal-pending] { opacity: 1; }
+  .sv-v2 [data-revealed] { animation: none; }
+}

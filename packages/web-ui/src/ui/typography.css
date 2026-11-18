@@ -1,0 +1,68 @@
+/* Editorial scale: opt-in classes leave existing app controls unchanged. */
+:root {
+  --type-h1-size: 56px;
+  --type-h1-leading: 62px;
+  --type-h2-size: 40px;
+  --type-h2-leading: 44px;
+  --type-h3-size: 24px;
+  --type-h3-leading: 30px;
+  --type-prose-size: 18px;
+  --type-prose-leading: 26px;
+}
+
+.sv-typography {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-normal);
+}
+.sv-typography--h1,
+.sv-typography--h2,
+.sv-typography--h3 {
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+.sv-typography--h1 { font-size: var(--type-h1-size); line-height: var(--type-h1-leading); }
+.sv-typography--h2 { font-size: var(--type-h2-size); line-height: var(--type-h2-leading); }
+.sv-typography--h3 { font-size: var(--type-h3-size); line-height: var(--type-h3-leading); }
+.sv-typography--body { font-size: var(--type-prose-size); line-height: var(--type-prose-leading); }
+.sv-typography--label { font-size: var(--type-label-size); line-height: var(--type-label-leading); }
+.sv-typography--caption { font-size: var(--type-caption-size); line-height: var(--type-caption-leading); }
+.sv-typography--regular { font-weight: var(--font-weight-regular); }
+.sv-typography--medium { font-weight: var(--font-weight-medium); }
+.sv-typography--semibold { font-weight: var(--font-weight-semibold); }
+
+@media (max-width: 1023.98px) {
+  :root {
+    --type-h1-size: 44px;
+    --type-h1-leading: 50px;
+    --type-h2-size: 36px;
+    --type-h2-leading: 42px;
+    --type-h3-size: 22px;
+    --type-h3-leading: 28px;
+    --type-prose-size: 16px;
+    --type-prose-leading: 24px;
+  }
+}
+@media (max-width: 767px) {
+  :root {
+    --type-h1-size: 36px;
+    --type-h1-leading: 40px;
+    --type-h2-size: 30px;
+    --type-h2-leading: 36px;
+  }
+}
+@media (max-width: 540px) {
+  :root {
+    --type-h1-size: 28px;
+    --type-h1-leading: 32px;
+    --type-h2-size: 24px;
+    --type-h2-leading: 30px;
+    --type-h3-size: 20px;
+    --type-h3-leading: 26px;
+  }
+}
+@media (max-width: 360px) {
+  :root { --type-h1-size: 26px; --type-h1-leading: 30px; }
+}

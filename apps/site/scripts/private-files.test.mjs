@@ -4,7 +4,7 @@ import { writeFile, unlink, mkdir, mkdtemp, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { randomUUID } from 'node:crypto'
-import { createServer } from 'vite'
+import { createServer, normalizePath } from 'vite'
 
 test('development server never serves private database or backup files, including /@fs paths', async () => {
   const marker = `qa-private-${randomUUID()}`
@@ -43,7 +43,8 @@ test('development server never serves private database or backup files, includin
     await server.listen()
     const port = server.httpServer.address().port
     for (const path of files) {
-      for (const urlPath of [...(path.startsWith('../') ? [] : [`/${path}`]), `/@fs${resolve(path)}`]) {
+      const fsUrl = `/@fs/${normalizePath(resolve(path)).replace(/^\//, '')}`
+      for (const urlPath of [...(path.startsWith('../') ? [] : [`/${path}`]), fsUrl]) {
         const response = await fetch(`http://127.0.0.1:${port}${urlPath}`)
         assert.ok(
           response.status === 403 || response.status === 404,

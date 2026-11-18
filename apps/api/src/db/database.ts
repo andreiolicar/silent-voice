@@ -62,6 +62,12 @@ export function createDatabase(path: string): Database.Database {
           'INSERT INTO schema_migrations (version, applied_at) VALUES (2, ?)'
         ).run(new Date().toISOString())
       }
+      if (!db.prepare('SELECT version FROM schema_migrations WHERE version = 3').get()) {
+        db.exec(`CREATE TABLE waitlist_entries (
+          id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL
+        ); CREATE INDEX waitlist_entries_created_at ON waitlist_entries(created_at DESC);`)
+        db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (3, ?)').run(new Date().toISOString())
+      }
     }).immediate()
     return db
   } catch (error) {

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48" fill="none">
+  <g id="mouth" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".6" stroke-width="1.1">
+    <defs>
+      <path id="lip-contour" d="M5 24C12 22.5 18 15.5 23.3 17.5C27.6 18.2 29.1 21.1 32 21.1C34.9 21.1 36.4 18.2 40.7 17.5C46 15.5 52 22.5 59 24C59.6 24.2 59.8 24.8 59.3 25.4C50.7 33.6 42.5 37.1 32 37.1C21.5 37.1 13.3 33.6 4.7 25.4C4.2 24.8 4.4 24.2 5 24Z"/>
+      <clipPath id="lip-clip"><use href="#lip-contour"/></clipPath>
+      <linearGradient id="upper-lip-fill" x1="32" y1="16" x2="32" y2="27" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0E7AFF" stop-opacity=".24"/>
+        <stop offset=".5" stop-color="#0E7AFF" stop-opacity=".1"/>
+        <stop offset="1" stop-color="#0E7AFF" stop-opacity=".015"/>
+      </linearGradient>
+      <linearGradient id="lower-lip-fill" x1="32" y1="38" x2="32" y2="25" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0E7AFF" stop-opacity=".24"/>
+        <stop offset=".5" stop-color="#0E7AFF" stop-opacity=".1"/>
+        <stop offset="1" stop-color="#0E7AFF" stop-opacity=".015"/>
+      </linearGradient>
+      <filter id="lip-softness" x="0" y="10" width="64" height="34" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation=".65"/>
+      </filter>
+    </defs>
+    <g clip-path="url(#lip-clip)" stroke="none">
+      <g filter="url(#lip-softness)">
+        <path d="M0 12H64V24.6H59C48.5 28.4 41.4 23.3 32 26.2C22.6 23.3 15.5 28.4 5 24.6H0Z" fill="url(#upper-lip-fill)"/>
+        <path d="M0 24.6H5C15.5 28.4 22.6 23.3 32 26.2C41.4 23.3 48.5 28.4 59 24.6H64V42H0Z" fill="url(#lower-lip-fill)"/>
+      </g>
+    </g>
+    <use href="#lip-contour"/>
+    <path d="M5 24.6C15.5 28.4 22.6 23.3 32 26.2C41.4 23.3 48.5 28.4 59 24.6"/>
+  </g>
+</svg>

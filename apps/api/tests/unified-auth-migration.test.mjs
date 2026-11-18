@@ -15,7 +15,7 @@ test('isolated PostgreSQL migrations preserve admin identity, CRM audit links an
   assert.ok(before.every(o=>current.some(n=>n.id===o.id&&n.email===o.email&&n.role==='admin')))
   assert.deepEqual(await db.prepare('SELECT id,author_id FROM lead_notes ORDER BY id').all(),notes)
   assert.deepEqual(await db.prepare('SELECT id,status_updated_by FROM leads ORDER BY id').all(),leads)
-  assert.deepEqual((await db.prepare('SELECT version FROM sv_schema_migrations ORDER BY version').all()).map(r=>r.version),[1,2,3])
+  assert.deepEqual((await db.prepare('SELECT version FROM sv_schema_migrations ORDER BY version').all()).map(r=>r.version),[1,2,3,4])
   for(const row of before) assert.equal((await db.prepare('SELECT password FROM auth_account WHERE "userId" = ?').all(row.id)).length,0)
  }finally{await db.close()}
 })

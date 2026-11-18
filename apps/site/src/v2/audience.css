@@ -1,0 +1,76 @@
+.v2-audience {
+  --audience-tint: color-mix(in srgb, var(--color-brand) 12%, white);
+  --audience-edge: color-mix(in srgb, var(--color-brand) 19%, white);
+  --audience-accent: color-mix(in srgb, var(--color-brand) 62%, white);
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: var(--page-max-width);
+  margin-inline: auto;
+  padding: var(--v2-section-gap) 0 0;
+}
+.v2-audience-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+.v2-audience-eyebrow {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: var(--audience-tint);
+  color: var(--color-brand);
+}
+.v2-audience-intro h2 {
+  max-width: 860px;
+  background: linear-gradient(110deg, #141414 20%, #3f3f3f 65%, #888);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.v2-audience-intro p {
+  max-width: 620px;
+  color: var(--v2-muted);
+}
+.v2-audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin: 64px auto 0;
+}
+.v2-audience-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  min-width: 0;
+  padding: 32px 24px 48px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 24px;
+}
+.v2-audience-art {
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 400 / 280;
+  user-select: none;
+  pointer-events: none;
+}
+.v2-audience-art svg { display: block; width: 100%; height: 100%; }
+.v2-audience-copy { display: flex; flex-direction: column; gap: 12px; width: 100%; text-align: center; }
+.v2-audience-copy p { color: var(--v2-muted); }
+
+@media (max-width: 1023.98px) {
+  .v2-audience-grid { margin-top: 48px; }
+  .v2-audience-card { padding: 28px 18px 36px; gap: 24px; }
+}
+@media (max-width: 959px) {
+  .v2-audience-grid { grid-template-columns: 1fr; gap: 16px; }
+  .v2-audience-card { padding: 28px 28px 36px; }
+  .v2-audience-art { max-width: 300px; }
+}
+@media (max-width: 540px) {
+  .v2-audience-intro { gap: 20px; }
+  .v2-audience-grid { margin-top: 36px; }
+  .v2-audience-card { padding: 24px 20px 32px; gap: 24px; }
+  .v2-audience-copy { gap: 10px; }
+}

@@ -1,5 +1,9 @@
 node_modules/
 .expo/
 dist/
+ios/
+android/
+modules/*/.build/
+modules/*/.swiftpm/
 assets/expo.icon/icon.json
 AGENTS.md

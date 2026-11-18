@@ -1,0 +1,42 @@
+.v2-cap-portrait-layer--audio {
+  transform: scale(.94);
+  transform-origin: 50% 20%;
+}
+.v2-audio-waves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  color: var(--color-brand);
+}
+.v2-audio-ring {
+  transform-box: view-box;
+  transform-origin: 466px 675px;
+  opacity: 0;
+  /* Salte reference: three pulses, 2.4 s ease-out, staggered by 0.8 s. */
+  animation: v2-audio-propagate 2.4s ease-out var(--wave-delay) infinite;
+  animation-play-state: var(--audio-play-state, paused);
+}
+.v2-audio-ring-line { stroke: currentColor; stroke-opacity: .5; stroke-width: 2.5; }
+.v2-audio-ring-halo { stroke: currentColor; stroke-opacity: .2; stroke-width: 7; filter: blur(3px); }
+.v2-audio-core {
+  fill: currentColor;
+  fill-opacity: .1;
+  animation: v2-audio-core-breathe 2.4s ease-in-out infinite;
+  animation-play-state: var(--audio-play-state, paused);
+}
+@keyframes v2-audio-propagate {
+  from { transform: scale(.5); opacity: .6; }
+  to { transform: scale(7); opacity: 0; }
+}
+@keyframes v2-audio-core-breathe {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+.v2-audio-waves[data-reduced-motion='true'] .v2-audio-ring {
+  animation: none;
+  transform: scale(var(--rest-scale));
+  opacity: .18;
+}
+.v2-audio-waves[data-reduced-motion='true'] .v2-audio-core { animation: none; }

@@ -6,6 +6,7 @@
   "exports": {
     "./Button": "./src/ui/Button.tsx",
     "./Input": "./src/ui/Input.tsx",
+    "./Typography": "./src/ui/Typography.tsx",
     "./ActionControl": "./src/ui/ActionControl.tsx",
     "./Brand": "./src/Brand.tsx",
     "./LoadBoundary": "./src/LoadBoundary.tsx",

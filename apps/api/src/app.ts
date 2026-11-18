@@ -62,6 +62,8 @@ export async function createServer({
   if (database) {
     const { registerDataRoutes } = await import('./leads/routes.ts')
     await registerDataRoutes(app, asSqlDatabase(database), config)
+    const { registerWaitlistRoutes } = await import('./waitlist/routes.ts')
+    await registerWaitlistRoutes(app, asSqlDatabase(database), config)
   }
   if (config.frontendPath) {
     const { default: staticFiles } = await import('@fastify/static')
